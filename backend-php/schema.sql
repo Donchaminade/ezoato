@@ -10,7 +10,10 @@ CREATE TABLE users (
   password_hash VARCHAR(255) NOT NULL,
   role         ENUM('utilisateur','gestionnaire','admin') NOT NULL DEFAULT 'utilisateur',
   ville        VARCHAR(80) NULL,
-  created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  classe       VARCHAR(40) NULL,
+  etablissement VARCHAR(180) NULL,
+  created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX (classe)
 ) ENGINE=InnoDB;
 
 CREATE TABLE etablissements (
@@ -110,6 +113,10 @@ CREATE TABLE abonnements (
   date_debut  DATETIME NULL,
   date_fin    DATETIME NULL,
   statut      ENUM('en_attente','actif','expire','annule') NOT NULL DEFAULT 'en_attente',
+  rappel_2mois DATETIME NULL,
+  rappel_2sem  DATETIME NULL,
+  rappel_3j    DATETIME NULL,
+  rappel_expiration DATETIME NULL,
   created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id),
   INDEX idx_abonnement_user (user_id),

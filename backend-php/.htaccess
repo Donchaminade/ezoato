@@ -52,6 +52,7 @@ RewriteRule ^wallet/portefeuille$ wallet.php?action=portefeuille [QSA,L]
 RewriteRule ^wallet/retrait$ wallet.php?action=retrait [QSA,L]
 
 RewriteRule ^admin/abonnements/stats$ admin.php?action=abonnements_stats [QSA,L]
+RewriteRule ^admin/abonnements/([a-f0-9-]+)/prolonger$ admin.php?action=abonnement_prolonger&id=$1 [QSA,L]
 RewriteRule ^admin/abonnements/?$ admin.php?action=abonnements [QSA,L]
 RewriteRule ^admin/archives/file$ admin.php?action=archives_file [QSA,L]
 RewriteRule ^admin/archives$ admin.php?action=archives [QSA,L]

@@ -6,7 +6,7 @@ interface AuthContextValue {
   user: User | null;
   loading: boolean;
   login: (identifier: string, password: string) => Promise<User>;
-  register: (nom: string, email: string, telephone: string, password: string) => Promise<User>;
+  register: (nom: string, email: string, telephone: string, password: string, classe: string, etablissement: string) => Promise<User>;
   logout: () => void;
   refreshUser: () => Promise<User | null>;
   setUserFromProfile: (user: User) => void;
@@ -33,8 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(user);
           return user;
         },
-        async register(nom, email, telephone, password) {
-          const { token, user } = await api.register(nom, email, telephone, password);
+        async register(nom, email, telephone, password, classe, etablissement) {
+          const { token, user } = await api.register(nom, email, telephone, password, classe, etablissement);
           localStorage.setItem("ezoa_token", token);
           setUser(user);
           return user;

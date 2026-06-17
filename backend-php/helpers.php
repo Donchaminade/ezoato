@@ -314,6 +314,53 @@ function load_meta_classes(): array {
   return $out;
 }
 
+/** Toutes les classes valides (collège + lycée). */
+function all_meta_class_names(): array {
+  $classes = load_meta_classes();
+  return array_values(array_unique(array_merge(
+    $classes['college'] ?? [],
+    $classes['lycee'] ?? [],
+  )));
+}
+
+/** Valide et normalise la classe utilisateur contre les référentiels. */
+function validate_user_classe(?string $classe, bool $required = false): ?string {
+  $classe = trim((string)($classe ?? ''));
+  if ($classe === '') {
+    if ($required) fail('Classe requise');
+    return null;
+  }
+  foreach (all_meta_class_names() as $allowed) {
+    if ($allowed === $classe) return $classe;
+  }
+  fail('Classe invalide');
+}
+
+/** Valide et normalise l'établissement utilisateur (texte libre). */
+function validate_user_etablissement(?string $etablissement, bool $required = false): ?string {
+  $etablissement = trim((string)($etablissement ?? ''));
+  if ($etablissement === '') {
+    if ($required) fail('Établissement requis');
+    return null;
+  }
+  if (mb_strlen($etablissement) > 180) fail('Établissement trop long (180 caractères max)');
+  return repair_display_text($etablissement) ?? $etablissement;
+}
+
+/** Représentation publique d'un utilisateur (auth / profil). */
+function map_auth_user(array $u): array {
+  return [
+    'id' => $u['id'],
+    'nom' => $u['nom'],
+    'email' => $u['email'],
+    'telephone' => $u['telephone'] ?? null,
+    'role' => $u['role'],
+    'ville' => $u['ville'] ?? null,
+    'classe' => isset($u['classe']) ? (repair_display_text($u['classe'] ?? '') ?: null) : null,
+    'etablissement' => isset($u['etablissement']) ? (repair_display_text($u['etablissement'] ?? '') ?: null) : null,
+  ];
+}
+
 /** Classes admin avec clé brute + libellé affiché. */
 function load_admin_class_items(): array {
   if (!table_exists('classes')) {
@@ -515,9 +562,10 @@ function current_user(): ?array {
   if (!preg_match('/Bearer\s+(.+)/i', $h, $m)) return null;
   $payload = jwt_decode($m[1]);
   if (!$payload) return null;
-  $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville FROM users WHERE id = ?');
+  $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement FROM users WHERE id = ?');
   $stmt->execute([$payload['sub']]);
-  return $stmt->fetch() ?: null;
+  $row = $stmt->fetch();
+  return $row ? map_auth_user($row) : null;
 }
 
 function require_user(array $roles = []): array {
@@ -871,13 +919,31 @@ function map_subscription_status(string $userId): array {
   $ab = user_active_abonnement($userId);
   $base = [
     'actif' => false,
+    'expire' => false,
     'dateDebut' => null,
     'dateFin' => null,
     'joursRestants' => 0,
     'montant' => subscription_price(),
     'dureeMois' => subscription_duration_months(),
   ];
-  if (!$ab) return $base;
+  if (!$ab) {
+    if (!table_exists('abonnements')) return $base;
+    expire_stale_abonnements($userId);
+    $stmt = db()->prepare("SELECT * FROM abonnements
+      WHERE user_id=? AND statut IN ('actif','expire')
+        AND date_fin IS NOT NULL AND date_fin <= NOW()
+      ORDER BY date_fin DESC LIMIT 1");
+    $stmt->execute([$userId]);
+    $expired = $stmt->fetch();
+    if ($expired) {
+      $base['expire'] = true;
+      $base['dateFin'] = date('c', strtotime((string)$expired['date_fin']));
+      if (!empty($expired['date_debut'])) {
+        $base['dateDebut'] = date('c', strtotime((string)$expired['date_debut']));
+      }
+    }
+    return $base;
+  }
 
   $fin = new DateTimeImmutable($ab['date_fin']);
   $now = new DateTimeImmutable('now');
@@ -885,6 +951,7 @@ function map_subscription_status(string $userId): array {
 
   return [
     'actif' => true,
+    'expire' => false,
     'dateDebut' => date('c', strtotime((string)$ab['date_debut'])),
     'dateFin' => $fin->format('c'),
     'joursRestants' => $jours,
@@ -1051,3 +1118,4 @@ function map_soumission_detail(array $row, bool $forOwner = false): array {
 }
 
 require_once __DIR__ . '/lib/notifications.php';
+require_once __DIR__ . '/lib/abonnement-rappels.php';

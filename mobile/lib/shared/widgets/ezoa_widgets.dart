@@ -80,6 +80,7 @@ class EzoaScreen extends StatelessWidget {
     this.showLogoInHeader = true,
     this.showWaveFooter = false,
     this.headerTrailing,
+    this.headerKey,
     required this.child,
   });
 
@@ -94,6 +95,9 @@ class EzoaScreen extends StatelessWidget {
 
   /// Widget affiché à droite du topbar (ex. bouton de thème).
   final Widget? headerTrailing;
+
+  /// Clé optionnelle pour cibler le header (guide de première ouverture).
+  final Key? headerKey;
   final Widget child;
 
   @override
@@ -104,6 +108,7 @@ class EzoaScreen extends StatelessWidget {
         children: [
           if (title != null && useGlassHeader)
             EzoaTopBar(
+              key: headerKey,
               title: title!,
               subtitle: subtitle,
               showLogo: showLogoInHeader,
@@ -612,6 +617,7 @@ class EpreuveGridCard extends StatelessWidget {
     required this.classe,
     required this.annee,
     required this.onTap,
+    this.onLongPress,
     this.ville,
     this.telechargements,
     this.isFavorite = false,
@@ -630,6 +636,7 @@ class EpreuveGridCard extends StatelessWidget {
   final bool isOffline;
   final String type;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
   final int? revealIndex;
 
   static const _gradients = [
@@ -650,6 +657,7 @@ class EpreuveGridCard extends StatelessWidget {
       padding: EdgeInsets.zero,
       enableShine: false,
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -934,10 +942,15 @@ class EzoaAuthLayout extends StatelessWidget {
 
 /// Élément de la barre de navigation flottante [EzoaGlassNavBar].
 class EzoaNavBarItem {
-  const EzoaNavBarItem({required this.icon, required this.label});
+  const EzoaNavBarItem({
+    required this.icon,
+    required this.label,
+    this.showBadge = false,
+  });
 
   final IconData icon;
   final String label;
+  final bool showBadge;
 }
 
 /// Capsule de navigation flottante en verre dépoli avec bouton central
@@ -959,6 +972,8 @@ class EzoaGlassNavBar extends StatelessWidget {
     required this.onDestinationSelected,
     required this.items,
     this.centerIndex = 2,
+    this.barKey,
+    this.centerButtonKey,
   });
 
   final int selectedIndex;
@@ -967,6 +982,12 @@ class EzoaGlassNavBar extends StatelessWidget {
 
   /// Index de l'élément rendu comme bouton central surélevé.
   final int centerIndex;
+
+  /// Clé optionnelle pour cibler la capsule de navigation.
+  final Key? barKey;
+
+  /// Clé optionnelle pour cibler le bouton central « Soumettre ».
+  final Key? centerButtonKey;
 
   static const double _height = 64;
   static const double _centerSize = 62;
@@ -1001,6 +1022,7 @@ class EzoaGlassNavBar extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
           child: SizedBox(
+            key: barKey,
             height: _height,
             child: Stack(
               clipBehavior: Clip.none,
@@ -1065,6 +1087,7 @@ class EzoaGlassNavBar extends StatelessWidget {
                       child: GestureDetector(
                         onTap: () => onDestinationSelected(centerIndex),
                         child: Container(
+                          key: centerButtonKey,
                           width: _centerSize,
                           height: _centerSize,
                           decoration: BoxDecoration(
@@ -1134,7 +1157,26 @@ class _NavBarSlot extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(item.icon, size: 22, color: color),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Icon(item.icon, size: 22, color: color),
+              if (item.showBadge)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: EzoaColors.error,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 3),
           Text(
             item.label,

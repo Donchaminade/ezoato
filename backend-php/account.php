@@ -232,6 +232,8 @@ function map_profile_user(array $u): array {
     'telephone' => $u['telephone'] ?? null,
     'role' => $u['role'],
     'ville' => $u['ville'],
+    'classe' => isset($u['classe']) ? (repair_display_text($u['classe'] ?? '') ?: null) : null,
+    'etablissement' => isset($u['etablissement']) ? (repair_display_text($u['etablissement'] ?? '') ?: null) : null,
     'createdAt' => isset($u['created_at']) ? date('c', strtotime($u['created_at'])) : null,
   ];
 }
@@ -295,7 +297,7 @@ function save_notification_prefs(string $userId, array $in): array {
 
 if ($action === 'profile') {
   if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
-    $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, created_at FROM users WHERE id = ?');
+    $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement, created_at FROM users WHERE id = ?');
     $stmt->execute([$user['id']]);
     $row = $stmt->fetch();
     if (!$row) fail('Utilisateur introuvable', 404);
@@ -317,6 +319,12 @@ if ($action === 'profile') {
     ? normalize_phone($in['telephone'] ?? '')
     : ($u['telephone'] ?? '');
   $ville = array_key_exists('ville', $in) ? (trim((string)($in['ville'] ?? '')) ?: null) : $u['ville'];
+  $classe = array_key_exists('classe', $in)
+    ? validate_user_classe($in['classe'] ?? null, false)
+    : ($u['classe'] ?? null);
+  $etablissement = array_key_exists('etablissement', $in)
+    ? validate_user_etablissement($in['etablissement'] ?? null, false)
+    : ($u['etablissement'] ?? null);
   $newPwd = $in['password'] ?? '';
   $currentPwd = $in['currentPassword'] ?? '';
 
@@ -330,8 +338,8 @@ if ($action === 'profile') {
     if (strlen($newPwd) < 8) fail('Nouveau mot de passe trop court (8+ caractères)');
   }
 
-  $sets = ['nom=?', 'email=?', 'telephone=?', 'ville=?'];
-  $params = [$nom, $email, $telephone, $ville];
+  $sets = ['nom=?', 'email=?', 'telephone=?', 'ville=?', 'classe=?', 'etablissement=?'];
+  $params = [$nom, $email, $telephone, $ville, $classe, $etablissement];
   if ($newPwd !== '') {
     $sets[] = 'password_hash=?';
     $params[] = password_hash($newPwd, PASSWORD_BCRYPT);
@@ -347,7 +355,7 @@ if ($action === 'profile') {
     fail('Modification impossible', 409);
   }
 
-  $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, created_at FROM users WHERE id = ?');
+  $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement, created_at FROM users WHERE id = ?');
   $stmt->execute([$user['id']]);
   json_out(['ok' => true, 'user' => map_profile_user($stmt->fetch())]);
 }

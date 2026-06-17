@@ -561,6 +561,13 @@ export const api = {
     });
   },
 
+  async prolongerAbonnement(id: string, jours: number): Promise<{ ok: boolean; abonnement: { id: string; dateFin: string; joursAjoutes: number } }> {
+    return http(`/admin/abonnements/${id}/prolonger`, {
+      method: "POST",
+      body: JSON.stringify({ jours }),
+    });
+  },
+
   async demanderRetrait(montant: number, methode: "flooz" | "tmoney", telephone: string): Promise<{ ok: boolean; message: string }> {
     return http("/wallet/retrait", { method: "POST", body: JSON.stringify({ montant, methode, telephone }) });
   },
@@ -658,10 +665,12 @@ export const api = {
     email: string,
     telephone: string,
     password: string,
+    classe: string,
+    etablissement: string,
   ): Promise<{ token: string; user: User }> {
     return http("/auth/register", {
       method: "POST",
-      body: JSON.stringify({ nom, email, telephone, password }),
+      body: JSON.stringify({ nom, email, telephone, password, classe, etablissement }),
     });
   },
 

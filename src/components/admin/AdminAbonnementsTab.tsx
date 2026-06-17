@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Crown, Loader2, Send } from "lucide-react";
+import { CalendarPlus, Crown, Loader2, Send } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -51,6 +51,9 @@ export function AdminAbonnementsTab() {
   const [titre, setTitre] = useState("");
   const [message, setMessage] = useState("");
   const [notifType, setNotifType] = useState<"info" | "push" | "all">("info");
+  const [prolongOpen, setProlongOpen] = useState(false);
+  const [prolongTarget, setProlongTarget] = useState<AdminAbonnement | null>(null);
+  const [prolongJours, setProlongJours] = useState("30");
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["admin-abonnements-stats"],
@@ -81,6 +84,30 @@ export function AdminAbonnementsTab() {
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Échec"),
   });
+
+  const prolongMutation = useMutation({
+    mutationFn: () => {
+      const jours = parseInt(prolongJours, 10);
+      if (!prolongTarget || !Number.isFinite(jours) || jours < 1) {
+        throw new Error("Nombre de jours invalide");
+      }
+      return api.prolongerAbonnement(prolongTarget.id, jours);
+    },
+    onSuccess: (res) => {
+      toast.success(`Abonnement prolongé de ${res.abonnement.joursAjoutes} jour(s) — notification envoyée`);
+      setProlongOpen(false);
+      setProlongTarget(null);
+      qc.invalidateQueries({ queryKey: ["admin-abonnements"] });
+      qc.invalidateQueries({ queryKey: ["admin-abonnements-stats"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Échec prolongation"),
+  });
+
+  const openProlong = (a: AdminAbonnement) => {
+    setProlongTarget(a);
+    setProlongJours("30");
+    setProlongOpen(true);
+  };
 
   return (
     <div className="space-y-4">
@@ -134,13 +161,14 @@ export function AdminAbonnementsTab() {
             <TableHead>Fin</TableHead>
             <TableHead>Montant</TableHead>
             <TableHead>Statut</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
-            <DataTableEmptyRow colSpan={6} message="Chargement…" />
+            <DataTableEmptyRow colSpan={7} message="Chargement…" />
           ) : pagination.items.length === 0 ? (
-            <DataTableEmptyRow colSpan={6} message="Aucun abonnement" />
+            <DataTableEmptyRow colSpan={7} message="Aucun abonnement" />
           ) : (
             pagination.items.map((a: AdminAbonnement) => (
               <TableRow key={a.id}>
@@ -150,6 +178,17 @@ export function AdminAbonnementsTab() {
                 <TableCell>{formatDate(a.dateFin)}</TableCell>
                 <TableCell>{formatFcfa(a.montant)}</TableCell>
                 <TableCell>{statutBadge(a.statut)}</TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl"
+                    onClick={() => openProlong(a)}
+                  >
+                    <CalendarPlus className="mr-1.5 size-4" />
+                    Prolonger
+                  </Button>
+                </TableCell>
               </TableRow>
             ))
           )}
@@ -210,6 +249,45 @@ export function AdminAbonnementsTab() {
                 <Send className="mr-2 size-4" />
               )}
               Envoyer
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={prolongOpen} onOpenChange={setProlongOpen}>
+        <SheetContent className="overflow-y-auto sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>Prolonger l&apos;abonnement</SheetTitle>
+            <SheetDescription>
+              {prolongTarget
+                ? `${prolongTarget.user.nom} — fin actuelle : ${formatDate(prolongTarget.dateFin)}`
+                : "Ajoutez des jours d'accès et notifiez l'utilisateur instantanément."}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-6 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="prolong-jours">Nombre de jours</Label>
+              <Input
+                id="prolong-jours"
+                type="number"
+                min={1}
+                max={365}
+                value={prolongJours}
+                onChange={(e) => setProlongJours(e.target.value)}
+                className="rounded-xl"
+              />
+            </div>
+            <Button
+              className="w-full rounded-xl"
+              disabled={prolongMutation.isPending || !prolongTarget}
+              onClick={() => prolongMutation.mutate()}
+            >
+              {prolongMutation.isPending ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <CalendarPlus className="mr-2 size-4" />
+              )}
+              Prolonger et notifier
             </Button>
           </div>
         </SheetContent>

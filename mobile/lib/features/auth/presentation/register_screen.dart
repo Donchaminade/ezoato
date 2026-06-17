@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../core/network/api_client.dart';
+import '../../../core/theme/ezoa_theme.dart';
+import '../../../shared/widgets/ezoa_searchable_picker.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
+import '../../epreuves/presentation/home_screen.dart' show metaProvider;
 import '../data/auth_repository.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -19,6 +22,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _email = TextEditingController();
   final _telephone = TextEditingController();
   final _password = TextEditingController();
+  final _etablissement = TextEditingController();
+  String _niveau = 'college';
+  String? _classe;
   bool _loading = false;
   String? _error;
 
@@ -28,6 +34,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _email.dispose();
     _telephone.dispose();
     _password.dispose();
+    _etablissement.dispose();
     super.dispose();
   }
 
@@ -36,8 +43,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (_nom.text.trim().isEmpty ||
         _email.text.trim().isEmpty ||
         _telephone.text.trim().isEmpty ||
-        _password.text.length < 8) {
-      setState(() => _error = 'Tous les champs sont requis (mot de passe 8+)');
+        _password.text.length < 8 ||
+        _classe == null ||
+        _classe!.isEmpty ||
+        _etablissement.text.trim().isEmpty) {
+      setState(() => _error = 'Tous les champs sont requis (mot de passe 8+, classe et établissement)');
       return;
     }
     setState(() => _loading = true);
@@ -47,6 +57,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             email: _email.text.trim(),
             telephone: _telephone.text.trim(),
             password: _password.text,
+            classe: _classe!,
+            etablissement: _etablissement.text.trim(),
           );
       if (mounted) context.go('/home');
     } catch (e) {
@@ -66,6 +78,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final metaAsync = ref.watch(metaProvider);
+
     return EzoaAuthLayout(
       title: 'Créer votre compte',
       subtitle: 'Rejoignez la communauté EZOA-TO',
@@ -84,6 +98,57 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           controller: _telephone,
           keyboardType: TextInputType.phone,
           prefixIcon: LucideIcons.phone,
+        ),
+        metaAsync.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: LinearProgressIndicator(),
+          ),
+          error: (_, __) => const SizedBox.shrink(),
+          data: (meta) {
+            final classes = _niveau == 'college' ? meta.classes.college : meta.classes.lycee;
+            return Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _NiveauChip(
+                        label: 'Collège',
+                        selected: _niveau == 'college',
+                        onTap: () => setState(() {
+                          _niveau = 'college';
+                          _classe = null;
+                        }),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _NiveauChip(
+                        label: 'Lycée',
+                        selected: _niveau == 'lycee',
+                        onTap: () => setState(() {
+                          _niveau = 'lycee';
+                          _classe = null;
+                        }),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                EzoaSearchablePicker(
+                  label: 'Classe',
+                  value: _classe,
+                  items: classes,
+                  onChanged: (v) => setState(() => _classe = v),
+                ),
+                EzoaTextField(
+                  label: 'Établissement',
+                  controller: _etablissement,
+                  prefixIcon: LucideIcons.school,
+                ),
+              ],
+            );
+          },
         ),
         EzoaTextField(
           label: 'Mot de passe',
@@ -106,6 +171,46 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           onPressed: () => context.pop(),
         ),
       ],
+    );
+  }
+}
+
+class _NiveauChip extends StatelessWidget {
+  const _NiveauChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: selected
+              ? EzoaColors.primary.withValues(alpha: 0.15)
+              : EzoaColors.of(context).subtleFill,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected ? EzoaColors.primary.withValues(alpha: 0.5) : EzoaColors.of(context).border,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: selected ? EzoaColors.primary : EzoaColors.of(context).textDim,
+          ),
+        ),
+      ),
     );
   }
 }

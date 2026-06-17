@@ -198,6 +198,13 @@ if ($action === 'corrige') {
                    $p['annee'], 'corrige', $p['periode'], $p['examen'],
                    $p['etablissement_id'], $p['ville'], $pdfPath, $pages, (int)($size/1024),
                    $admin['id'], $id]);
+    notify_classe_users_new_epreuve([
+      'id' => $corrigeId,
+      'titre' => $titre,
+      'classe' => $p['classe'],
+      'annee' => $p['annee'],
+      'ville' => $p['ville'],
+    ]);
   }
 
   json_out(['ok' => true, 'corrigeId' => $corrigeId]);
@@ -235,7 +242,7 @@ if ($action === 'supprimer') {
 // --- Utilisateurs ---
 if ($action === 'users') {
   require_user(['admin']);
-  $stmt = db()->query("SELECT id, nom, email, role, ville, created_at FROM users ORDER BY created_at DESC LIMIT 200");
+  $stmt = db()->query("SELECT id, nom, email, role, ville, classe, etablissement, created_at FROM users ORDER BY created_at DESC LIMIT 200");
   json_out(array_map(function ($u) {
     return [
       'id' => $u['id'],
@@ -243,6 +250,8 @@ if ($action === 'users') {
       'email' => $u['email'],
       'role' => $u['role'],
       'ville' => $u['ville'],
+      'classe' => repair_display_text($u['classe'] ?? '') ?: null,
+      'etablissement' => repair_display_text($u['etablissement'] ?? '') ?: null,
       'createdAt' => date('c', strtotime($u['created_at'])),
     ];
   }, $stmt->fetchAll()));
@@ -300,7 +309,7 @@ if ($action === 'role') {
 if ($action === 'user_detail') {
   require_user(['admin']);
   if (!$id) fail('id requis');
-  $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, created_at FROM users WHERE id=?');
+  $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement, created_at FROM users WHERE id=?');
   $stmt->execute([$id]);
   $u = $stmt->fetch();
   if (!$u) fail('Utilisateur introuvable', 404);
@@ -311,6 +320,8 @@ if ($action === 'user_detail') {
     'telephone' => $u['telephone'] ?? null,
     'role' => $u['role'],
     'ville' => $u['ville'],
+    'classe' => repair_display_text($u['classe'] ?? '') ?: null,
+    'etablissement' => repair_display_text($u['etablissement'] ?? '') ?: null,
     'createdAt' => date('c', strtotime($u['created_at'])),
   ]);
 }
@@ -331,6 +342,12 @@ if ($action === 'modifier_user') {
     : ($u['telephone'] ?? '');
   $role = $in['role'] ?? $u['role'];
   $ville = array_key_exists('ville', $in) ? (trim((string)($in['ville'] ?? '')) ?: null) : $u['ville'];
+  $classe = array_key_exists('classe', $in)
+    ? validate_user_classe($in['classe'] ?? null, false)
+    : ($u['classe'] ?? null);
+  $etablissement = array_key_exists('etablissement', $in)
+    ? validate_user_etablissement($in['etablissement'] ?? null, false)
+    : ($u['etablissement'] ?? null);
   $pwd = $in['password'] ?? '';
 
   if (strlen($nom) < 2 || strlen($nom) > 120) fail('Nom invalide');
@@ -339,8 +356,8 @@ if ($action === 'modifier_user') {
   if (!in_array($role, ['utilisateur', 'gestionnaire', 'admin'], true)) fail('Rôle invalide');
   if ($pwd !== '' && strlen($pwd) < 8) fail('Mot de passe trop court (8+ caractères)');
 
-  $sets = ['nom=?', 'email=?', 'telephone=?', 'role=?', 'ville=?'];
-  $params = [$nom, $email, $telephone, $role, $ville];
+  $sets = ['nom=?', 'email=?', 'telephone=?', 'role=?', 'ville=?', 'classe=?', 'etablissement=?'];
+  $params = [$nom, $email, $telephone, $role, $ville, $classe, $etablissement];
   if ($pwd !== '') {
     $sets[] = 'password_hash=?';
     $params[] = password_hash($pwd, PASSWORD_BCRYPT);
@@ -365,6 +382,8 @@ if ($action === 'modifier_user') {
       'telephone' => $telephone,
       'role' => $role,
       'ville' => $ville,
+      'classe' => repair_display_text($classe ?? '') ?: null,
+      'etablissement' => repair_display_text($etablissement ?? '') ?: null,
       'createdAt' => date('c', strtotime($u['created_at'])),
     ],
   ]);
@@ -1212,6 +1231,13 @@ if ($action === 'valider') {
     'nom' => $authorNom->fetchColumn() ?: 'Contributeur',
     'titre' => $sub['titre'],
   ], ['userId' => $sub['soumis_par'], 'url' => '/account/soumissions/' . $id]);
+  notify_classe_users_new_epreuve([
+    'id' => $newId,
+    'titre' => $sub['titre'],
+    'classe' => $sub['classe'],
+    'annee' => $sub['annee'],
+    'ville' => $sub['ville'],
+  ]);
   json_out(['ok'=>true,'epreuve_id'=>$newId,'reward'=>$reward]);
 }
 
@@ -1265,6 +1291,13 @@ if ($action === 'remplacer') {
                $sub['soumis_par']]);
   db()->prepare("UPDATE soumissions SET statut='validee', epreuve_id=? WHERE id=?")->execute([$newId, $id]);
   $reward = reward_contributor($sub['soumis_par']);
+  notify_classe_users_new_epreuve([
+    'id' => $newId,
+    'titre' => $sub['titre'],
+    'classe' => $sub['classe'],
+    'annee' => $sub['annee'],
+    'ville' => $sub['ville'],
+  ]);
   json_out(['ok'=>true,'epreuve_id'=>$newId,'archived_id'=>$doublonId,'reward'=>$reward]);
 }
 
@@ -1373,6 +1406,14 @@ if ($action === 'notifier_abonnes') {
   }
 
   json_out(['ok' => true, 'envoyes' => $sent, 'type' => $type]);
+}
+
+if ($action === 'abonnement_prolonger') {
+  require_user(['gestionnaire', 'admin']);
+  if (!$id) fail('id requis');
+  $body = json_input();
+  $jours = (int)($body['jours'] ?? 0);
+  json_out(prolonger_abonnement($id, $jours));
 }
 
 fail('Action inconnue', 404);

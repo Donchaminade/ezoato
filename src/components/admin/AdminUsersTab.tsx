@@ -340,6 +340,8 @@ export function AdminUsersTab() {
           <TableRow>
             <TableHead>Nom</TableHead>
             <TableHead>Email</TableHead>
+            <TableHead>Classe</TableHead>
+            <TableHead>Établissement</TableHead>
             <TableHead>Ville</TableHead>
             <TableHead>Rôle</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -353,6 +355,10 @@ export function AdminUsersTab() {
             <TableRow key={u.id}>
               <TableCell className="font-medium">{u.nom}</TableCell>
               <TableCell className="text-muted-foreground">{u.email}</TableCell>
+              <TableCell>{u.classe ?? "—"}</TableCell>
+              <TableCell className="max-w-[140px] truncate" title={u.etablissement ?? undefined}>
+                {u.etablissement ?? "—"}
+              </TableCell>
               <TableCell>{u.ville ?? "—"}</TableCell>
               <TableCell><UserRoleBadge role={u.role} /></TableCell>
               <TableCell className="text-right">
@@ -409,6 +415,14 @@ export function AdminUsersTab() {
                 <div>
                   <dt className="text-muted-foreground">Ville</dt>
                   <dd className="font-medium">{detail.ville ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Classe</dt>
+                  <dd className="font-medium">{detail.classe ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Établissement</dt>
+                  <dd className="font-medium">{detail.etablissement ?? "—"}</dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">Inscrit le</dt>

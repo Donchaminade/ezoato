@@ -42,16 +42,26 @@ class AbonnementScreen extends ConsumerWidget {
                     Row(
                       children: [
                         Icon(
-                          s.actif ? LucideIcons.badgeCheck : LucideIcons.crown,
+                          s.actif
+                              ? LucideIcons.badgeCheck
+                              : s.expire
+                                  ? LucideIcons.alertCircle
+                                  : LucideIcons.crown,
                           color: s.actif
                               ? EzoaColors.of(context).emerald
-                              : EzoaColors.of(context).gold,
+                              : s.expire
+                                  ? EzoaColors.of(context).error
+                                  : EzoaColors.of(context).gold,
                           size: 28,
                         ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Text(
-                            s.actif ? 'Abonnement actif' : 'Pas d\'abonnement actif',
+                            s.actif
+                                ? 'Abonnement actif'
+                                : s.expire
+                                    ? 'Abonnement expiré'
+                                    : 'Pas d\'abonnement actif',
                             style: EzoaTypography.titleMedium(context),
                           ),
                         ),
@@ -68,6 +78,21 @@ class AbonnementScreen extends ConsumerWidget {
                         label: 'Jours restants',
                         value: '${s.joursRestants} jour${s.joursRestants > 1 ? 's' : ''}',
                       ),
+                    ] else if (s.expire) ...[
+                      Text(
+                        'Votre abonnement a expiré. Renouvelez (${s.montant} FCFA / ${s.dureeMois} mois) '
+                        'pour retrouver l\'accès illimité aux épreuves payantes.',
+                        style: EzoaTypography.bodySmall(context).copyWith(
+                          color: EzoaColors.of(context).error,
+                        ),
+                      ),
+                      if (s.dateFin != null) ...[
+                        const SizedBox(height: 12),
+                        _InfoRow(
+                          label: 'Expiré le',
+                          value: _formatDate(s.dateFin!),
+                        ),
+                      ],
                     ] else ...[
                       Text(
                         'Accédez à toutes les épreuves payantes (examens nationaux et corrigés types) '
@@ -86,7 +111,9 @@ class AbonnementScreen extends ConsumerWidget {
               const SizedBox(height: 20),
               if (!s.actif)
                 EzoaButton(
-                  label: 'S\'abonner — ${s.montant} FCFA / ${s.dureeMois} mois',
+                  label: s.expire
+                      ? 'Renouveler — ${s.montant} FCFA / ${s.dureeMois} mois'
+                      : 'S\'abonner — ${s.montant} FCFA / ${s.dureeMois} mois',
                   icon: LucideIcons.smartphone,
                   onPressed: () => _openSubscribeSheet(context, ref, s.montant),
                 ),

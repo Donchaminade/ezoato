@@ -88,6 +88,7 @@ export interface PaymentAccess {
 
 export interface SubscriptionStatus {
   actif: boolean;
+  expire?: boolean;
   dateDebut?: string | null;
   dateFin?: string | null;
   joursRestants: number;
@@ -273,6 +274,8 @@ export interface AdminUser {
   email: string;
   role: Role;
   ville?: string;
+  classe?: string | null;
+  etablissement?: string | null;
   createdAt: string;
 }
 
@@ -522,6 +525,8 @@ export interface User {
   telephone?: string;
   role: Role;
   ville?: Ville;
+  classe?: string | null;
+  etablissement?: string | null;
   createdAt?: string;
 }
 
@@ -587,6 +592,8 @@ export interface UpdateProfilePayload {
   email: string;
   telephone: string;
   ville?: string | null;
+  classe?: string | null;
+  etablissement?: string | null;
   currentPassword?: string;
   password?: string;
 }

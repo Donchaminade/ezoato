@@ -59,7 +59,7 @@ export function ProfilePageContent() {
         <TabsContent value="informations" className="mt-4">
           <DashboardSectionCard
             title="Modifier mes informations"
-            subtitle="Nom, email, téléphone et ville"
+            subtitle="Nom, email, téléphone, classe et établissement"
           >
             <ProfileInfoForm onSaved={() => qc.invalidateQueries({ queryKey: ["profile"] })} />
           </DashboardSectionCard>

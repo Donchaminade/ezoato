@@ -4,7 +4,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/ezoa_theme.dart';
+import '../../../shared/widgets/ezoa_searchable_picker.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
+import '../../epreuves/presentation/home_screen.dart' show metaProvider;
 
 final profileProvider = FutureProvider((ref) => ref.watch(apiClientProvider).getProfile());
 
@@ -21,6 +23,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _email = TextEditingController();
   final _telephone = TextEditingController();
   final _ville = TextEditingController();
+  final _etablissement = TextEditingController();
+  String _niveau = 'college';
+  String? _classe;
   final _currentPassword = TextEditingController();
   final _password = TextEditingController();
   bool _loading = false;
@@ -31,6 +36,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _email.dispose();
     _telephone.dispose();
     _ville.dispose();
+    _etablissement.dispose();
     _currentPassword.dispose();
     _password.dispose();
     super.dispose();
@@ -44,6 +50,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         'email': _email.text.trim(),
         'telephone': _telephone.text.trim(),
         'ville': _ville.text.trim().isEmpty ? null : _ville.text.trim(),
+        'classe': _classe,
+        'etablissement': _etablissement.text.trim().isEmpty ? null : _etablissement.text.trim(),
       });
       ref.invalidate(profileProvider);
       if (mounted) {
@@ -74,6 +82,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         'email': _email.text.trim(),
         'telephone': _telephone.text.trim(),
         'ville': _ville.text.trim().isEmpty ? null : _ville.text.trim(),
+        'classe': _classe,
+        'etablissement': _etablissement.text.trim().isEmpty ? null : _etablissement.text.trim(),
         'currentPassword': _currentPassword.text,
         'password': _password.text,
       });
@@ -96,6 +106,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(profileProvider);
+    final metaAsync = ref.watch(metaProvider);
 
     return EzoaDetailScreen(
       title: 'Profil',
@@ -109,7 +120,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             _email.text = data.user.email;
             _telephone.text = data.user.telephone ?? '';
             _ville.text = data.user.ville ?? '';
+            _classe = data.user.classe;
+            _etablissement.text = data.user.etablissement ?? '';
+            metaAsync.whenData((meta) {
+              if (data.user.classe != null && meta.classes.lycee.contains(data.user.classe)) {
+                _niveau = 'lycee';
+              } else if (data.user.classe != null && meta.classes.college.contains(data.user.classe)) {
+                _niveau = 'college';
+              }
+            });
           }
+
+          final classes = metaAsync.maybeWhen(
+            data: (meta) => _niveau == 'college' ? meta.classes.college : meta.classes.lycee,
+            orElse: () => <String>[],
+          );
 
           return Column(
             children: [
@@ -144,10 +169,63 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     child: _tab == 0
                         ? Column(
                             children: [
+                              if (data.user.classe == null || data.user.classe!.isEmpty)
+                                Container(
+                                  width: double.infinity,
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.amber.withValues(alpha: 0.35)),
+                                  ),
+                                  child: Text(
+                                    'Complète ta classe pour recevoir les notifications des nouvelles épreuves de ton niveau.',
+                                    style: EzoaTypography.bodySmall(context),
+                                  ),
+                                ),
                               EzoaTextField(label: 'Nom', controller: _nom, prefixIcon: LucideIcons.user),
                               EzoaTextField(label: 'Email', controller: _email, prefixIcon: LucideIcons.mail),
                               EzoaTextField(label: 'Téléphone', controller: _telephone, prefixIcon: LucideIcons.phone),
                               EzoaTextField(label: 'Ville', controller: _ville, prefixIcon: LucideIcons.mapPin),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _ProfileNiveauChip(
+                                      label: 'Collège',
+                                      selected: _niveau == 'college',
+                                      onTap: () => setState(() {
+                                        _niveau = 'college';
+                                        _classe = null;
+                                      }),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: _ProfileNiveauChip(
+                                      label: 'Lycée',
+                                      selected: _niveau == 'lycee',
+                                      onTap: () => setState(() {
+                                        _niveau = 'lycee';
+                                        _classe = null;
+                                      }),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              if (classes.isNotEmpty)
+                                EzoaSearchablePicker(
+                                  label: 'Classe',
+                                  value: _classe,
+                                  items: classes,
+                                  onChanged: (v) => setState(() => _classe = v),
+                                ),
+                              EzoaTextField(
+                                label: 'Établissement',
+                                controller: _etablissement,
+                                prefixIcon: LucideIcons.school,
+                              ),
                               EzoaButton(label: 'Enregistrer', onPressed: _saveInfo, loading: _loading),
                             ],
                           )
@@ -184,6 +262,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _ProfileNiveauChip extends StatelessWidget {
+  const _ProfileNiveauChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = EzoaColors.of(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? EzoaColors.primary.withValues(alpha: 0.15) : pal.subtleFill,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: selected ? EzoaColors.primary.withValues(alpha: 0.5) : pal.border),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: EzoaTypography.titleSmall(context).copyWith(
+            fontSize: 13,
+            color: selected ? EzoaColors.primary : pal.textDim,
+          ),
+        ),
       ),
     );
   }

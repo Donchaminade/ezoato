@@ -9,6 +9,7 @@ import '../../../core/security/secure_screen.dart';
 import '../../../core/theme/ezoa_theme.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
+import '../../../shared/widgets/subscription_pro_widgets.dart';
 import '../../favorites/data/favoris_providers.dart';
 import '../../offline/data/offline_repository.dart';
 import 'epreuve_preview_viewer.dart';
@@ -309,17 +310,10 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
                           ),
                           if (locked && isOnline && access != null) ...[
                             const SizedBox(height: 16),
-                            EzoaButton(
-                              label: 'Payer avec Flooz / T-Money',
-                              icon: LucideIcons.smartphone,
-                              onPressed: () => _openPaymentSheet(epreuve, access),
-                            ),
-                            const SizedBox(height: 10),
-                            EzoaButton(
-                              label: 'S\'abonner — 1000 FCFA / 6 mois',
-                              variant: EzoaButtonVariant.outline,
-                              icon: LucideIcons.crown,
-                              onPressed: () => context.push('/account/abonnement'),
+                            SubscriptionProPaywallActions(
+                              montant: montant,
+                              onSubscribe: () => context.push('/account/abonnement'),
+                              onPayExam: () => _openPaymentSheet(epreuve, access),
                             ),
                           ],
                         ],

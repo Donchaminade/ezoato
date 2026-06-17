@@ -11,6 +11,7 @@ class EzoaGlassCard extends StatefulWidget {
     super.key,
     required this.child,
     this.onTap,
+    this.onLongPress,
     this.padding = const EdgeInsets.all(16),
     this.margin = const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
     this.borderRadius = 16,
@@ -21,6 +22,7 @@ class EzoaGlassCard extends StatefulWidget {
 
   final Widget child;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry margin;
   final double borderRadius;
@@ -148,13 +150,14 @@ class _EzoaGlassCardState extends State<EzoaGlassCard>
       ),
     );
 
-    if (widget.onTap != null) {
+    if (widget.onTap != null || widget.onLongPress != null) {
       card = MouseRegion(
         onEnter: (_) => _triggerShine(),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: widget.onTap,
+            onLongPress: widget.onLongPress,
             onTapDown: (_) {
               _setPressed(true);
               _triggerShine();

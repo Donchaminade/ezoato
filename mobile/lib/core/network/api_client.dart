@@ -431,6 +431,8 @@ class ApiClient {
     required String email,
     required String telephone,
     required String password,
+    required String classe,
+    required String etablissement,
   }) async {
     final data = await _post<Map<String, dynamic>>(
       '/auth/register',
@@ -439,6 +441,8 @@ class ApiClient {
         'email': email,
         'telephone': telephone,
         'password': password,
+        'classe': classe,
+        'etablissement': etablissement,
       },
     );
     return (
