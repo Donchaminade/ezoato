@@ -397,6 +397,11 @@ function SoumissionsTab() {
                 </FormField>
               </div>
 
+                <p className="text-xs text-muted-foreground">
+                  À la publication, une notification (in-app + push) est envoyée aux utilisateurs inscrits en{" "}
+                  <strong>{active.classe}</strong> uniquement — pas à toute la base.
+                </p>
+
                 <div className="flex gap-2">
                   <Button onClick={() => valider(active)} className="flex-1">
                     <Check className="size-4" /> Valider & publier
