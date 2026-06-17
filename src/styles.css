@@ -1,0 +1,546 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * EZOA-TO — Design system aux couleurs du drapeau togolais.
+ * Vert principal (#006A4E), Jaune accent (#FFCE00), Rouge alerte (#D21034),
+ * Étoile blanche, fond clair lisible. Aucun dégradé.
+ * Typo: Sora (titres) + Manrope (corps).
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
+  --font-display: "Sora", system-ui, -apple-system, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+
+  --color-tg-green: var(--tg-green);
+  --color-tg-yellow: var(--tg-yellow);
+  --color-tg-red: var(--tg-red);
+  --color-tg-ink: var(--tg-ink);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --shadow-soft: 0 1px 2px 0 oklch(0 0 0 / 0.04), 0 4px 16px -4px oklch(0 0 0 / 0.06);
+  --shadow-card: 0 1px 0 0 oklch(0 0 0 / 0.03), 0 8px 24px -8px oklch(0 0 0 / 0.08);
+}
+
+:root {
+  --radius: 0.875rem;
+
+  /* Drapeau togolais en oklch */
+  --tg-green: oklch(0.48 0.12 162);   /* #006A4E */
+  --tg-yellow: oklch(0.86 0.18 92);   /* #FFCE00 */
+  --tg-red: oklch(0.58 0.22 27);      /* #D21034 */
+  --tg-ink: oklch(0.18 0.02 250);
+
+  --background: oklch(0.99 0.003 100);
+  --surface: oklch(0.975 0.005 110);
+  --foreground: oklch(0.18 0.02 250);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.02 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 250);
+
+  --primary: oklch(0.48 0.12 162);
+  --primary-foreground: oklch(0.99 0.003 100);
+
+  --secondary: oklch(0.96 0.01 160);
+  --secondary-foreground: oklch(0.28 0.06 162);
+
+  --muted: oklch(0.96 0.005 100);
+  --muted-foreground: oklch(0.5 0.02 250);
+
+  --accent: oklch(0.86 0.18 92);
+  --accent-foreground: oklch(0.22 0.04 90);
+
+  --destructive: oklch(0.58 0.22 27);
+  --destructive-foreground: oklch(0.99 0.003 100);
+
+  --success: oklch(0.55 0.14 152);
+  --success-foreground: oklch(0.99 0.003 100);
+
+  --warning: oklch(0.78 0.16 75);
+  --warning-foreground: oklch(0.22 0.04 90);
+
+  --border: oklch(0.92 0.008 150);
+  --input: oklch(0.94 0.008 150);
+  --ring: oklch(0.48 0.12 162);
+
+  --chart-1: oklch(0.82 0.19 92);   /* jaune */
+  --chart-2: oklch(0.62 0.26 330);  /* magenta */
+  --chart-3: oklch(0.48 0.12 162);  /* vert */
+  --chart-4: oklch(0.58 0.22 27);   /* rouge */
+  --chart-5: oklch(0.58 0.14 230);  /* cyan */
+
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.18 0.02 250);
+  --sidebar-primary: oklch(0.48 0.12 162);
+  --sidebar-primary-foreground: oklch(0.99 0.003 100);
+  --sidebar-accent: oklch(0.96 0.01 160);
+  --sidebar-accent-foreground: oklch(0.28 0.06 162);
+  --sidebar-border: oklch(0.92 0.008 150);
+  --sidebar-ring: oklch(0.48 0.12 162);
+}
+
+.dark {
+  /* Bleu nuit profond — confortable, pas de noir pur */
+  --background: oklch(0.18 0.035 258);
+  --surface: oklch(0.21 0.038 257);
+  --foreground: oklch(0.92 0.012 260);
+  --card: oklch(0.23 0.04 256);
+  --card-foreground: oklch(0.92 0.012 260);
+  --popover: oklch(0.25 0.042 256);
+  --popover-foreground: oklch(0.92 0.012 260);
+  --primary: oklch(0.64 0.14 162);
+  --primary-foreground: oklch(0.98 0.005 260);
+  --secondary: oklch(0.28 0.04 256);
+  --secondary-foreground: oklch(0.9 0.012 260);
+  --muted: oklch(0.26 0.035 257);
+  --muted-foreground: oklch(0.68 0.025 258);
+  --accent: oklch(0.86 0.18 92);
+  --accent-foreground: oklch(0.22 0.04 90);
+  --destructive: oklch(0.62 0.22 27);
+  --destructive-foreground: oklch(0.99 0.003 100);
+  --success: oklch(0.62 0.14 152);
+  --success-foreground: oklch(0.98 0.005 260);
+  --warning: oklch(0.78 0.16 75);
+  --warning-foreground: oklch(0.22 0.04 90);
+  --border: oklch(0.38 0.04 256 / 38%);
+  --input: oklch(0.32 0.04 256 / 55%);
+  --ring: oklch(0.64 0.14 162);
+
+  --chart-1: oklch(0.86 0.19 92);   /* jaune vif */
+  --chart-2: oklch(0.72 0.28 330);  /* magenta vif */
+  --chart-3: oklch(0.64 0.14 162);  /* vert */
+  --chart-4: oklch(0.62 0.22 27);   /* rouge */
+  --chart-5: oklch(0.68 0.16 230);  /* cyan */
+
+  --sidebar: oklch(0.2 0.038 257);
+  --sidebar-foreground: oklch(0.92 0.012 260);
+  --sidebar-primary: oklch(0.64 0.14 162);
+  --sidebar-primary-foreground: oklch(0.98 0.005 260);
+  --sidebar-accent: oklch(0.26 0.04 256);
+  --sidebar-accent-foreground: oklch(0.9 0.012 260);
+  --sidebar-border: oklch(0.38 0.04 256 / 38%);
+  --sidebar-ring: oklch(0.64 0.14 162);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+  }
+}
+
+@utility flag-stripe-top {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 3px;
+    background-image: linear-gradient(
+      to right,
+      var(--tg-green) 0 33.33%,
+      var(--tg-yellow) 33.33% 66.66%,
+      var(--tg-red) 66.66% 100%
+    );
+    /* dégradé interdit en design — ici c'est juste un découpage en 3 bandes nettes via linear-gradient stops durs */
+  }
+}
+
+@utility card-elevated {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 200ms;
+  &:hover {
+    box-shadow: var(--shadow-card);
+    border-color: color-mix(in oklab, var(--color-primary) 25%, var(--color-border));
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes ezoa-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-fade-up {
+  animation: ezoa-fade-up 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes tea-marquee-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.tea-marquee__track {
+  animation: tea-marquee-scroll linear infinite;
+}
+
+.tea-marquee--pausable:hover .tea-marquee__track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tea-marquee__track {
+    animation-duration: 96s !important;
+  }
+}
+
+/* --- Boutons : remplissage d'eau — le fond change, le texte reste stable --- */
+.tea-water-fill {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.tea-water-fill > * {
+  position: relative;
+  z-index: 1;
+}
+
+.tea-water-fill-none::before {
+  display: none;
+}
+
+.tea-water-fill::before {
+  content: "";
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  bottom: -2%;
+  height: 130%;
+  background: var(--tea-water-color);
+  border-radius: 48% 48% 0 0 / 42% 42% 0 0;
+  transform: translateY(102%);
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.tea-water-fill:hover::before {
+  transform: translateY(0);
+  border-radius: 0;
+}
+
+.tea-water-fill:active::before {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Boutons pleins — remplissage assombri au survol, texte clair verrouillé */
+.tea-water-default {
+  --tea-water-color: color-mix(in oklab, var(--primary) 80%, black);
+  color: var(--primary-foreground);
+}
+.tea-water-default:hover,
+.tea-water-default:active,
+.tea-water-default:focus-visible {
+  color: var(--primary-foreground);
+  box-shadow: 0 8px 24px -6px color-mix(in oklab, var(--primary) 45%, transparent);
+}
+.tea-water-default .tea-water-content,
+.tea-water-default:hover .tea-water-content,
+.tea-water-default svg,
+.tea-water-default:hover svg,
+.tea-water-default *,
+.tea-water-default:hover * {
+  color: inherit;
+}
+
+.tea-water-destructive {
+  --tea-water-color: color-mix(in oklab, var(--destructive) 82%, black);
+  color: var(--destructive-foreground);
+}
+.tea-water-destructive:hover,
+.tea-water-destructive:active,
+.tea-water-destructive:focus-visible {
+  color: var(--destructive-foreground);
+}
+.tea-water-destructive .tea-water-content,
+.tea-water-destructive:hover .tea-water-content,
+.tea-water-destructive svg,
+.tea-water-destructive:hover svg,
+.tea-water-destructive *,
+.tea-water-destructive:hover * {
+  color: inherit;
+}
+
+.tea-water-destructive-fill {
+  --tea-water-color: color-mix(in oklab, var(--destructive) 80%, black);
+  color: var(--destructive-foreground);
+}
+.tea-water-destructive-fill:hover,
+.tea-water-destructive-fill:active,
+.tea-water-destructive-fill:focus-visible,
+.tea-water-destructive-fill.text-white:hover {
+  color: var(--destructive-foreground);
+}
+
+.tea-water-secondary {
+  --tea-water-color: color-mix(in oklab, var(--primary) 28%, var(--secondary));
+}
+.tea-water-secondary:hover,
+.tea-water-secondary:active,
+.tea-water-secondary:focus-visible {
+  color: var(--secondary-foreground);
+}
+.tea-water-secondary .tea-water-content,
+.tea-water-secondary:hover .tea-water-content,
+.tea-water-secondary svg,
+.tea-water-secondary:hover svg,
+.tea-water-secondary *,
+.tea-water-secondary:hover * {
+  color: inherit;
+}
+
+/* Contour — remplissage primaire plein, texte/icônes en blanc au survol.
+   Sans effet eau (fill-none), pas de fond : le texte reste sombre. */
+.tea-water-outline {
+  --tea-water-color: var(--primary);
+}
+.tea-water-outline:hover,
+.tea-water-outline:active,
+.tea-water-outline:focus-visible {
+  border-color: var(--primary);
+}
+.tea-water-outline:not(.tea-water-fill-none):hover,
+.tea-water-outline:not(.tea-water-fill-none):active,
+.tea-water-outline:not(.tea-water-fill-none):focus-visible {
+  color: var(--primary-foreground);
+}
+.tea-water-outline .tea-water-content,
+.tea-water-outline:hover .tea-water-content,
+.tea-water-outline svg,
+.tea-water-outline:hover svg,
+.tea-water-outline *,
+.tea-water-outline:hover * {
+  color: inherit;
+}
+
+/* Fantôme — légère teinte accent, texte stable au survol */
+.tea-water-ghost {
+  --tea-water-color: color-mix(in oklab, var(--accent) 38%, transparent);
+}
+.tea-water-ghost .tea-water-content,
+.tea-water-ghost:hover .tea-water-content,
+.tea-water-ghost svg,
+.tea-water-ghost:hover svg,
+.tea-water-ghost:hover * {
+  color: inherit;
+}
+
+/* Outline/ghost sur fond sombre — blanc ou jaune EZOA-TO au survol */
+.dark .tea-water-outline.text-foreground:hover,
+.dark .tea-water-outline.text-foreground:hover *,
+.dark .tea-water-ghost.text-foreground:hover,
+.dark .tea-water-ghost.text-foreground:hover * {
+  color: var(--foreground);
+}
+.dark .tea-water-outline.text-white:hover,
+.dark .tea-water-outline.text-white:hover *,
+.dark .tea-water-ghost.text-white:hover,
+.dark .tea-water-ghost.text-white:hover * {
+  color: #fff;
+}
+
+/* Sur hero sombre — fond blanc semi-transparent, texte blanc verrouillé */
+.tea-water-glass {
+  --tea-water-color: rgb(255 255 255 / 0.34);
+  color: #fff;
+}
+.tea-water-glass:hover,
+.tea-water-glass:active,
+.tea-water-glass:focus-visible {
+  border-color: rgb(255 255 255 / 0.48);
+  color: #fff;
+}
+
+.tea-water-glass-outline {
+  --tea-water-color: rgb(255 255 255 / 0.26);
+  color: rgb(255 255 255 / 0.92);
+}
+.tea-water-glass-outline:hover,
+.tea-water-glass-outline:active,
+.tea-water-glass-outline:focus-visible {
+  border-color: rgb(255 255 255 / 0.42);
+  color: #fff;
+}
+
+/* Boutons explicitement blancs — survol sans dérive de couleur */
+.tea-water-fill.text-white,
+.tea-water-fill.text-white:hover,
+.tea-water-fill.text-white:active,
+.tea-water-fill.text-white:focus-visible,
+.tea-water-fill-none.text-white:hover,
+.dark .tea-water-fill-none.text-white:hover {
+  color: #fff;
+}
+
+/* Boutons vides archives — survol lisible, sans overlay sur le texte */
+.tea-btn-solid-hover.tea-water-fill::before {
+  display: none;
+}
+.tea-btn-solid-hover {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  transition:
+    background-color 0.25s ease,
+    box-shadow 0.25s ease,
+    color 0.25s ease;
+}
+.tea-btn-solid-hover:hover {
+  background-color: color-mix(in oklab, var(--primary) 72%, black);
+  color: var(--primary-foreground);
+  box-shadow: 0 8px 28px -8px color-mix(in oklab, var(--primary) 50%, transparent);
+}
+
+.tea-btn-air-outline.tea-water-fill::before {
+  display: none;
+}
+.tea-btn-air-outline {
+  border-width: 2px;
+  border-color: color-mix(in oklab, var(--primary) 38%, var(--border));
+  background-color: color-mix(in oklab, var(--primary) 10%, var(--background));
+  color: var(--primary);
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    color 0.25s ease;
+}
+.tea-btn-air-outline:hover {
+  border-color: color-mix(in oklab, var(--primary) 55%, var(--border));
+  background-color: color-mix(in oklab, var(--primary) 22%, var(--background));
+  color: var(--foreground);
+  box-shadow: 0 4px 20px -8px color-mix(in oklab, var(--primary) 35%, transparent);
+}
+
+/* Texte et icônes toujours au-dessus de l'effet eau */
+.tea-water-fill > .tea-water-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* CTA auth sur hero sombre — pas d'effet eau, contraste lisible au survol */
+.tea-hero-auth-primary.tea-water-fill::before,
+.tea-hero-auth-light.tea-water-fill::before {
+  display: none;
+}
+.tea-hero-auth-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  transition:
+    background-color 0.25s ease,
+    box-shadow 0.25s ease,
+    color 0.25s ease;
+}
+.tea-hero-auth-primary:hover {
+  background-color: color-mix(in oklab, var(--primary) 72%, black);
+  color: var(--primary-foreground);
+  box-shadow: 0 8px 28px -8px color-mix(in oklab, var(--primary) 50%, transparent);
+}
+.tea-hero-auth-light {
+  border-width: 0;
+  background-color: white;
+  color: var(--tg-ink);
+  transition:
+    background-color 0.25s ease,
+    box-shadow 0.25s ease,
+    color 0.25s ease;
+}
+.tea-hero-auth-light:hover {
+  background-color: color-mix(in oklab, white 82%, var(--tg-yellow));
+  color: var(--tg-ink);
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.32);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tea-water-fill::before {
+    transition: none;
+  }
+  .tea-water-fill:hover::before {
+    transform: translateY(0);
+    border-radius: 0;
+  }
+}

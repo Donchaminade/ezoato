@@ -1,0 +1,43 @@
+---
+description: Git workflow ezoato (zovu-project) — branches, PRs, remote
+alwaysApply: true
+---
+
+# Git workflow — ezoato / zovu-project
+
+**Remote:** `https://github.com/Donchaminade/ezoato.git`
+
+## Branches
+
+| Branch | Role |
+|--------|------|
+| `master` | Production — **never push or commit directly** |
+| `dev` | Integration — default target for all PRs |
+| `feature/*`, `fix/*`, `chore/*` | Short-lived work branches |
+
+## Flow
+
+1. `git checkout dev && git pull origin dev`
+2. `git checkout -b feature/<slug>` (or `fix/`, `chore/`)
+3. Commit, push branch, open PR **into `dev`**
+4. After review and validation on `dev`, promote to production: PR or merge **`dev` → `master`** only for releases
+
+## Commits
+
+- Imperative subject, ≤72 chars: `feat(mobile): improve account shell navigation`
+- Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
+- No secrets (`.env`, `config.local.php`, credentials)
+
+## Agent behavior
+
+- Always branch from `dev`; never commit on `master`
+- Never `git push origin master` for feature work
+- Never force-push `master`
+- Before commit: confirm `.env` and local secrets are not staged
+
+## PR checklist
+
+- [ ] Tests / manual check on target platform (web + mobile if touched)
+- [ ] Lint/analyze clean where applicable
+- [ ] No secrets in diff
+- [ ] PR base branch is `dev` (not `master`)

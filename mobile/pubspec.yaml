@@ -1,0 +1,69 @@
+name: ezoa_to
+description: EZOA-TO — Archives scolaires du Togo
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.6.1
+  go_router: ^14.8.1
+  dio: ^5.8.0+1
+  flutter_secure_storage: ^9.2.4
+  sqflite: ^2.4.2
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  open_filex: ^4.7.0
+  connectivity_plus: ^6.1.4
+  cached_network_image: ^3.4.1
+  intl: ^0.20.2
+  google_fonts: ^6.2.1
+  flutter_animate: ^4.5.2
+  lucide_icons: ^0.257.0
+  visibility_detector: ^0.4.0+2
+  image_picker: ^1.2.2
+  file_picker: ^11.0.2
+  crypto: ^3.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  # Client HTTP factice des tests (neutralise le fetch réseau de google_fonts).
+  http: ^1.6.0
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.5
+  image: ^4.8.0
+
+# Icônes composées par tool/make_launcher_icons.dart à partir de
+# icon-ezoa.png (icône verte sur fond blanc + fin anneau vert).
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: assets/images/icon-ezoa-launcher.png
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: assets/images/icon-ezoa-adaptive.png
+  web:
+    generate: true
+    image_path: assets/images/icon-ezoa-launcher.png
+    background_color: "#FFFFFF"
+    theme_color: "#006A4E"
+
+flutter_native_splash:
+  color: "#000000"
+  image: assets/images/icon-ezoa-splash.png
+  android_12:
+    color: "#000000"
+    image: assets/images/icon-ezoa-splash.png
+  web: true
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/logo-ezoa.png
+    - assets/images/icon-ezoa.png
