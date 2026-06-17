@@ -83,6 +83,40 @@ export interface PaymentAccess {
   montant: number;
   devise?: string;
   expiresAt?: string | null;
+  hasSubscription?: boolean;
+}
+
+export interface SubscriptionStatus {
+  actif: boolean;
+  dateDebut?: string | null;
+  dateFin?: string | null;
+  joursRestants: number;
+  montant: number;
+  dureeMois: number;
+}
+
+export interface AdminAbonnement {
+  id: string;
+  user: { id: string; nom: string; email: string };
+  montant: number;
+  dateDebut?: string | null;
+  dateFin?: string | null;
+  statut: "actif" | "expire" | "en_attente";
+  createdAt: string;
+}
+
+export interface AdminAbonnementsPage {
+  items: AdminAbonnement[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export interface AdminAbonnementsStats {
+  actifs: number;
+  expirantBientot: number;
+  expires: number;
+  revenusFcfa: number;
 }
 
 export interface PaymentInit {

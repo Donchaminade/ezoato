@@ -45,14 +45,20 @@ RewriteRule ^account/notifications/subscribe$ account.php?action=notifications_s
 RewriteRule ^account/notifications/unsubscribe$ account.php?action=notifications_unsubscribe [QSA,L]
 RewriteRule ^account/notifications$ account.php?action=notifications [QSA,L]
 
+RewriteRule ^account/abonnement/status$ abonnements.php?action=status [QSA,L]
+RewriteRule ^account/abonnement/subscribe$ abonnements.php?action=subscribe [QSA,L]
+
 RewriteRule ^wallet/portefeuille$ wallet.php?action=portefeuille [QSA,L]
 RewriteRule ^wallet/retrait$ wallet.php?action=retrait [QSA,L]
 
+RewriteRule ^admin/abonnements/stats$ admin.php?action=abonnements_stats [QSA,L]
+RewriteRule ^admin/abonnements/?$ admin.php?action=abonnements [QSA,L]
 RewriteRule ^admin/archives/file$ admin.php?action=archives_file [QSA,L]
 RewriteRule ^admin/archives$ admin.php?action=archives [QSA,L]
 RewriteRule ^admin/stats$ admin.php?action=stats [QSA,L]
 RewriteRule ^admin/referentiels$ admin.php?action=referentiels [QSA,L]
 RewriteRule ^admin/settings$ admin.php?action=settings [QSA,L]
+RewriteRule ^admin/notifications/subscribers$ admin.php?action=notifier_abonnes [QSA,L]
 RewriteRule ^admin/notifications/creer$ admin.php?action=creer_notification [QSA,L]
 RewriteRule ^admin/notifications/([a-f0-9-]+)/modifier$ admin.php?action=modifier_notification&id=$1 [QSA,L]
 RewriteRule ^admin/notifications/([a-f0-9-]+)/toggle$ admin.php?action=toggle_notification&id=$1 [QSA,L]

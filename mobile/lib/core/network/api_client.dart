@@ -224,6 +224,30 @@ class ApiClient {
     return data['hasAccess'] as bool? ?? false;
   }
 
+  Future<SubscriptionStatus> getSubscriptionStatus() =>
+      _get('/account/abonnement/status', fromJson: SubscriptionStatus.fromJson);
+
+  Future<PaymentInit> initierAbonnement({
+    required String methode,
+    required String telephone,
+  }) async {
+    final data = await _post<Map<String, dynamic>>(
+      '/account/abonnement/subscribe',
+      body: {'methode': methode, 'telephone': telephone},
+    );
+    if (data['alreadyActive'] == true) {
+      return PaymentInit(alreadyPaid: true);
+    }
+    return PaymentInit.fromJson(data);
+  }
+
+  Future<SubscriptionStatus> confirmerAbonnement(String reference) =>
+      _post(
+        '/account/abonnement/subscribe',
+        body: {'reference': reference},
+        fromJson: SubscriptionStatus.fromJson,
+      );
+
   Future<String> requestRetrait({
     required int montant,
     required String methode,

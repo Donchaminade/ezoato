@@ -23,9 +23,11 @@ if ($action === 'acces') {
   }
 
   $hasAccess = user_has_access($user['id'], $epreuveId);
+  $subscribed = user_has_active_subscription($user['id']);
   json_out([
     'requiresPayment' => true,
     'hasAccess' => $hasAccess,
+    'hasSubscription' => $subscribed,
     'expiresAt' => $hasAccess ? user_access_expires_at($user['id'], $epreuveId) : null,
     'montant' => $montant,
     'devise' => $cfg['paiement']['devise'],
@@ -71,7 +73,7 @@ if ($action === 'initier') {
       'reference' => $existing['reference'],
       'montant' => $montant,
       'methode' => $methode,
-      'instructions' => build_instructions($methode, $existing['reference'], $montant),
+      'instructions' => build_mobile_money_instructions($methode, $existing['reference'], $montant),
     ]);
   }
 
@@ -86,7 +88,7 @@ if ($action === 'initier') {
     'reference' => $ref,
     'montant' => $montant,
     'methode' => $methode,
-    'instructions' => build_instructions($methode, $ref, $montant),
+    'instructions' => build_mobile_money_instructions($methode, $ref, $montant),
   ]);
 }
 
@@ -128,29 +130,4 @@ if ($action === 'confirmer') {
 
 fail('Action inconnue', 404);
 
-function build_instructions(string $methode, string $ref, int $montant): array {
-  if ($methode === 'flooz') {
-    return [
-      'titre' => 'Payer avec Flooz (Moov)',
-      'etapes' => [
-        "Composez *155*1# sur votre téléphone Flooz",
-        "Sélectionnez « Payer un marchand »",
-        "Entrez le code marchand EZOA-TO et le montant {$montant} FCFA",
-        "Confirmez avec votre code PIN",
-        "Référence : {$ref}",
-      ],
-      'ussd' => '*155*1#',
-    ];
-  }
-  return [
-    'titre' => 'Payer avec T-Money (Togocom)',
-    'etapes' => [
-      "Composez *144*1# sur votre téléphone T-Money",
-      "Sélectionnez « Payer » puis « Marchand »",
-      "Entrez le montant {$montant} FCFA",
-      "Confirmez avec votre code PIN",
-      "Référence : {$ref}",
-    ],
-    'ussd' => '*144*1#',
-  ];
-}
+fail('Action inconnue', 404);

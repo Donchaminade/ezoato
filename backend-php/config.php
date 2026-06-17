@@ -27,6 +27,12 @@ return [
     /** Durée d'accès après paiement confirmé (aperçu, téléchargement) */
     'access_months' => 6,
   ],
+  /** Abonnement plateforme — accès à toutes les épreuves payantes */
+  'abonnement' => [
+    'montant' => 1000, // SUBSCRIPTION_PRICE FCFA
+    'duree_mois' => 6, // SUBSCRIPTION_DURATION_MONTHS
+    'expiration_minutes' => 15,
+  ],
   'contributeur' => [
     'epreuves_par_recompense' => 50,
     'montant_recompense' => 1000, // FCFA

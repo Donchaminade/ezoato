@@ -17,6 +17,7 @@ import {
   FolderTree,
   UserCircle,
   Bell,
+  Crown,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
 
@@ -32,7 +33,8 @@ export type AdminSection =
   | "etablissements"
   | "users"
   | "settings"
-  | "notifications";
+  | "notifications"
+  | "abonnements";
 
 export type UserSection =
   | "overview"
@@ -172,6 +174,14 @@ export function getAdminNavGroups(isAdmin: boolean, badges?: {
           icon: BarChart3,
           to: "/admin",
           search: section("stats"),
+        },
+        {
+          id: "abonnements",
+          label: "Abonnements",
+          icon: Crown,
+          to: "/admin",
+          search: section("abonnements"),
+          adminOnly: true,
         },
         {
           id: "notifications",
@@ -347,6 +357,7 @@ export function adminSectionLabel(section: AdminSection): string {
     etablissements: "Établissements",
     users: "Utilisateurs",
     notifications: "Notifications",
+    abonnements: "Abonnements",
     settings: "Paramètres",
   };
   return labels[section];

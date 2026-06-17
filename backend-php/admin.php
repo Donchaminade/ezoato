@@ -1274,4 +1274,105 @@ if ($action === 'archiver_soumission') {
   json_out(['ok'=>true]);
 }
 
+// --- Abonnements ---
+if ($action === 'abonnements') {
+  require_user(['gestionnaire', 'admin']);
+  if (!table_exists('abonnements')) fail('Migration abonnements requise', 503);
+
+  expire_stale_abonnements();
+
+  $statut = $_GET['statut'] ?? 'all';
+  $page = max(1, (int)($_GET['page'] ?? 1));
+  $perPage = max(1, min(100, (int)($_GET['perPage'] ?? 25)));
+  $offset = ($page - 1) * $perPage;
+
+  $where = ['1=1'];
+  $args = [];
+  if ($statut === 'actif') {
+    $where[] = "a.statut='actif' AND a.date_fin > NOW()";
+  } elseif ($statut === 'expire') {
+    $where[] = "(a.statut IN ('expire','annule') OR (a.statut='actif' AND a.date_fin <= NOW()))";
+  }
+  $cond = implode(' AND ', $where);
+
+  $countStmt = db()->prepare("SELECT COUNT(*) FROM abonnements a WHERE $cond");
+  $countStmt->execute($args);
+  $total = (int)$countStmt->fetchColumn();
+
+  $stmt = db()->prepare("SELECT a.*, u.nom AS user_nom, u.email AS user_email
+    FROM abonnements a
+    JOIN users u ON u.id = a.user_id
+    WHERE $cond
+    ORDER BY a.created_at DESC
+    LIMIT $perPage OFFSET $offset");
+  $stmt->execute($args);
+
+  json_out([
+    'items' => array_map(function ($r) {
+      $actif = $r['statut'] === 'actif' && !empty($r['date_fin']) && strtotime($r['date_fin']) > time();
+      return [
+        'id' => $r['id'],
+        'user' => ['id' => $r['user_id'], 'nom' => $r['user_nom'], 'email' => $r['user_email']],
+        'montant' => (int)$r['montant'],
+        'dateDebut' => $r['date_debut'] ? date('c', strtotime($r['date_debut'])) : null,
+        'dateFin' => $r['date_fin'] ? date('c', strtotime($r['date_fin'])) : null,
+        'statut' => $actif ? 'actif' : ($r['statut'] === 'en_attente' ? 'en_attente' : 'expire'),
+        'createdAt' => date('c', strtotime($r['created_at'])),
+      ];
+    }, $stmt->fetchAll()),
+    'total' => $total,
+    'page' => $page,
+    'perPage' => $perPage,
+  ]);
+}
+
+if ($action === 'abonnements_stats') {
+  require_user(['gestionnaire', 'admin']);
+  if (!table_exists('abonnements')) fail('Migration abonnements requise', 503);
+
+  expire_stale_abonnements();
+  $db = db();
+
+  $actifs = (int)$db->query("SELECT COUNT(*) FROM abonnements WHERE statut='actif' AND date_fin > NOW()")->fetchColumn();
+  $expirantBientot = (int)$db->query("SELECT COUNT(*) FROM abonnements
+    WHERE statut='actif' AND date_fin > NOW() AND date_fin <= DATE_ADD(NOW(), INTERVAL 7 DAY)")->fetchColumn();
+  $expires = (int)$db->query("SELECT COUNT(*) FROM abonnements WHERE statut IN ('expire','annule')")->fetchColumn();
+  $revenus = (int)$db->query("SELECT COALESCE(SUM(montant),0) FROM abonnements WHERE statut='actif'")->fetchColumn();
+
+  json_out([
+    'actifs' => $actifs,
+    'expirantBientot' => $expirantBientot,
+    'expires' => $expires,
+    'revenusFcfa' => $revenus,
+  ]);
+}
+
+if ($action === 'notifier_abonnes') {
+  require_user(['gestionnaire', 'admin']);
+  if (!table_exists('abonnements')) fail('Migration abonnements requise', 503);
+
+  $body = json_input();
+  $titre = trim($body['titre'] ?? '');
+  $message = trim($body['message'] ?? $body['corps'] ?? '');
+  $type = trim($body['type'] ?? 'info');
+  $url = trim($body['url'] ?? '/account/notifications') ?: '/account/notifications';
+
+  if ($titre === '' || $message === '') fail('titre et message requis');
+
+  expire_stale_abonnements();
+  $stmt = db()->query("SELECT DISTINCT user_id FROM abonnements WHERE statut='actif' AND date_fin > NOW()");
+  $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
+
+  $sent = 0;
+  foreach ($userIds as $uid) {
+    insert_notification_inbox($uid, null, $titre, $message, $url);
+    if ($type === 'push' || $type === 'all') {
+      send_web_push_to_user($uid, $titre, $message, $url);
+    }
+    $sent++;
+  }
+
+  json_out(['ok' => true, 'envoyes' => $sent, 'type' => $type]);
+}
+
 fail('Action inconnue', 404);

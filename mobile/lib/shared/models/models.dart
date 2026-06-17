@@ -889,6 +889,7 @@ class PaymentAccess {
     required this.montant,
     this.devise,
     this.expiresAt,
+    this.hasSubscription = false,
   });
 
   factory PaymentAccess.fromJson(Map<String, dynamic> json) {
@@ -898,6 +899,7 @@ class PaymentAccess {
       montant: (json['montant'] as num).toInt(),
       devise: json['devise'] as String?,
       expiresAt: json['expiresAt'] as String?,
+      hasSubscription: json['hasSubscription'] as bool? ?? false,
     );
   }
 
@@ -906,4 +908,35 @@ class PaymentAccess {
   final int montant;
   final String? devise;
   final String? expiresAt;
+  final bool hasSubscription;
+}
+
+/// Statut abonnement plateforme (`GET /account/abonnement/status`).
+class SubscriptionStatus {
+  const SubscriptionStatus({
+    required this.actif,
+    this.dateDebut,
+    this.dateFin,
+    required this.joursRestants,
+    required this.montant,
+    required this.dureeMois,
+  });
+
+  factory SubscriptionStatus.fromJson(Map<String, dynamic> json) {
+    return SubscriptionStatus(
+      actif: json['actif'] as bool? ?? false,
+      dateDebut: json['dateDebut'] as String?,
+      dateFin: json['dateFin'] as String?,
+      joursRestants: (json['joursRestants'] as num?)?.toInt() ?? 0,
+      montant: (json['montant'] as num?)?.toInt() ?? 1000,
+      dureeMois: (json['dureeMois'] as num?)?.toInt() ?? 6,
+    );
+  }
+
+  final bool actif;
+  final String? dateDebut;
+  final String? dateFin;
+  final int joursRestants;
+  final int montant;
+  final int dureeMois;
 }

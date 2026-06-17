@@ -9,6 +9,9 @@ import type {
   AdminUser,
   AdminUserDetail,
   AdminUserStats,
+  AdminAbonnement,
+  AdminAbonnementsPage,
+  AdminAbonnementsStats,
   ArchiveBrowseResult,
   ContactInfo,
   ContributorWallet,
@@ -31,6 +34,7 @@ import type {
   Soumission,
   SoumissionDetail,
   SoumissionHistory,
+  SubscriptionStatus,
   UpdateProfilePayload,
   User,
   UserFavoris,
@@ -175,6 +179,24 @@ export const api = {
 
   async confirmerPaiement(reference: string): Promise<{ ok: boolean; hasAccess: boolean }> {
     return http("/paiements/confirmer", { method: "POST", body: JSON.stringify({ reference }) });
+  },
+
+  async getSubscriptionStatus(): Promise<SubscriptionStatus> {
+    return http("/account/abonnement/status");
+  },
+
+  async initierAbonnement(methode: "flooz" | "tmoney", telephone: string): Promise<PaymentInit> {
+    return http("/account/abonnement/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ methode, telephone }),
+    });
+  },
+
+  async confirmerAbonnement(reference: string): Promise<SubscriptionStatus> {
+    return http("/account/abonnement/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ reference }),
+    });
   },
 
   async downloadEpreuve(epreuveId: string): Promise<void> {
@@ -508,6 +530,35 @@ export const api = {
 
   async deleteNotificationRule(id: string): Promise<{ ok: boolean }> {
     return http(`/admin/notifications/${id}/supprimer`, { method: "POST" });
+  },
+
+  async listAdminAbonnements(params: {
+    statut?: "all" | "actif" | "expire";
+    page?: number;
+    perPage?: number;
+  } = {}): Promise<AdminAbonnementsPage> {
+    const qs = new URLSearchParams();
+    if (params.statut && params.statut !== "all") qs.set("statut", params.statut);
+    if (params.page) qs.set("page", String(params.page));
+    if (params.perPage) qs.set("perPage", String(params.perPage));
+    const q = qs.toString();
+    return http(`/admin/abonnements${q ? `?${q}` : ""}`);
+  },
+
+  async getAdminAbonnementsStats(): Promise<AdminAbonnementsStats> {
+    return http("/admin/abonnements/stats");
+  },
+
+  async notifySubscribers(payload: {
+    titre: string;
+    message: string;
+    type?: "info" | "push" | "all";
+    url?: string;
+  }): Promise<{ ok: boolean; envoyes: number }> {
+    return http("/admin/notifications/subscribers", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
   },
 
   async demanderRetrait(montant: number, methode: "flooz" | "tmoney", telephone: string): Promise<{ ok: boolean; message: string }> {

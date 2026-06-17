@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../core/onboarding/onboarding_provider.dart';
 import '../../../core/theme/ezoa_theme.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
@@ -21,6 +22,7 @@ class AccountMenuScreen extends ConsumerWidget {
   ];
 
   static const _contentSection = <_MenuEntry>[
+    ('Abonnement', 'Accès illimité 6 mois — 1000 FCFA', '/account/abonnement', LucideIcons.crown),
     ('Bibliothèque', 'Achats et téléchargements', '/account/bibliotheque', LucideIcons.library),
     ('Favoris', 'Épreuves enregistrées', '/account/favoris', LucideIcons.heart),
     ('Hors ligne', 'PDF téléchargés localement', '/account/offline', LucideIcons.hardDrive),
@@ -84,7 +86,18 @@ class AccountMenuScreen extends ConsumerWidget {
               title: 'Préférences',
               items: _preferencesSection,
               onItemTap: (route) => context.push(route),
-              trailing: const _AccountThemeRow(),
+              trailing: Column(
+                children: [
+                  const _AccountOnboardingRow(),
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    indent: 56,
+                    color: EzoaColors.of(context).border.withValues(alpha: 0.6),
+                  ),
+                  const _AccountThemeRow(),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -341,6 +354,62 @@ class _AccountMenuRow extends StatelessWidget {
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: EzoaTypography.bodySmall(context),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(LucideIcons.chevronRight, size: 16, color: pal.textFaint),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountOnboardingRow extends ConsumerWidget {
+  const _AccountOnboardingRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pal = EzoaColors.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () async {
+          context.go('/home');
+          await Future<void>.delayed(const Duration(milliseconds: 350));
+          if (!context.mounted) return;
+          await ref.read(onboardingProvider.notifier).startTour(context);
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: EzoaColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: pal.border),
+                ),
+                child: Icon(LucideIcons.compass, size: 18, color: pal.accent),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Guide de l\'application',
+                      style: EzoaTypography.titleSmall(context),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      'Revoir la visite guidée',
                       style: EzoaTypography.bodySmall(context),
                     ),
                   ],
