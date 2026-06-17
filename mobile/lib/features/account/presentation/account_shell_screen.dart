@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../core/onboarding/onboarding_provider.dart';
 import '../../../core/theme/ezoa_theme.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
+import '../../../shared/widgets/subscription_pro_widgets.dart';
 import '../../auth/data/auth_repository.dart';
+import '../data/subscription_providers.dart';
 
 typedef _MenuEntry = (String title, String subtitle, String route, IconData icon);
 
@@ -21,6 +24,7 @@ class AccountMenuScreen extends ConsumerWidget {
   ];
 
   static const _contentSection = <_MenuEntry>[
+    ('Abonnement', 'Accès illimité 6 mois — 1000 FCFA', '/account/abonnement', LucideIcons.crown),
     ('Bibliothèque', 'Achats et téléchargements', '/account/bibliotheque', LucideIcons.library),
     ('Favoris', 'Épreuves enregistrées', '/account/favoris', LucideIcons.heart),
     ('Hors ligne', 'PDF téléchargés localement', '/account/offline', LucideIcons.hardDrive),
@@ -38,6 +42,23 @@ class AccountMenuScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProvider).user;
+    final subscriptionAsync = ref.watch(subscriptionStatusProvider);
+    final showExpiredBadge = subscriptionAsync.maybeWhen(
+      data: (s) => s.expire && !s.actif,
+      orElse: () => false,
+    );
+    final abonnementSubtitle = subscriptionAsync.maybeWhen(
+      data: (s) {
+        if (s.actif && s.dateFin != null) {
+          return 'Actif — expire le ${_formatShortDate(s.dateFin!)}';
+        }
+        if (s.expire) {
+          return 'Expiré — renouvelez pour retrouver l\'accès';
+        }
+        return 'Accès illimité 6 mois — 1000 FCFA';
+      },
+      orElse: () => 'Accès illimité 6 mois — 1000 FCFA',
+    );
 
     return EzoaScreen(
       title: 'Compte',
@@ -50,10 +71,25 @@ class AccountMenuScreen extends ConsumerWidget {
               name: user?.nom ?? 'Utilisateur',
               email: user?.email ?? '',
               role: user?.role,
+              showAlertBadge: showExpiredBadge,
               onTap: () => context.push('/account/profile'),
             ),
           ),
-          const SizedBox(height: 20),
+          subscriptionAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (s) {
+              if (s.actif) {
+                return EzoaScrollReveal(
+                  child: SubscriptionProStatusBadge(status: s),
+                );
+              }
+              return EzoaScrollReveal(
+                child: SubscriptionProUpgradeBanner(status: s),
+              );
+            },
+          ),
+          const SizedBox(height: 4),
           EzoaStaggerReveal(
             index: 0,
             child: _AccountMenuSection(
@@ -68,6 +104,12 @@ class AccountMenuScreen extends ConsumerWidget {
               title: 'Bibliothèque & contenu',
               items: _contentSection,
               onItemTap: (route) => context.push(route),
+              itemOverrides: {
+                '/account/abonnement': _MenuItemOverride(
+                  subtitle: abonnementSubtitle,
+                  showAlertBadge: showExpiredBadge,
+                ),
+              },
             ),
           ),
           EzoaStaggerReveal(
@@ -84,7 +126,18 @@ class AccountMenuScreen extends ConsumerWidget {
               title: 'Préférences',
               items: _preferencesSection,
               onItemTap: (route) => context.push(route),
-              trailing: const _AccountThemeRow(),
+              trailing: Column(
+                children: [
+                  const _AccountOnboardingRow(),
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    indent: 56,
+                    color: EzoaColors.of(context).border.withValues(alpha: 0.6),
+                  ),
+                  const _AccountThemeRow(),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -105,6 +158,22 @@ class AccountMenuScreen extends ConsumerWidget {
   }
 }
 
+String _formatShortDate(String iso) {
+  try {
+    final d = DateTime.parse(iso).toLocal();
+    return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+  } catch (_) {
+    return iso;
+  }
+}
+
+class _MenuItemOverride {
+  const _MenuItemOverride({this.subtitle, this.showAlertBadge = false});
+
+  final String? subtitle;
+  final bool showAlertBadge;
+}
+
 String _roleLabel(String? role) {
   return switch (role) {
     'utilisateur' => 'Utilisateur',
@@ -121,12 +190,14 @@ class _AccountProfileCard extends StatelessWidget {
     required this.email,
     required this.role,
     required this.onTap,
+    this.showAlertBadge = false,
   });
 
   final String name;
   final String email;
   final String? role;
   final VoidCallback onTap;
+  final bool showAlertBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -142,32 +213,51 @@ class _AccountProfileCard extends StatelessWidget {
       onTap: onTap,
       child: Row(
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              gradient: const LinearGradient(
-                colors: [EzoaColors.primary, EzoaColors.primaryDark],
-              ),
-              border: Border.all(color: EzoaColors.emerald.withValues(alpha: 0.4)),
-              boxShadow: [
-                BoxShadow(
-                  color: EzoaColors.primary.withValues(alpha: 0.25),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  gradient: const LinearGradient(
+                    colors: [EzoaColors.primary, EzoaColors.primaryDark],
+                  ),
+                  border: Border.all(color: EzoaColors.emerald.withValues(alpha: 0.4)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: EzoaColors.primary.withValues(alpha: 0.25),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              initial,
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
+                alignment: Alignment.center,
+                child: Text(
+                  initial,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
               ),
-            ),
+              if (showAlertBadge)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: EzoaColors.error,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -226,12 +316,14 @@ class _AccountMenuSection extends StatelessWidget {
     required this.items,
     required this.onItemTap,
     this.trailing,
+    this.itemOverrides = const {},
   });
 
   final String title;
   final List<_MenuEntry> items;
   final ValueChanged<String> onItemTap;
   final Widget? trailing;
+  final Map<String, _MenuItemOverride> itemOverrides;
 
   @override
   Widget build(BuildContext context) {
@@ -271,8 +363,9 @@ class _AccountMenuSection extends StatelessWidget {
                     ),
                   _AccountMenuRow(
                     title: item.$1,
-                    subtitle: item.$2,
+                    subtitle: itemOverrides[item.$3]?.subtitle ?? item.$2,
                     icon: item.$4,
+                    showAlertBadge: itemOverrides[item.$3]?.showAlertBadge ?? false,
                     onTap: () => onItemTap(item.$3),
                   ),
                 ],
@@ -301,12 +394,14 @@ class _AccountMenuRow extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     required this.onTap,
+    this.showAlertBadge = false,
   });
 
   final String title;
   final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
+  final bool showAlertBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -321,14 +416,33 @@ class _AccountMenuRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(9),
-                decoration: BoxDecoration(
-                  color: EzoaColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: pal.border),
-                ),
-                child: Icon(icon, size: 18, color: pal.accent),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(9),
+                    decoration: BoxDecoration(
+                      color: EzoaColors.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: pal.border),
+                    ),
+                    child: Icon(icon, size: 18, color: pal.accent),
+                  ),
+                  if (showAlertBadge)
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: EzoaColors.error,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 1.5),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -341,6 +455,62 @@ class _AccountMenuRow extends StatelessWidget {
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: EzoaTypography.bodySmall(context),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(LucideIcons.chevronRight, size: 16, color: pal.textFaint),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountOnboardingRow extends ConsumerWidget {
+  const _AccountOnboardingRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pal = EzoaColors.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () async {
+          context.go('/home');
+          await Future<void>.delayed(const Duration(milliseconds: 350));
+          if (!context.mounted) return;
+          await ref.read(onboardingProvider.notifier).startTour(context);
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: EzoaColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: pal.border),
+                ),
+                child: Icon(LucideIcons.compass, size: 18, color: pal.accent),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Guide de l\'application',
+                      style: EzoaTypography.titleSmall(context),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      'Revoir la visite guidée',
                       style: EzoaTypography.bodySmall(context),
                     ),
                   ],

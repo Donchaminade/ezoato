@@ -22,14 +22,16 @@ if ($route === 'register') {
   $email = strtolower(trim($in['email'] ?? ''));
   $telephone = normalize_phone($in['telephone'] ?? '');
   $pwd = $in['password'] ?? '';
+  $classe = validate_user_classe($in['classe'] ?? null, true);
+  $etablissement = validate_user_etablissement($in['etablissement'] ?? null, true);
   if (strlen($nom) < 2 || strlen($nom) > 120) fail('Nom invalide');
   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) fail('Email invalide');
   if (strlen($telephone) < 8 || strlen($telephone) > 12) fail('Numéro de téléphone invalide');
   if (strlen($pwd) < 8) fail('Mot de passe trop court (8+ caractères)');
   $id = uuid();
   try {
-    db()->prepare('INSERT INTO users (id,nom,email,telephone,password_hash,role) VALUES (?,?,?,?,?,?)')
-        ->execute([$id, $nom, $email, $telephone, password_hash($pwd, PASSWORD_BCRYPT), 'utilisateur']);
+    db()->prepare('INSERT INTO users (id,nom,email,telephone,password_hash,role,classe,etablissement) VALUES (?,?,?,?,?,?,?,?)')
+        ->execute([$id, $nom, $email, $telephone, password_hash($pwd, PASSWORD_BCRYPT), 'utilisateur', $classe, $etablissement]);
   } catch (PDOException $e) {
     $msg = (string)$e->getMessage();
     if (str_contains($msg, 'email')) fail('Email déjà utilisé', 409);
@@ -37,7 +39,16 @@ if ($route === 'register') {
     fail('Inscription impossible', 409);
   }
   $token = jwt_encode(['sub'=>$id,'exp'=>time()+86400*30]);
-  json_out(['token'=>$token,'user'=>['id'=>$id,'nom'=>$nom,'email'=>$email,'telephone'=>$telephone,'role'=>'utilisateur']]);
+  json_out(['token'=>$token,'user'=>map_auth_user([
+    'id' => $id,
+    'nom' => $nom,
+    'email' => $email,
+    'telephone' => $telephone,
+    'role' => 'utilisateur',
+    'ville' => null,
+    'classe' => $classe,
+    'etablissement' => $etablissement,
+  ])]);
 }
 
 if ($route === 'login') {
@@ -47,19 +58,19 @@ if ($route === 'login') {
   if ($identifier === '' || $pwd === '') fail('Identifiants invalides', 401);
 
   if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
-    $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, password_hash FROM users WHERE email = ?');
+    $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement, password_hash FROM users WHERE email = ?');
     $stmt->execute([strtolower($identifier)]);
   } else {
     $telephone = normalize_phone($identifier);
     if (strlen($telephone) < 8) fail('Identifiants invalides', 401);
-    $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, password_hash FROM users WHERE telephone = ?');
+    $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement, password_hash FROM users WHERE telephone = ?');
     $stmt->execute([$telephone]);
   }
   $u = $stmt->fetch();
   if (!$u || !password_verify($pwd, $u['password_hash'])) fail('Identifiants invalides', 401);
   unset($u['password_hash']);
   $token = jwt_encode(['sub'=>$u['id'],'exp'=>time()+86400*30]);
-  json_out(['token'=>$token,'user'=>$u]);
+  json_out(['token'=>$token,'user'=>map_auth_user($u)]);
 }
 
 if ($route === 'me') {

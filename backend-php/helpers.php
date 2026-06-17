@@ -314,6 +314,53 @@ function load_meta_classes(): array {
   return $out;
 }
 
+/** Toutes les classes valides (collège + lycée). */
+function all_meta_class_names(): array {
+  $classes = load_meta_classes();
+  return array_values(array_unique(array_merge(
+    $classes['college'] ?? [],
+    $classes['lycee'] ?? [],
+  )));
+}
+
+/** Valide et normalise la classe utilisateur contre les référentiels. */
+function validate_user_classe(?string $classe, bool $required = false): ?string {
+  $classe = trim((string)($classe ?? ''));
+  if ($classe === '') {
+    if ($required) fail('Classe requise');
+    return null;
+  }
+  foreach (all_meta_class_names() as $allowed) {
+    if ($allowed === $classe) return $classe;
+  }
+  fail('Classe invalide');
+}
+
+/** Valide et normalise l'établissement utilisateur (texte libre). */
+function validate_user_etablissement(?string $etablissement, bool $required = false): ?string {
+  $etablissement = trim((string)($etablissement ?? ''));
+  if ($etablissement === '') {
+    if ($required) fail('Établissement requis');
+    return null;
+  }
+  if (mb_strlen($etablissement) > 180) fail('Établissement trop long (180 caractères max)');
+  return repair_display_text($etablissement) ?? $etablissement;
+}
+
+/** Représentation publique d'un utilisateur (auth / profil). */
+function map_auth_user(array $u): array {
+  return [
+    'id' => $u['id'],
+    'nom' => $u['nom'],
+    'email' => $u['email'],
+    'telephone' => $u['telephone'] ?? null,
+    'role' => $u['role'],
+    'ville' => $u['ville'] ?? null,
+    'classe' => isset($u['classe']) ? (repair_display_text($u['classe'] ?? '') ?: null) : null,
+    'etablissement' => isset($u['etablissement']) ? (repair_display_text($u['etablissement'] ?? '') ?: null) : null,
+  ];
+}
+
 /** Classes admin avec clé brute + libellé affiché. */
 function load_admin_class_items(): array {
   if (!table_exists('classes')) {
@@ -515,9 +562,10 @@ function current_user(): ?array {
   if (!preg_match('/Bearer\s+(.+)/i', $h, $m)) return null;
   $payload = jwt_decode($m[1]);
   if (!$payload) return null;
-  $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville FROM users WHERE id = ?');
+  $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement FROM users WHERE id = ?');
   $stmt->execute([$payload['sub']]);
-  return $stmt->fetch() ?: null;
+  $row = $stmt->fetch();
+  return $row ? map_auth_user($row) : null;
 }
 
 function require_user(array $roles = []): array {
@@ -707,6 +755,8 @@ function pricing_public(): array {
     'epreuvesParRecompense' => (int)$s['epreuves_par_recompense'],
     'montantRecompense' => (int)$s['montant_recompense'],
     'minRetrait' => (int)$s['min_retrait'],
+    'abonnementMontant' => subscription_price(),
+    'abonnementDureeMois' => subscription_duration_months(),
   ];
 }
 
@@ -830,6 +880,113 @@ function paid_access_months(): int {
   return max(1, min(24, $months));
 }
 
+function subscription_price(): int {
+  return (int)(cfg()['abonnement']['montant'] ?? 1000);
+}
+
+function subscription_duration_months(): int {
+  return max(1, min(24, (int)(cfg()['abonnement']['duree_mois'] ?? 6)));
+}
+
+function expire_stale_abonnements(?string $userId = null): void {
+  if (!table_exists('abonnements')) return;
+  if ($userId) {
+    db()->prepare("UPDATE abonnements SET statut='expire'
+      WHERE user_id=? AND statut='actif' AND date_fin IS NOT NULL AND date_fin <= NOW()")
+        ->execute([$userId]);
+    return;
+  }
+  db()->exec("UPDATE abonnements SET statut='expire'
+    WHERE statut='actif' AND date_fin IS NOT NULL AND date_fin <= NOW()");
+}
+
+function user_active_abonnement(string $userId): ?array {
+  if (!table_exists('abonnements')) return null;
+  expire_stale_abonnements($userId);
+  $stmt = db()->prepare("SELECT * FROM abonnements
+    WHERE user_id=? AND statut='actif' AND date_fin > NOW()
+    ORDER BY date_fin DESC LIMIT 1");
+  $stmt->execute([$userId]);
+  $row = $stmt->fetch();
+  return $row ?: null;
+}
+
+function user_has_active_subscription(string $userId): bool {
+  return user_active_abonnement($userId) !== null;
+}
+
+function map_subscription_status(string $userId): array {
+  $ab = user_active_abonnement($userId);
+  $base = [
+    'actif' => false,
+    'expire' => false,
+    'dateDebut' => null,
+    'dateFin' => null,
+    'joursRestants' => 0,
+    'montant' => subscription_price(),
+    'dureeMois' => subscription_duration_months(),
+  ];
+  if (!$ab) {
+    if (!table_exists('abonnements')) return $base;
+    expire_stale_abonnements($userId);
+    $stmt = db()->prepare("SELECT * FROM abonnements
+      WHERE user_id=? AND statut IN ('actif','expire')
+        AND date_fin IS NOT NULL AND date_fin <= NOW()
+      ORDER BY date_fin DESC LIMIT 1");
+    $stmt->execute([$userId]);
+    $expired = $stmt->fetch();
+    if ($expired) {
+      $base['expire'] = true;
+      $base['dateFin'] = date('c', strtotime((string)$expired['date_fin']));
+      if (!empty($expired['date_debut'])) {
+        $base['dateDebut'] = date('c', strtotime((string)$expired['date_debut']));
+      }
+    }
+    return $base;
+  }
+
+  $fin = new DateTimeImmutable($ab['date_fin']);
+  $now = new DateTimeImmutable('now');
+  $jours = max(0, (int)ceil(($fin->getTimestamp() - $now->getTimestamp()) / 86400));
+
+  return [
+    'actif' => true,
+    'expire' => false,
+    'dateDebut' => date('c', strtotime((string)$ab['date_debut'])),
+    'dateFin' => $fin->format('c'),
+    'joursRestants' => $jours,
+    'montant' => (int)$ab['montant'],
+    'dureeMois' => subscription_duration_months(),
+  ];
+}
+
+function build_mobile_money_instructions(string $methode, string $ref, int $montant): array {
+  if ($methode === 'flooz') {
+    return [
+      'titre' => 'Payer avec Flooz (Moov)',
+      'etapes' => [
+        "Composez *155*1# sur votre téléphone Flooz",
+        "Sélectionnez « Payer un marchand »",
+        "Entrez le code marchand EZOA-TO et le montant {$montant} FCFA",
+        "Confirmez avec votre code PIN",
+        "Référence : {$ref}",
+      ],
+      'ussd' => '*155*1#',
+    ];
+  }
+  return [
+    'titre' => 'Payer avec T-Money (Togocom)',
+    'etapes' => [
+      "Composez *144*1# sur votre téléphone T-Money",
+      "Sélectionnez « Payer » puis « Marchand »",
+      "Entrez le montant {$montant} FCFA",
+      "Confirmez avec votre code PIN",
+      "Référence : {$ref}",
+    ],
+    'ussd' => '*144*1#',
+  ];
+}
+
 /** Paiement confirmé encore valide (fenêtre d'accès post-achat). */
 function user_access_record(string $userId, string $epreuveId): ?array {
   $months = paid_access_months();
@@ -844,10 +1001,15 @@ function user_access_record(string $userId, string $epreuveId): ?array {
 }
 
 function user_has_access(string $userId, string $epreuveId): bool {
+  if (user_has_active_subscription($userId)) return true;
   return user_access_record($userId, $epreuveId) !== null;
 }
 
 function user_access_expires_at(string $userId, string $epreuveId): ?string {
+  $ab = user_active_abonnement($userId);
+  if ($ab && !empty($ab['date_fin'])) {
+    return date('c', strtotime((string)$ab['date_fin']));
+  }
   $row = user_access_record($userId, $epreuveId);
   if (!$row || empty($row['confirme_le'])) return null;
   $dt = new DateTimeImmutable($row['confirme_le']);
@@ -956,3 +1118,4 @@ function map_soumission_detail(array $row, bool $forOwner = false): array {
 }
 
 require_once __DIR__ . '/lib/notifications.php';
+require_once __DIR__ . '/lib/abonnement-rappels.php';

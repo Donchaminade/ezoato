@@ -10,7 +10,10 @@ CREATE TABLE users (
   password_hash VARCHAR(255) NOT NULL,
   role         ENUM('utilisateur','gestionnaire','admin') NOT NULL DEFAULT 'utilisateur',
   ville        VARCHAR(80) NULL,
-  created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  classe       VARCHAR(40) NULL,
+  etablissement VARCHAR(180) NULL,
+  created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX (classe)
 ) ENGINE=InnoDB;
 
 CREATE TABLE etablissements (
@@ -97,6 +100,28 @@ CREATE TABLE paiements (
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (epreuve_id) REFERENCES epreuves(id),
   UNIQUE KEY uq_paiement_user_epreuve (user_id, epreuve_id)
+) ENGINE=InnoDB;
+
+-- Abonnement 6 mois — accès illimité aux épreuves payantes (1000 FCFA)
+CREATE TABLE abonnements (
+  id          CHAR(36) PRIMARY KEY,
+  user_id     CHAR(36) NOT NULL,
+  montant     INT NOT NULL DEFAULT 1000,
+  methode     ENUM('flooz','tmoney') NULL,
+  telephone   VARCHAR(20) NULL,
+  reference   VARCHAR(32) NULL UNIQUE,
+  date_debut  DATETIME NULL,
+  date_fin    DATETIME NULL,
+  statut      ENUM('en_attente','actif','expire','annule') NOT NULL DEFAULT 'en_attente',
+  rappel_2mois DATETIME NULL,
+  rappel_2sem  DATETIME NULL,
+  rappel_3j    DATETIME NULL,
+  rappel_expiration DATETIME NULL,
+  created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  INDEX idx_abonnement_user (user_id),
+  INDEX idx_abonnement_date_fin (date_fin),
+  INDEX idx_abonnement_statut (statut)
 ) ENGINE=InnoDB;
 
 -- Portefeuille contributeur (50 épreuves validées = 1000 FCFA)

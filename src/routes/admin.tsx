@@ -23,6 +23,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import { AdminArchivesBrowser } from "@/components/admin/AdminArchivesBrowser";
 import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
 import { AdminNotificationsTab } from "@/components/admin/AdminNotificationsTab";
+import { AdminAbonnementsTab } from "@/components/admin/AdminAbonnementsTab";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
 import { AuthenticatedImageGrid, AuthenticatedPdf } from "@/components/admin/AuthenticatedMedia";
 import { AdminStatsCharts } from "@/components/admin/AdminStatsCharts";
@@ -67,6 +68,7 @@ const ADMIN_SECTIONS = [
   "etablissements",
   "users",
   "notifications",
+  "abonnements",
   "settings",
 ] as const satisfies readonly AdminSection[];
 
@@ -197,6 +199,7 @@ function AdminDashboard({ isAdmin }: { isAdmin: boolean }) {
       {activeSection === "etablissements" && <DemandesEtablissementAdminTab />}
       {activeSection === "users" && isAdmin && <AdminUsersTab />}
       {activeSection === "notifications" && isAdmin && <AdminNotificationsTab />}
+      {activeSection === "abonnements" && isAdmin && <AdminAbonnementsTab />}
       {activeSection === "settings" && isAdmin && <AdminSettingsTab />}
     </DashboardLayout>
   );
@@ -393,6 +396,11 @@ function SoumissionsTab() {
                   />
                 </FormField>
               </div>
+
+                <p className="text-xs text-muted-foreground">
+                  À la publication, une notification (in-app + push) est envoyée aux utilisateurs inscrits en{" "}
+                  <strong>{active.classe}</strong> uniquement — pas à toute la base.
+                </p>
 
                 <div className="flex gap-2">
                   <Button onClick={() => valider(active)} className="flex-1">

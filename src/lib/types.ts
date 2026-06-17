@@ -83,6 +83,41 @@ export interface PaymentAccess {
   montant: number;
   devise?: string;
   expiresAt?: string | null;
+  hasSubscription?: boolean;
+}
+
+export interface SubscriptionStatus {
+  actif: boolean;
+  expire?: boolean;
+  dateDebut?: string | null;
+  dateFin?: string | null;
+  joursRestants: number;
+  montant: number;
+  dureeMois: number;
+}
+
+export interface AdminAbonnement {
+  id: string;
+  user: { id: string; nom: string; email: string };
+  montant: number;
+  dateDebut?: string | null;
+  dateFin?: string | null;
+  statut: "actif" | "expire" | "en_attente";
+  createdAt: string;
+}
+
+export interface AdminAbonnementsPage {
+  items: AdminAbonnement[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export interface AdminAbonnementsStats {
+  actifs: number;
+  expirantBientot: number;
+  expires: number;
+  revenusFcfa: number;
 }
 
 export interface PaymentInit {
@@ -239,6 +274,8 @@ export interface AdminUser {
   email: string;
   role: Role;
   ville?: string;
+  classe?: string | null;
+  etablissement?: string | null;
   createdAt: string;
 }
 
@@ -488,6 +525,8 @@ export interface User {
   telephone?: string;
   role: Role;
   ville?: Ville;
+  classe?: string | null;
+  etablissement?: string | null;
   createdAt?: string;
 }
 
@@ -553,6 +592,8 @@ export interface UpdateProfilePayload {
   email: string;
   telephone: string;
   ville?: string | null;
+  classe?: string | null;
+  etablissement?: string | null;
   currentPassword?: string;
   password?: string;
 }
