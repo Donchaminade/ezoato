@@ -299,7 +299,54 @@ class _PressScaleState extends State<_PressScale> {
   }
 }
 
-class EzoaTextField extends StatelessWidget {
+/// Zone de formulaire défilable : masque le clavier au glisser et compense
+/// l'encart clavier si le [Scaffold] parent a `resizeToAvoidBottomInset: false`.
+class EzoaFormScroll extends StatelessWidget {
+  const EzoaFormScroll({
+    super.key,
+    required this.child,
+    this.padding = EdgeInsets.zero,
+    this.minHeight,
+    this.centerWhenShort = false,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double? minHeight;
+  final bool centerWhenShort;
+
+  @override
+  Widget build(BuildContext context) {
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final scaffoldResizes =
+        Scaffold.maybeOf(context)?.resizeToAvoidBottomInset ?? true;
+    final extraBottom = scaffoldResizes ? 0.0 : keyboardInset;
+
+    final resolved = padding.resolve(Directionality.of(context));
+    final scrollPadding = EdgeInsets.fromLTRB(
+      resolved.left,
+      resolved.top,
+      resolved.right,
+      resolved.bottom + extraBottom,
+    );
+
+    Widget body = child;
+    if (minHeight != null) {
+      body = ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minHeight!),
+        child: centerWhenShort ? Center(child: body) : body,
+      );
+    }
+
+    return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: scrollPadding,
+      child: body,
+    );
+  }
+}
+
+class EzoaTextField extends StatefulWidget {
   const EzoaTextField({
     super.key,
     required this.label,
@@ -309,6 +356,7 @@ class EzoaTextField extends StatelessWidget {
     this.errorText,
     this.onChanged,
     this.prefixIcon,
+    this.suffixIcon,
   });
 
   final String label;
@@ -318,28 +366,67 @@ class EzoaTextField extends StatelessWidget {
   final String? errorText;
   final ValueChanged<String>? onChanged;
   final IconData? prefixIcon;
+  final Widget? suffixIcon;
+
+  @override
+  State<EzoaTextField> createState() => _EzoaTextFieldState();
+}
+
+class _EzoaTextFieldState extends State<EzoaTextField> {
+  final _focusNode = FocusNode();
+  final _fieldKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_scrollIntoViewOnFocus);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_scrollIntoViewOnFocus);
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _scrollIntoViewOnFocus() {
+    if (!_focusNode.hasFocus) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final target = _fieldKey.currentContext;
+      if (target == null || !mounted) return;
+      Scrollable.ensureVisible(
+        target,
+        alignment: 0.25,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final pal = EzoaColors.of(context);
 
     return Padding(
+      key: _fieldKey,
       padding: const EdgeInsets.only(bottom: 14),
       child: TextField(
-        controller: controller,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        onChanged: onChanged,
+        controller: widget.controller,
+        focusNode: _focusNode,
+        obscureText: widget.obscureText,
+        keyboardType: widget.keyboardType,
+        onChanged: widget.onChanged,
         style: GoogleFonts.inter(
           color: pal.text,
           fontWeight: FontWeight.w300,
         ),
         decoration: InputDecoration(
-          labelText: label,
-          errorText: errorText,
-          prefixIcon: prefixIcon != null
-              ? Icon(prefixIcon, size: 20, color: pal.textFaint)
+          labelText: widget.label,
+          errorText: widget.errorText,
+          prefixIcon: widget.prefixIcon != null
+              ? Icon(widget.prefixIcon, size: 20, color: pal.textFaint)
               : null,
+          suffixIcon: widget.suffixIcon,
         ),
       ),
     );
@@ -871,65 +958,51 @@ class EzoaAuthLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Hauteur du clavier : le Scaffold ne se redimensionne pas
-    // (resizeToAvoidBottomInset: false) pour que les vagues restent fixes au
-    // bas de l'écran physique ; on compense ici dans le padding du scroll.
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-
     return EzoaScaffold(
       showWaveFooter: true,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: EdgeInsets.fromLTRB(24, 16, 24, 32 + keyboardInset),
-              child: ConstrainedBox(
-                // 48 = padding vertical (16 haut + 32 bas) hors clavier, pour
-                // que le bloc soit centré sur la hauteur visible restante.
-                constraints: BoxConstraints(
-                  minHeight: (constraints.maxHeight - keyboardInset - 48)
-                      .clamp(0.0, double.infinity),
-                ),
-                child: Center(
-                  child: EzoaContentWidth(
-                    maxWidth: 480,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (showBack)
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: IconButton(
-                              icon: Icon(
-                                LucideIcons.arrowLeft,
-                                color: EzoaColors.of(context).textMuted,
-                              ),
-                              onPressed: onBack,
-                            ),
+            return EzoaFormScroll(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+              minHeight: constraints.maxHeight - 48,
+              centerWhenShort: true,
+              child: EzoaContentWidth(
+                maxWidth: 480,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (showBack)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: IconButton(
+                          icon: Icon(
+                            LucideIcons.arrowLeft,
+                            color: EzoaColors.of(context).textMuted,
                           ),
-                        const SizedBox(height: 8),
-                        const Center(child: EzoaLogo(height: 88)),
-                        const SizedBox(height: 32),
-                        EzoaGlassCard(
-                          margin: EdgeInsets.zero,
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(title, style: EzoaTypography.titleLarge(context)),
-                              const SizedBox(height: 8),
-                              Text(subtitle, style: EzoaTypography.body(context)),
-                              const SizedBox(height: 24),
-                              ...children,
-                            ],
-                          ),
+                          onPressed: onBack,
                         ),
-                      ],
+                      ),
+                    const SizedBox(height: 8),
+                    const Center(child: EzoaLogo(height: 88)),
+                    const SizedBox(height: 32),
+                    EzoaGlassCard(
+                      margin: EdgeInsets.zero,
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(title, style: EzoaTypography.titleLarge(context)),
+                          const SizedBox(height: 8),
+                          Text(subtitle, style: EzoaTypography.body(context)),
+                          const SizedBox(height: 24),
+                          ...children,
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             );
