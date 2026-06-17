@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/account/presentation/abonnement_screen.dart';
 import '../../features/account/presentation/account_shell_screen.dart';
 import '../../features/account/presentation/bibliotheque_screen.dart';
 import '../../features/account/presentation/downloads_screen.dart';
@@ -142,6 +143,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/account/downloads',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, __) => const DownloadsScreen(),
+      ),
+      GoRoute(
+        path: '/account/abonnement',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, __) => const AbonnementScreen(),
       ),
       GoRoute(
         path: '/account/notifications',

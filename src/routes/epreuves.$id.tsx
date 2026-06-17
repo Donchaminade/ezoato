@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   Download, ArrowLeft, FileText, Lock, CreditCard, Loader2,
-  MapPin, Calendar, Building2, Share2, Eye, CheckCircle2, ClipboardCheck,
+  MapPin, Calendar, Building2, Share2, Eye, CheckCircle2, ClipboardCheck, Crown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHero } from "@/components/layout/PageHero";
@@ -17,6 +17,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { shareEpreuve } from "@/lib/epreuve-share";
 import { formatFcfa, getPrixFcfa, requiresPayment, typeLabel } from "@/lib/pricing";
+import { subscriptionProCtaLabel } from "@/components/subscription/SubscriptionProBanner";
 
 export const Route = createFileRoute("/epreuves/$id")({
   head: () => ({
@@ -152,10 +153,18 @@ function EpreuveDetail() {
                   Télécharger le PDF
                 </Button>
               ) : (
-                <Button size="lg" onClick={() => setPayOpen(true)}>
-                  <CreditCard className="size-4" />
-                  Payer {formatFcfa(getPrixFcfa(data))} et télécharger
-                </Button>
+                <>
+                  <Button size="lg" asChild>
+                    <Link to="/account/abonnement">
+                      <Crown className="size-4" />
+                      {subscriptionProCtaLabel()}
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" onClick={() => setPayOpen(true)}>
+                    <CreditCard className="size-4" />
+                    Payer {formatFcfa(getPrixFcfa(data))} et télécharger
+                  </Button>
+                </>
               )}
               <Button size="lg" variant="outline" onClick={handleShare}>
                 <Share2 className="size-4" /> Partager
@@ -180,10 +189,18 @@ function EpreuveDetail() {
                           l&apos;aperçu et le téléchargement (accès 6 mois).
                         </p>
                         {user ? (
-                          <Button className="mt-5" onClick={() => setPayOpen(true)}>
-                            <CreditCard className="size-4" />
-                            Débloquer — {formatFcfa(getPrixFcfa(data))}
-                          </Button>
+                          <div className="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+                            <Button asChild>
+                              <Link to="/account/abonnement">
+                                <Crown className="size-4" />
+                                Passer en abonnement Pro
+                              </Link>
+                            </Button>
+                            <Button variant="outline" onClick={() => setPayOpen(true)}>
+                              <CreditCard className="size-4" />
+                              Débloquer — {formatFcfa(getPrixFcfa(data))}
+                            </Button>
+                          </div>
                         ) : (
                           <Button asChild className="mt-5">
                             <Link to="/auth/login">Se connecter pour payer</Link>
@@ -292,10 +309,15 @@ function EpreuveDetail() {
                   <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5 text-sm">
                     <p className="font-semibold">Contenu payant</p>
                     <p className="mt-1 text-muted-foreground">
-                      Paiement unique de {formatFcfa(getPrixFcfa(data))} via Flooz ou T-Money. Accès 6 mois après confirmation.
+                      Paiement unique de {formatFcfa(getPrixFcfa(data))} via Flooz ou T-Money, ou abonnement Pro pour tout débloquer.
                     </p>
-                    <Button className="mt-3 w-full" size="sm" onClick={() => setPayOpen(true)}>
-                      <CreditCard className="size-4" /> Payer maintenant
+                    <Button className="mt-3 w-full" size="sm" asChild>
+                      <Link to="/account/abonnement">
+                        <Crown className="size-4" /> {subscriptionProCtaLabel()}
+                      </Link>
+                    </Button>
+                    <Button className="mt-2 w-full" size="sm" variant="outline" onClick={() => setPayOpen(true)}>
+                      <CreditCard className="size-4" /> Payer cette épreuve
                     </Button>
                   </div>
                 )}

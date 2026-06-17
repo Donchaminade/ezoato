@@ -101,6 +101,8 @@ class User {
     required this.role,
     this.telephone,
     this.ville,
+    this.classe,
+    this.etablissement,
     this.createdAt,
   });
 
@@ -112,6 +114,8 @@ class User {
       role: json['role'] as String,
       telephone: json['telephone'] as String?,
       ville: json['ville'] as String?,
+      classe: json['classe'] as String?,
+      etablissement: json['etablissement'] as String?,
       createdAt: json['createdAt'] as String?,
     );
   }
@@ -122,6 +126,8 @@ class User {
   final String? telephone;
   final String role;
   final String? ville;
+  final String? classe;
+  final String? etablissement;
   final String? createdAt;
 }
 
@@ -134,6 +140,8 @@ class UserProfile extends User {
     required this.createdAtProfile,
     super.telephone,
     super.ville,
+    super.classe,
+    super.etablissement,
     super.createdAt,
   });
 
@@ -146,6 +154,8 @@ class UserProfile extends User {
       role: json['role'] as String,
       telephone: json['telephone'] as String?,
       ville: json['ville'] as String?,
+      classe: json['classe'] as String?,
+      etablissement: json['etablissement'] as String?,
       createdAt: created,
       createdAtProfile: created,
     );
@@ -889,6 +899,7 @@ class PaymentAccess {
     required this.montant,
     this.devise,
     this.expiresAt,
+    this.hasSubscription = false,
   });
 
   factory PaymentAccess.fromJson(Map<String, dynamic> json) {
@@ -898,6 +909,7 @@ class PaymentAccess {
       montant: (json['montant'] as num).toInt(),
       devise: json['devise'] as String?,
       expiresAt: json['expiresAt'] as String?,
+      hasSubscription: json['hasSubscription'] as bool? ?? false,
     );
   }
 
@@ -906,4 +918,38 @@ class PaymentAccess {
   final int montant;
   final String? devise;
   final String? expiresAt;
+  final bool hasSubscription;
+}
+
+/// Statut abonnement plateforme (`GET /account/abonnement/status`).
+class SubscriptionStatus {
+  const SubscriptionStatus({
+    required this.actif,
+    this.expire = false,
+    this.dateDebut,
+    this.dateFin,
+    required this.joursRestants,
+    required this.montant,
+    required this.dureeMois,
+  });
+
+  factory SubscriptionStatus.fromJson(Map<String, dynamic> json) {
+    return SubscriptionStatus(
+      actif: json['actif'] as bool? ?? false,
+      expire: json['expire'] as bool? ?? false,
+      dateDebut: json['dateDebut'] as String?,
+      dateFin: json['dateFin'] as String?,
+      joursRestants: (json['joursRestants'] as num?)?.toInt() ?? 0,
+      montant: (json['montant'] as num?)?.toInt() ?? 1000,
+      dureeMois: (json['dureeMois'] as num?)?.toInt() ?? 6,
+    );
+  }
+
+  final bool actif;
+  final bool expire;
+  final String? dateDebut;
+  final String? dateFin;
+  final int joursRestants;
+  final int montant;
+  final int dureeMois;
 }

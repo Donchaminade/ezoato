@@ -33,6 +33,7 @@ import { Route as AccountProfilRouteImport } from './routes/account.profil'
 import { Route as AccountPortefeuilleRouteImport } from './routes/account.portefeuille'
 import { Route as AccountFavorisRouteImport } from './routes/account.favoris'
 import { Route as AccountBibliothequeRouteImport } from './routes/account.bibliotheque'
+import { Route as AccountAbonnementRouteImport } from './routes/account.abonnement'
 import { Route as AccountSoumissionsIdRouteImport } from './routes/account.soumissions_.$id'
 
 const SubmitRoute = SubmitRouteImport.update({
@@ -155,6 +156,11 @@ const AccountBibliothequeRoute = AccountBibliothequeRouteImport.update({
   path: '/bibliotheque',
   getParentRoute: () => AccountRoute,
 } as any)
+const AccountAbonnementRoute = AccountAbonnementRouteImport.update({
+  id: '/abonnement',
+  path: '/abonnement',
+  getParentRoute: () => AccountRoute,
+} as any)
 const AccountSoumissionsIdRoute = AccountSoumissionsIdRouteImport.update({
   id: '/soumissions_/$id',
   path: '/soumissions/$id',
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/partenariat': typeof PartenariatRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/account/abonnement': typeof AccountAbonnementRoute
   '/account/bibliotheque': typeof AccountBibliothequeRoute
   '/account/favoris': typeof AccountFavorisRoute
   '/account/portefeuille': typeof AccountPortefeuilleRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/partenariat': typeof PartenariatRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/account/abonnement': typeof AccountAbonnementRoute
   '/account/bibliotheque': typeof AccountBibliothequeRoute
   '/account/favoris': typeof AccountFavorisRoute
   '/account/portefeuille': typeof AccountPortefeuilleRoute
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/partenariat': typeof PartenariatRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/account/abonnement': typeof AccountAbonnementRoute
   '/account/bibliotheque': typeof AccountBibliothequeRoute
   '/account/favoris': typeof AccountFavorisRoute
   '/account/portefeuille': typeof AccountPortefeuilleRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
     | '/partenariat'
     | '/sitemap.xml'
     | '/submit'
+    | '/account/abonnement'
     | '/account/bibliotheque'
     | '/account/favoris'
     | '/account/portefeuille'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/partenariat'
     | '/sitemap.xml'
     | '/submit'
+    | '/account/abonnement'
     | '/account/bibliotheque'
     | '/account/favoris'
     | '/account/portefeuille'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/partenariat'
     | '/sitemap.xml'
     | '/submit'
+    | '/account/abonnement'
     | '/account/bibliotheque'
     | '/account/favoris'
     | '/account/portefeuille'
@@ -512,6 +524,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountBibliothequeRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/account/abonnement': {
+      id: '/account/abonnement'
+      path: '/abonnement'
+      fullPath: '/account/abonnement'
+      preLoaderRoute: typeof AccountAbonnementRouteImport
+      parentRoute: typeof AccountRoute
+    }
     '/account/soumissions_/$id': {
       id: '/account/soumissions_/$id'
       path: '/soumissions/$id'
@@ -523,6 +542,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AccountRouteChildren {
+  AccountAbonnementRoute: typeof AccountAbonnementRoute
   AccountBibliothequeRoute: typeof AccountBibliothequeRoute
   AccountFavorisRoute: typeof AccountFavorisRoute
   AccountPortefeuilleRoute: typeof AccountPortefeuilleRoute
@@ -533,6 +553,7 @@ interface AccountRouteChildren {
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
+  AccountAbonnementRoute: AccountAbonnementRoute,
   AccountBibliothequeRoute: AccountBibliothequeRoute,
   AccountFavorisRoute: AccountFavorisRoute,
   AccountPortefeuilleRoute: AccountPortefeuilleRoute,

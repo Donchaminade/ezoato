@@ -1,12 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Eye,
   EyeOff,
+  GraduationCap,
   Loader2,
   Lock,
   Mail,
+  School,
   ShieldCheck,
   Smartphone,
   Sparkles,
@@ -17,7 +20,15 @@ import { AUTH_FIELD, AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/lib/auth";
+import { api } from "@/lib/api";
 import { isValidPhone, normalizePhone } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 
@@ -42,12 +53,23 @@ function passwordStrength(pwd: string): { score: number; label: string; color: s
 function RegisterPage() {
   const { register } = useAuth();
   const nav = useNavigate();
+  const { data: meta } = useQuery({ queryKey: ["meta"], queryFn: () => api.getMeta() });
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [niveau, setNiveau] = useState<"college" | "lycee">("college");
+  const [classe, setClasse] = useState("");
+  const [etablissement, setEtablissement] = useState("");
+
+  const CLASSES_COLLEGE = meta?.classes?.college ?? ["6e", "5e", "4e", "3e"];
+  const CLASSES_LYCEE = meta?.classes?.lycee ?? [];
+  const etablissementSuggestions = useMemo(
+    () => [...new Set((meta?.etablissements ?? []).map((e) => e.nom).filter(Boolean))],
+    [meta?.etablissements],
+  );
 
   const strength = useMemo(() => passwordStrength(password), [password]);
   const pwdMismatch = confirmPwd.length > 0 && password !== confirmPwd;
@@ -82,6 +104,14 @@ function RegisterPage() {
             toast.error("Numéro de téléphone invalide (8 chiffres minimum).");
             return;
           }
+          if (!classe) {
+            toast.error("Sélectionne ta classe.");
+            return;
+          }
+          if (!etablissement.trim()) {
+            toast.error("Indique ton établissement.");
+            return;
+          }
           setLoading(true);
           try {
             await register(
@@ -89,6 +119,8 @@ function RegisterPage() {
               String(fd.get("email")),
               normalizePhone(telephone),
               password,
+              classe,
+              etablissement.trim(),
             );
             toast.success("Compte créé ! Bienvenue sur EZOA-TO.");
             nav({ to: "/account" });
@@ -154,6 +186,74 @@ function RegisterPage() {
           </div>
           <p className="text-xs text-muted-foreground">
             Utilisé pour la connexion, les paiements Mobile Money et les retraits contributeur.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Niveau</Label>
+            <Select
+              value={niveau}
+              onValueChange={(v) => {
+                setNiveau(v as "college" | "lycee");
+                setClasse("");
+              }}
+            >
+              <SelectTrigger className={AUTH_FIELD}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="college">Collège</SelectItem>
+                <SelectItem value="lycee">Lycée</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Classe</Label>
+            <div className="relative">
+              <GraduationCap className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Select value={classe} onValueChange={setClasse} required>
+                <SelectTrigger className={cn(AUTH_FIELD, "pl-11")}>
+                  <SelectValue placeholder="Ta classe" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(niveau === "college" ? CLASSES_COLLEGE : CLASSES_LYCEE).map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="etablissement" className="text-sm font-medium">
+            Établissement scolaire
+          </Label>
+          <div className="relative">
+            <School className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="etablissement"
+              list="register-etablissements"
+              required
+              value={etablissement}
+              onChange={(e) => setEtablissement(e.target.value)}
+              placeholder="Ex. Collège Saint-Joseph, Lycée 2 Février…"
+              className={AUTH_FIELD}
+              autoComplete="organization"
+            />
+            {etablissementSuggestions.length > 0 && (
+              <datalist id="register-etablissements">
+                {etablissementSuggestions.map((e) => (
+                  <option key={e} value={e} />
+                ))}
+              </datalist>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Permet de personnaliser ton expérience et les notifications d&apos;épreuves pour ta classe.
           </p>
         </div>
 

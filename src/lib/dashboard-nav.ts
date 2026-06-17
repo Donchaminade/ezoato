@@ -17,6 +17,7 @@ import {
   FolderTree,
   UserCircle,
   Bell,
+  Crown,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
 
@@ -32,7 +33,8 @@ export type AdminSection =
   | "etablissements"
   | "users"
   | "settings"
-  | "notifications";
+  | "notifications"
+  | "abonnements";
 
 export type UserSection =
   | "overview"
@@ -40,6 +42,7 @@ export type UserSection =
   | "bibliotheque"
   | "favoris"
   | "portefeuille"
+  | "abonnement"
   | "profil"
   | "submit";
 
@@ -174,6 +177,14 @@ export function getAdminNavGroups(isAdmin: boolean, badges?: {
           search: section("stats"),
         },
         {
+          id: "abonnements",
+          label: "Abonnements",
+          icon: Crown,
+          to: "/admin",
+          search: section("abonnements"),
+          adminOnly: true,
+        },
+        {
           id: "notifications",
           label: "Notifications",
           icon: Bell,
@@ -208,6 +219,7 @@ export const USER_DASHBOARD_PATHS = {
   bibliotheque: "/account/bibliotheque",
   favoris: "/account/favoris",
   portefeuille: "/account/portefeuille",
+  abonnement: "/account/abonnement",
   profil: "/account/profil",
   submit: "/submit",
 } as const satisfies Record<UserSection, string>;
@@ -218,6 +230,7 @@ export function resolveUserActiveSection(pathname: string, explicit?: UserSectio
   if (pathname.startsWith("/account/bibliotheque")) return "bibliotheque";
   if (pathname.startsWith("/account/favoris")) return "favoris";
   if (pathname.startsWith("/account/portefeuille") || pathname === "/contributor") return "portefeuille";
+  if (pathname.startsWith("/account/abonnement")) return "abonnement";
   if (pathname.startsWith("/account/profil")) return "profil";
   if (pathname === "/submit") return "submit";
   if (pathname === "/account" || pathname === "/account/") return "overview";
@@ -254,6 +267,7 @@ export function userSectionLabel(section: UserSection): string {
     bibliotheque: "Ma bibliothèque",
     favoris: "Mes favoris",
     portefeuille: "Mon portefeuille",
+    abonnement: "Abonnement Pro",
     profil: "Mon profil",
     submit: "Soumettre une épreuve",
   };
@@ -305,6 +319,13 @@ export function getUserNavGroups(badges?: {
           to: USER_DASHBOARD_PATHS.portefeuille,
         },
         {
+          id: "abonnement",
+          label: "Abonnement Pro",
+          shortLabel: "Pro",
+          icon: Crown,
+          to: USER_DASHBOARD_PATHS.abonnement,
+        },
+        {
           id: "profil",
           label: "Mon profil",
           shortLabel: "Profil",
@@ -347,6 +368,7 @@ export function adminSectionLabel(section: AdminSection): string {
     etablissements: "Établissements",
     users: "Utilisateurs",
     notifications: "Notifications",
+    abonnements: "Abonnements",
     settings: "Paramètres",
   };
   return labels[section];

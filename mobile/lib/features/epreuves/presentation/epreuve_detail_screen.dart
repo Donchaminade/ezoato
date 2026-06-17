@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -8,6 +9,7 @@ import '../../../core/security/secure_screen.dart';
 import '../../../core/theme/ezoa_theme.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
+import '../../../shared/widgets/subscription_pro_widgets.dart';
 import '../../favorites/data/favoris_providers.dart';
 import '../../offline/data/offline_repository.dart';
 import 'epreuve_preview_viewer.dart';
@@ -188,6 +190,7 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
           final requiresPayment =
               access?.requiresPayment ?? (epreuve.requiresPayment == true);
           final hasAccess = access?.hasAccess ?? !requiresPayment;
+          final hasSubscription = access?.hasSubscription == true;
           final locked = requiresPayment && !hasAccess;
           final montant = access?.montant ?? epreuve.prixFcfa ?? 0;
 
@@ -290,10 +293,14 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
                                     const SizedBox(height: 4),
                                     Text(
                                       hasAccess
-                                          ? access?.expiresAt != null
-                                              ? 'Accès débloqué jusqu\'au ${_formatExpiry(access!.expiresAt!)}'
-                                              : 'Accès débloqué — téléchargement disponible'
-                                          : 'Payez par Flooz ou T-Money pour débloquer l\'aperçu et le téléchargement',
+                                          ? hasSubscription
+                                              ? access?.expiresAt != null
+                                                  ? 'Accès via abonnement jusqu\'au ${_formatExpiry(access!.expiresAt!)}'
+                                                  : 'Accès via abonnement — téléchargement disponible'
+                                              : access?.expiresAt != null
+                                                  ? 'Accès débloqué jusqu\'au ${_formatExpiry(access!.expiresAt!)}'
+                                                  : 'Accès débloqué — téléchargement disponible'
+                                          : 'Payez par Flooz ou T-Money, ou abonnez-vous pour tout débloquer',
                                       style: EzoaTypography.bodySmall(context),
                                     ),
                                   ],
@@ -303,10 +310,10 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
                           ),
                           if (locked && isOnline && access != null) ...[
                             const SizedBox(height: 16),
-                            EzoaButton(
-                              label: 'Payer avec Flooz / T-Money',
-                              icon: LucideIcons.smartphone,
-                              onPressed: () => _openPaymentSheet(epreuve, access),
+                            SubscriptionProPaywallActions(
+                              montant: montant,
+                              onSubscribe: () => context.push('/account/abonnement'),
+                              onPayExam: () => _openPaymentSheet(epreuve, access),
                             ),
                           ],
                         ],

@@ -106,12 +106,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String email,
     required String telephone,
     required String password,
+    required String classe,
+    required String etablissement,
   }) async {
     final result = await _api.register(
       nom: nom,
       email: email,
       telephone: telephone,
       password: password,
+      classe: classe,
+      etablissement: etablissement,
     );
     await _completeAuth(token: result.token, user: result.user);
   }

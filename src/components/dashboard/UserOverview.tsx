@@ -1,10 +1,17 @@
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { BookOpen, CheckCircle2, Clock, Library, Upload, Wallet } from "lucide-react";
 import { UserOverviewCharts } from "@/components/dashboard/UserOverviewCharts";
 import { DashboardProgressRow, DashboardSectionCard, DashboardTodoItem } from "@/components/dashboard/DashboardSectionCard";
 import { DashboardStatCard } from "@/components/dashboard/DashboardStatCard";
+import {
+  SubscriptionProStatusBadge,
+  SubscriptionProUpgradeBanner,
+} from "@/components/subscription/SubscriptionProBanner";
 import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 import { EPREUVES_PAR_RECOMPENSE, formatFcfa, MONTANT_RECOMPENSE } from "@/lib/pricing";
+import { isSubscriptionExpiringSoon } from "@/lib/subscription-utils";
 import type { ContributorWallet, LibraryItem, SoumissionHistory } from "@/lib/types";
 import {
   dashboardSectionStack,
@@ -37,8 +44,21 @@ export function UserOverview({
   const solde = wallet?.solde ?? 0;
   const pct = Math.round((progressionPalier / EPREUVES_PAR_RECOMPENSE) * 100);
 
+  const { data: subscription } = useQuery({
+    queryKey: ["subscription-status"],
+    queryFn: () => api.getSubscriptionStatus(),
+  });
+
   return (
     <div className={dashboardSectionStack}>
+      {subscription && (
+        !subscription.actif ? (
+          <SubscriptionProUpgradeBanner status={subscription} />
+        ) : isSubscriptionExpiringSoon(subscription) ? (
+          <SubscriptionProStatusBadge status={subscription} />
+        ) : null
+      )}
+
       {/* 1. Stats */}
       <div className={dashboardStatGrid}>
         <DashboardStatCard label="Soumissions" value={soumissionsCount} icon={Upload} tone="blue" />

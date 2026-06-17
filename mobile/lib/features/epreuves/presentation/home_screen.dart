@@ -5,11 +5,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../core/onboarding/onboarding_keys.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/connectivity_service.dart';
 import '../../../core/theme/ezoa_theme.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
+import '../../../shared/widgets/subscription_pro_widgets.dart';
+import '../../account/data/subscription_providers.dart';
 import '../../account/data/wallet_providers.dart';
 import '../../account/presentation/downloads_screen.dart'
     show mesDownloadsProvider;
@@ -75,6 +78,7 @@ class HomeScreen extends ConsumerWidget {
     return EzoaScreen(
       title: greeting,
       subtitle: 'Archives scolaires du Togo',
+      headerKey: OnboardingKeys.homeHeader,
       isOnline: isOnline,
       headerTrailing: const Row(
         mainAxisSize: MainAxisSize.min,
@@ -91,6 +95,7 @@ class HomeScreen extends ConsumerWidget {
           if (isOnline) {
             ref.invalidate(walletProvider);
             ref.invalidate(homeUserStatsProvider);
+            ref.invalidate(subscriptionStatusProvider);
           }
         },
         color: EzoaColors.of(context).accent,
@@ -100,13 +105,36 @@ class HomeScreen extends ConsumerWidget {
             // Carte portefeuille : en ligne uniquement (l'API exige le
             // réseau ; hors ligne la carte est masquée, pas de crash).
             if (isOnline)
-              const EzoaScrollReveal(
+              EzoaScrollReveal(
                 offset: 35,
-                child: HomeWalletCard(),
+                child: KeyedSubtree(
+                  key: OnboardingKeys.wallet,
+                  child: const HomeWalletCard(),
+                ),
               ),
-            const _QuickActionsRow(),
+            if (isOnline)
+              ref.watch(subscriptionStatusProvider).maybeWhen(
+                    data: (s) => !s.actif
+                        ? EzoaScrollReveal(
+                            child: SubscriptionProUpgradeBanner(
+                              status: s,
+                              compact: true,
+                            ),
+                          )
+                        : s.isExpiringSoon
+                            ? EzoaScrollReveal(
+                                child: SubscriptionProStatusBadge(status: s),
+                              )
+                            : const SizedBox.shrink(),
+                    orElse: () => const SizedBox.shrink(),
+                  ),
+            KeyedSubtree(
+              key: OnboardingKeys.quickActions,
+              child: const _QuickActionsRow(),
+            ),
             if (isOnline) const _UserStatsSection(),
             Padding(
+              key: OnboardingKeys.recentEpreuves,
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: Row(
                 children: [

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Calendar, Mail, MapPin, Shield, Smartphone } from "lucide-react";
+import { Calendar, GraduationCap, Mail, MapPin, School, Shield, Smartphone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatPhoneDisplay } from "@/lib/phone";
@@ -75,6 +75,24 @@ export function ProfileIdentityCard({ user }: { user: User | UserProfile }) {
               <div>
                 <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Ville</dt>
                 <dd className="font-medium">{user.ville}</dd>
+              </div>
+            </div>
+          )}
+          {user.classe && (
+            <div className="flex items-center gap-2 rounded-xl bg-muted/40 px-3 py-2.5">
+              <GraduationCap className="size-4 shrink-0 text-muted-foreground" />
+              <div>
+                <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Classe</dt>
+                <dd className="font-medium">{user.classe}</dd>
+              </div>
+            </div>
+          )}
+          {user.etablissement && (
+            <div className="flex items-center gap-2 rounded-xl bg-muted/40 px-3 py-2.5">
+              <School className="size-4 shrink-0 text-muted-foreground" />
+              <div>
+                <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Établissement</dt>
+                <dd className="font-medium">{user.etablissement}</dd>
               </div>
             </div>
           )}
