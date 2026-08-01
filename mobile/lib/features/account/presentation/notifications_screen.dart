@@ -8,6 +8,9 @@ import '../../../core/theme/ezoa_theme.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
 
+/// Notifications in-app (API `/account/notifications`).
+/// TODO(fcm): enregistrer un token FCM après login quand
+/// `POST /account/notifications/fcm` existera côté backend — voir MOBILE.md.
 final notificationsProvider = FutureProvider((ref) {
   return ref.watch(apiClientProvider).getNotificationConfig();
 });

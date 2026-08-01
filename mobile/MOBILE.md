@@ -69,6 +69,10 @@ Configurez l'URL via `--dart-define` (recommandé) :
 | Émulateur Android (alt.) | `flutter run --dart-define=API_URL=http://10.0.2.2/zovu-project/backend-php` |
 | Simulateur iOS / Windows | `flutter run --dart-define=API_URL=http://localhost/zovu-project/backend-php` |
 | Appareil physique | `flutter run --dart-define=DEV_LAN_HOST=<IP-LAN>` |
+| URL web (contact, reset) | `flutter run --dart-define=WEB_URL=http://localhost:5173` |
+
+`WEB_URL` alimente `Env.webUrl` / `Env.contactUrl` (liens support, e-mails de reset).
+Sans surcharge, l’app déduit l’hôte depuis `API_URL` et utilise le port Vite `5173`.
 
 Sans `--dart-define`, l'app utilise par défaut sur Android l'**IP LAN du PC**
 (`DEV_LAN_HOST`, défaut `192.168.1.67` dans `lib/core/config/env.dart`) et
@@ -296,9 +300,14 @@ flutter test
 - [x] Cert pinning (production, via `--dart-define=CERT_PINS`)
 - [x] Favoris toggle depuis détail épreuve
 - [x] Préférence push (`pushEnabled`) dans Notifications
-- [ ] Push natif FCM/APNs — **bloqué côté backend** : seul le Web Push VAPID est
-      supporté (`/account/notifications/subscribe`). Nécessite un endpoint
-      d'enregistrement de token FCM côté serveur.
+- [ ] Push natif FCM/APNs — **non implémenté** (hors scope Phase 1). Aujourd’hui :
+      - Web : Web Push VAPID (`/account/notifications/subscribe`)
+      - Mobile : notifications **in-app** uniquement (`/account/notifications`)
+      - Les rappels d’abonnement (`cron/abonnement_rappels.php`) créent des
+        notifications en base visibles dans l’app ; pas de push device.
+      - Stub futur : enregistrer un token FCM après login et exposer
+        `POST /account/notifications/fcm` côté backend (à ajouter).
+      - Ne pas ajouter `firebase_messaging` tant que l’endpoint serveur n’existe pas.
 - [ ] Messagerie (si spec backend ajoutée — seul `POST /contact` existe)
 
 ## Legacy Expo
