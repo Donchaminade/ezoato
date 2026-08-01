@@ -157,7 +157,7 @@ class EzoaScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: EzoaColors.of(context).background,
-      resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+      resizeToAvoidBottomInset: resizeToAvoidBottomInset ?? true,
       extendBody: extendBody,
       extendBodyBehindAppBar: appBar != null,
       appBar: appBar,

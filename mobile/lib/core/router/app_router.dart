@@ -13,8 +13,10 @@ import '../../features/account/presentation/profile_screen.dart';
 import '../../features/account/presentation/soumission_detail_screen.dart';
 import '../../features/account/presentation/soumissions_screen.dart';
 import '../../features/auth/data/auth_repository.dart';
+import '../../features/auth/presentation/forgot_password_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
+import '../../features/auth/presentation/reset_password_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/epreuves/presentation/archives_screen.dart';
 import '../../features/epreuves/presentation/epreuve_detail_screen.dart';
@@ -42,7 +44,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuth = auth.isAuthenticated;
       final path = state.matchedLocation;
       final isSplash = path == '/';
-      final isAuthRoute = path == '/login' || path == '/register';
+      final isAuthRoute = path == '/login' ||
+          path == '/register' ||
+          path == '/forgot-password' ||
+          path == '/reset-password';
 
       if (isLoading) return isSplash ? null : '/';
       if (!isAuth && !isAuthRoute && !isSplash) return '/login';
@@ -53,6 +58,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/', builder: (_, __) => const SplashScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (_, __) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        builder: (_, state) => ResetPasswordScreen(
+          token: state.uri.queryParameters['token'],
+        ),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainShellScreen(navigationShell: navigationShell);

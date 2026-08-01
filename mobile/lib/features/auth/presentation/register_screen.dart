@@ -22,11 +22,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _email = TextEditingController();
   final _telephone = TextEditingController();
   final _password = TextEditingController();
+  final _confirmPassword = TextEditingController();
   final _etablissement = TextEditingController();
   String _niveau = 'college';
   String? _classe;
   bool _loading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String? _error;
+  String? _confirmError;
 
   @override
   void dispose() {
@@ -34,12 +38,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _email.dispose();
     _telephone.dispose();
     _password.dispose();
+    _confirmPassword.dispose();
     _etablissement.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    setState(() => _error = null);
+    setState(() {
+      _error = null;
+      _confirmError = null;
+    });
     if (_nom.text.trim().isEmpty ||
         _email.text.trim().isEmpty ||
         _telephone.text.trim().isEmpty ||
@@ -48,6 +56,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _classe!.isEmpty ||
         _etablissement.text.trim().isEmpty) {
       setState(() => _error = 'Tous les champs sont requis (mot de passe 8+, classe et établissement)');
+      return;
+    }
+    if (_password.text != _confirmPassword.text) {
+      setState(() => _confirmError = 'Les mots de passe ne correspondent pas');
       return;
     }
     setState(() => _loading = true);
@@ -153,9 +165,34 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         EzoaTextField(
           label: 'Mot de passe',
           controller: _password,
-          obscureText: true,
+          obscureText: _obscurePassword,
           errorText: _error,
           prefixIcon: LucideIcons.lock,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
+              size: 20,
+              color: EzoaColors.of(context).textFaint,
+            ),
+            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+            tooltip: _obscurePassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe',
+          ),
+        ),
+        EzoaTextField(
+          label: 'Confirmer le mot de passe',
+          controller: _confirmPassword,
+          obscureText: _obscureConfirmPassword,
+          errorText: _confirmError,
+          prefixIcon: LucideIcons.lock,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscureConfirmPassword ? LucideIcons.eyeOff : LucideIcons.eye,
+              size: 20,
+              color: EzoaColors.of(context).textFaint,
+            ),
+            onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+            tooltip: _obscureConfirmPassword ? 'Afficher la confirmation' : 'Masquer la confirmation',
+          ),
         ),
         const SizedBox(height: 8),
         EzoaButton(
