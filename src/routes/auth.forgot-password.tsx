@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, KeyRound, Loader2, Mail } from "lucide-react";
+import { ArrowLeft, CheckCircle2, KeyRound, LifeBuoy, Loader2, Mail } from "lucide-react";
 import { AUTH_FIELD, AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +57,12 @@ function ForgotPasswordPage() {
               <ArrowLeft className="size-4" /> Retour à la connexion
             </Link>
           </Button>
+          <p className="text-center text-sm text-muted-foreground">
+            Tu n&apos;as pas reçu le lien ?{" "}
+            <Link to="/contact" className="inline-flex items-center gap-1 font-semibold text-primary hover:underline">
+              <LifeBuoy className="size-3.5" /> Contacter le support
+            </Link>
+          </p>
         </div>
       ) : (
         <form
@@ -109,6 +115,12 @@ function ForgotPasswordPage() {
           <p className="text-center text-sm text-muted-foreground">
             <Link to="/auth/login" className="inline-flex items-center gap-1 font-semibold text-primary hover:underline">
               <ArrowLeft className="size-3.5" /> Retour à la connexion
+            </Link>
+          </p>
+          <p className="text-center text-sm text-muted-foreground">
+            Problème avec la réinitialisation ?{" "}
+            <Link to="/contact" className="inline-flex items-center gap-1 font-semibold text-primary hover:underline">
+              <LifeBuoy className="size-3.5" /> Contacter le support
             </Link>
           </p>
         </form>
