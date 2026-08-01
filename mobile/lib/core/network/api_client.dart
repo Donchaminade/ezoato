@@ -459,6 +459,53 @@ class ApiClient {
       return null;
     }
   }
+
+  Future<({String message, bool ok, String? resetUrl})> requestPasswordReset(
+    String email,
+  ) async {
+    final data = await _post<Map<String, dynamic>>(
+      '/auth/forgot-password',
+      body: {'email': email.trim().toLowerCase()},
+    );
+    return (
+      message: data['message'] as String? ??
+          'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.',
+      ok: data['ok'] as bool? ?? true,
+      resetUrl: data['resetUrl'] as String?,
+    );
+  }
+
+  Future<({bool valid, String? email, String? nom})> verifyResetToken(
+    String token,
+  ) async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>(
+        '/auth/verify-reset',
+        queryParameters: {'token': token},
+      );
+      final body = res.data;
+      if (body == null) throw ApiException('Réponse vide');
+      return (
+        valid: body['valid'] as bool? ?? false,
+        email: body['email'] as String?,
+        nom: body['nom'] as String?,
+      );
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  Future<String> resetPassword({
+    required String token,
+    required String password,
+  }) async {
+    final data = await _post<Map<String, dynamic>>(
+      '/auth/reset-password',
+      body: {'token': token, 'password': password},
+    );
+    return data['message'] as String? ??
+        'Mot de passe mis à jour. Tu peux te connecter.';
+  }
 }
 
 final apiClientProvider = Provider<ApiClient>((ref) {

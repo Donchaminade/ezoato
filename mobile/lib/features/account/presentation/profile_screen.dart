@@ -161,7 +161,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
               Expanded(
-                child: SingleChildScrollView(
+                child: EzoaFormScroll(
                   padding: const EdgeInsets.all(16),
                   child: EzoaGlassCard(
                     margin: EdgeInsets.zero,

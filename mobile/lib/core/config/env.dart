@@ -11,6 +11,10 @@ class Env {
 
   static const String _dartDefineUrl = String.fromEnvironment('API_URL');
 
+  /// URL du frontend web (contact, liens reset email). Surcharge :
+  /// `--dart-define=WEB_URL=https://ezoa-to.tg`
+  static const String _dartDefineWebUrl = String.fromEnvironment('WEB_URL');
+
   /// Empreintes SHA-256 (hex, séparées par des virgules) du certificat TLS
   /// attendu en production. Exemple :
   /// `--dart-define=CERT_PINS=ab12...ef,cd34...90`
@@ -40,6 +44,22 @@ class Env {
     'USE_EMULATOR_HOST',
     defaultValue: false,
   );
+
+  /// Page contact publique (`/contact` sur le site web).
+  static String get contactUrl => '$webUrl/contact';
+
+  static String get webUrl {
+    if (_dartDefineWebUrl.isNotEmpty) {
+      return _normalize(_dartDefineWebUrl);
+    }
+    final uri = Uri.parse(apiUrl);
+    final host = uri.host;
+    if (host == '10.0.2.2') return 'http://10.0.2.2:5173';
+    if (host == 'localhost' || host == '127.0.0.1') {
+      return 'http://localhost:5173';
+    }
+    return 'http://$host:5173';
+  }
 
   static String get apiUrl {
     if (_dartDefineUrl.isNotEmpty) {

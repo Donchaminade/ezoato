@@ -171,7 +171,7 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
     final classes = meta.classes.forNiveau(_niveau);
     final result = _result;
 
-    return SingleChildScrollView(
+    return EzoaFormScroll(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 120),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

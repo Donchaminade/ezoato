@@ -308,6 +308,7 @@ class EzoaFormScroll extends StatelessWidget {
     this.padding = EdgeInsets.zero,
     this.minHeight,
     this.centerWhenShort = false,
+    this.compensateKeyboardInset = false,
   });
 
   final Widget child;
@@ -315,12 +316,15 @@ class EzoaFormScroll extends StatelessWidget {
   final double? minHeight;
   final bool centerWhenShort;
 
+  /// À activer uniquement si le scaffold parent ne redimensionne pas le body
+  /// (`resizeToAvoidBottomInset: false`).
+  final bool compensateKeyboardInset;
+
   @override
   Widget build(BuildContext context) {
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final scaffoldResizes =
-        Scaffold.maybeOf(context)?.resizeToAvoidBottomInset ?? true;
-    final extraBottom = scaffoldResizes ? 0.0 : keyboardInset;
+    final extraBottom = compensateKeyboardInset
+        ? MediaQuery.viewInsetsOf(context).bottom
+        : 0.0;
 
     final resolved = padding.resolve(Directionality.of(context));
     final scrollPadding = EdgeInsets.fromLTRB(
@@ -948,6 +952,7 @@ class EzoaAuthLayout extends StatelessWidget {
     required this.children,
     this.showBack = false,
     this.onBack,
+    this.compactHeader = false,
   });
 
   final String title;
@@ -956,58 +961,88 @@ class EzoaAuthLayout extends StatelessWidget {
   final bool showBack;
   final VoidCallback? onBack;
 
+  /// Formulaire court (connexion) : carte centrée dans la zone sous le logo (clavier fermé).
+  final bool compactHeader;
+
+  Widget _formCard(BuildContext context) {
+    return EzoaGlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(title, style: EzoaTypography.titleLarge(context)),
+          const SizedBox(height: 8),
+          Text(subtitle, style: EzoaTypography.body(context)),
+          const SizedBox(height: 24),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _logoHeader(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (showBack)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              icon: Icon(
+                LucideIcons.arrowLeft,
+                color: EzoaColors.of(context).textMuted,
+              ),
+              onPressed: onBack,
+            ),
+          ),
+        const SizedBox(height: 8),
+        const Center(child: EzoaLogo(height: 88)),
+        SizedBox(height: compactHeader ? 12 : 32),
+      ],
+    );
+  }
+
+  /// Logo fixe en haut, formulaire scrollable en dessous. Structure unique pour
+  /// éviter la perte de focus quand le clavier ouvre (pas de bascule de layout).
+  Widget _buildBody(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+          child: EzoaContentWidth(
+            maxWidth: 480,
+            child: _logoHeader(context),
+          ),
+        ),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return EzoaFormScroll(
+                padding: EdgeInsets.fromLTRB(24, compactHeader ? 4 : 0, 24, 32),
+                minHeight: constraints.maxHeight,
+                centerWhenShort: compactHeader,
+                child: EzoaContentWidth(
+                  maxWidth: 480,
+                  child: _formCard(context),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return EzoaScaffold(
       showWaveFooter: true,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return EzoaFormScroll(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-              minHeight: constraints.maxHeight - 48,
-              centerWhenShort: true,
-              child: EzoaContentWidth(
-                maxWidth: 480,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (showBack)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: IconButton(
-                          icon: Icon(
-                            LucideIcons.arrowLeft,
-                            color: EzoaColors.of(context).textMuted,
-                          ),
-                          onPressed: onBack,
-                        ),
-                      ),
-                    const SizedBox(height: 8),
-                    const Center(child: EzoaLogo(height: 88)),
-                    const SizedBox(height: 32),
-                    EzoaGlassCard(
-                      margin: EdgeInsets.zero,
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(title, style: EzoaTypography.titleLarge(context)),
-                          const SizedBox(height: 8),
-                          Text(subtitle, style: EzoaTypography.body(context)),
-                          const SizedBox(height: 24),
-                          ...children,
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+        child: _buildBody(context),
       ),
     );
   }
