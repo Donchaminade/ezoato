@@ -18,6 +18,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _identifier = TextEditingController();
   final _password = TextEditingController();
   bool _loading = false;
+  bool _obscurePassword = true;
   String? _error;
 
   @override
@@ -79,6 +80,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return EzoaAuthLayout(
+      compactHeader: true,
       title: 'Bienvenue sur EZOA-TO',
       subtitle: 'Connectez-vous pour accéder aux épreuves',
       children: [
@@ -91,9 +93,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         EzoaTextField(
           label: 'Mot de passe',
           controller: _password,
-          obscureText: true,
+          obscureText: _obscurePassword,
           errorText: _error,
           prefixIcon: LucideIcons.lock,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
+              size: 20,
+              color: EzoaColors.of(context).textFaint,
+            ),
+            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+            tooltip: _obscurePassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe',
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: GestureDetector(
+            onTap: () => context.push('/forgot-password'),
+            child: Text(
+              'Mot de passe oublié ?',
+              style: EzoaTypography.bodySmall(context).copyWith(
+                color: EzoaColors.of(context).accent,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
         const SizedBox(height: 8),
         EzoaButton(

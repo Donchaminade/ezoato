@@ -28,7 +28,23 @@ Définis `VITE_API_URL` côté front pour pointer vers cette API (ex: `https://a
 - `POST /admin/soumissions/{id}/valider` — copie le PDF en publié
 - `POST /admin/soumissions/{id}/rejeter` — { motif }
 
+## Cron — rappels abonnement
+
+Script CLI-only : `cron/abonnement_rappels.php` (refus HTTP 403).
+
+```powershell
+# Test manuel
+C:\xampp\php\php.exe C:\xampp\htdocs\zovu-project\backend-php\cron\abonnement_rappels.php
+
+# Installer la tâche Windows (quotidien 08:00)
+cd backend-php\cron
+.\install-abonnement-rappels-task.ps1
+```
+
+Voir aussi le commentaire en tête de `cron/abonnement_rappels.php` (crontab Linux).
+
 ## Sécurité
 - Toujours valider les inputs (type, longueur, MIME des images)
 - Rate-limit côté serveur web (mod_evasive / nginx)
 - HTTPS obligatoire en prod
+- Les scripts `cron/*` doivent rester CLI-only (pas d’exposition HTTP)
