@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/onboarding/onboarding_provider.dart';
 import '../../../core/theme/ezoa_theme.dart';
-import '../../../shared/widgets/ezoa_widgets.dart';
 import '../data/auth_repository.dart';
 
+/// Écran de lancement animé (fond clair, logo + nom) avant login/home.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -15,29 +18,73 @@ class SplashScreen extends ConsumerStatefulWidget {
 
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _pulseController;
+  static const _bg = Color(0xFFFAFAFA);
+  /// Durée minimale d'affichage du splash avant navigation.
+  static const _holdDuration = Duration(seconds: 4);
+
+  late final AnimationController _controller;
+  late final Animation<double> _logoFade;
+  late final Animation<double> _logoScale;
+  late final Animation<double> _titleFade;
+  bool _holdComplete = false;
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: _bg,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
+
+    _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    )..repeat(reverse: true);
-    Future<void>.delayed(const Duration(milliseconds: 1200), _route);
+      duration: const Duration(milliseconds: 1100),
+    );
+
+    _logoFade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.55, curve: Curves.easeOut),
+    );
+    _logoScale = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOutCubic),
+      ),
+    );
+    _titleFade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.35, 0.9, curve: Curves.easeOut),
+    );
+
+    _controller.forward();
+    Future<void>.delayed(_holdDuration, () {
+      if (!mounted) return;
+      _holdComplete = true;
+      _route();
+    });
   }
 
   @override
   void dispose() {
-    _pulseController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   void _route() {
-    if (!mounted) return;
+    if (!mounted || !_holdComplete) return;
     final auth = ref.read(authProvider);
-    if (auth.isLoading) {
+    final onboarding = ref.read(onboardingProvider);
+    if (auth.isLoading || !onboarding.loaded) {
       Future<void>.delayed(const Duration(milliseconds: 300), _route);
+      return;
+    }
+    if (!onboarding.completed) {
+      context.go('/onboarding');
       return;
     }
     if (auth.isAuthenticated) {
@@ -50,33 +97,54 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     ref.listen(authProvider, (_, __) => _route());
+    ref.listen(onboardingProvider, (_, __) => _route());
 
-    return EzoaScaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    final bottomPad = MediaQuery.sizeOf(context).height * 0.18;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: _bg,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: _bg,
+        body: Stack(
+          fit: StackFit.expand,
           children: [
-            AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: 1.0 + _pulseController.value * 0.03,
-                  child: child,
-                );
-              },
-              child: const EzoaLogo(height: 140),
-            ),
-            const SizedBox(height: 28),
-            Text(
-              'ARCHIVES SCOLAIRES DU TOGO',
-              style: EzoaTypography.badge(context).copyWith(
-                fontSize: 11,
-                letterSpacing: 2,
-                color: EzoaColors.of(context).accent,
+            Center(
+              child: FadeTransition(
+                opacity: _logoFade,
+                child: ScaleTransition(
+                  scale: _logoScale,
+                  child: Image.asset(
+                    'assets/images/logo-ezoa.png',
+                    height: 148,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 48),
-            const EzoaGlassLoader(),
+            Positioned(
+              left: 24,
+              right: 24,
+              bottom: bottomPad,
+              child: FadeTransition(
+                opacity: _titleFade,
+                child: Text(
+                  'EZOA-TO',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 4,
+                    color: EzoaColors.primary,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

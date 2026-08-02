@@ -29,7 +29,7 @@ class EzoaTopBar extends StatelessWidget {
 
     return ClipRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           width: double.infinity,
           padding: EdgeInsets.fromLTRB(16, statusBar + 10, 10, 12),
@@ -159,7 +159,7 @@ class EzoaGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: actions,
       flexibleSpace: ClipRect(
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(

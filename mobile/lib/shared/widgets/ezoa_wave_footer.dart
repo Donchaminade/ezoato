@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/ezoa_theme.dart';
 
-/// Decorative wave shapes at page footer.
+/// Decorative wave shapes at page footer (émeraude soft, pas d’indigo).
 class EzoaWaveFooter extends StatelessWidget {
   const EzoaWaveFooter({super.key, this.height = 120});
 
@@ -55,8 +55,8 @@ class _WavePainter extends CustomPainter {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            EzoaColors.accentBlue.withValues(alpha: 0.12),
-            EzoaColors.primary.withValues(alpha: 0.06),
+            EzoaColors.primary.withValues(alpha: pal.isDark ? 0.10 : 0.08),
+            EzoaColors.primary.withValues(alpha: pal.isDark ? 0.04 : 0.03),
           ],
         ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
     );
@@ -80,7 +80,7 @@ class _WavePainter extends CustomPainter {
       Paint()..color = pal.curveLine.withValues(alpha: 0.02),
     );
 
-    // Crête indigo fine sur la première vague, pour un relief satiné.
+    // Crête émeraude fine.
     final crest = Path()
       ..moveTo(0, size.height * 0.55)
       ..quadraticBezierTo(
@@ -100,7 +100,7 @@ class _WavePainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.2
-        ..color = pal.accent.withValues(alpha: 0.18),
+        ..color = EzoaColors.primary.withValues(alpha: pal.isDark ? 0.14 : 0.12),
     );
 
     // Troisième vague profonde, ancrée au bas de page.
@@ -125,8 +125,8 @@ class _WavePainter extends CustomPainter {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            EzoaColors.primary.withValues(alpha: 0.10),
-            EzoaColors.accentBlue.withValues(alpha: 0.05),
+            EzoaColors.primary.withValues(alpha: pal.isDark ? 0.08 : 0.06),
+            EzoaColors.primary.withValues(alpha: 0.02),
           ],
         ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
     );

@@ -42,13 +42,16 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     state = const OnboardingState(loaded: true, completed: true);
   }
 
-  /// Réinitialise la persistance (tests / debug).
-  Future<void> resetForTesting() async {
+  /// Remet le flag pour réafficher le carousel (Compte > Revoir la visite).
+  Future<void> reset() async {
     await ref.read(secureStorageProvider).setOnboardingCompleted(false);
     state = const OnboardingState(loaded: true, completed: false);
   }
 
-  /// Lance le guide depuis n'importe quel écran (ex. Compte > Paramètres).
+  /// Alias conservé pour les appels existants / tests.
+  Future<void> resetForTesting() => reset();
+
+  /// Coach marks optionnels (non lancés automatiquement).
   Future<void> startTour(BuildContext context) async {
     if (_isShowing || !context.mounted) return;
     _isShowing = true;

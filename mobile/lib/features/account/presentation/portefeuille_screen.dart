@@ -136,7 +136,13 @@ class PortefeuilleScreen extends ConsumerWidget {
                 if (wallet.transactions.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text('Aucune transaction', style: EzoaTypography.bodySmall(context)),
+                    child: Center(
+                      child: Text(
+                        'Aucune transaction',
+                        textAlign: TextAlign.center,
+                        style: EzoaTypography.bodySmall(context),
+                      ),
+                    ),
                   )
                 else
                   ...wallet.transactions.asMap().entries.map(
@@ -182,7 +188,13 @@ class PortefeuilleScreen extends ConsumerWidget {
                 if (wallet.retraits.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text('Aucun retrait', style: EzoaTypography.bodySmall(context)),
+                    child: Center(
+                      child: Text(
+                        'Aucun retrait',
+                        textAlign: TextAlign.center,
+                        style: EzoaTypography.bodySmall(context),
+                      ),
+                    ),
                   )
                 else
                   ...wallet.retraits.map(
