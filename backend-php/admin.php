@@ -992,6 +992,38 @@ if ($action === 'list') {
   json_out(array_map('map_soumission', $stmt->fetchAll()));
 }
 
+// --- Épreuves similaires à une soumission (comparaison admin) ---
+if ($action === 'similaires') {
+  require_user(['gestionnaire', 'admin']);
+  if (!$id) fail('id requis');
+  $s = db()->prepare("SELECT s.*, et.nom AS etablissement
+                      FROM soumissions s
+                      LEFT JOIN etablissements et ON et.id = s.etablissement_id
+                      WHERE s.id = ?");
+  $s->execute([$id]);
+  $sub = $s->fetch();
+  if (!$sub) fail('Soumission introuvable', 404);
+
+  $candidate = [
+    'niveau' => $sub['niveau'],
+    'matiere' => $sub['matiere'],
+    'classe' => $sub['classe'],
+    'annee' => (int)$sub['annee'],
+    'type' => $sub['type'],
+    'examen' => $sub['examen'] ?? null,
+    'titre' => $sub['titre'],
+    'meta_niveau' => decode_meta_niveau($sub['meta_niveau'] ?? null),
+  ];
+  $similaires = find_similar_epreuves($candidate, 15, 35);
+  json_out([
+    'soumission' => map_soumission(array_merge($sub, [
+      'auteur' => null,
+    ])),
+    'similaires' => $similaires,
+    'similairesCount' => count($similaires),
+  ]);
+}
+
 // --- Référentiels (classes, matières, villes) ---
 if ($action === 'referentiels') {
   require_user(['admin']);
@@ -1011,7 +1043,7 @@ if ($action === 'referentiels') {
       fail('Table classes absente — exécutez migration-classes.sql', 503);
     }
     $niveau = $in['niveau'] ?? '';
-    if (!in_array($niveau, ['college', 'lycee'], true)) fail('Niveau invalide');
+    if (!in_array($niveau, ['college', 'lycee', 'universite', 'concours'], true)) fail('Niveau invalide');
     if ($op === 'add') {
       $nom = canonical_referentiel_nom($nomInput);
       if ($nom === '') fail('Nom invalide');
@@ -1213,13 +1245,15 @@ if ($action === 'valider') {
 
   $newId = uuid();
   $published = publish_soumission_to_epreuve($cfg, $sub, $newId);
+  $metaJson = $sub['meta_niveau'] ?? null;
+  if (is_array($metaJson)) $metaJson = json_encode($metaJson, JSON_UNESCAPED_UNICODE);
 
   db()->prepare("INSERT INTO epreuves
-    (id,titre,matiere,niveau,classe,annee,type,periode,examen,etablissement_id,ville,
+    (id,titre,matiere,niveau,classe,annee,type,periode,examen,meta_niveau,etablissement_id,ville,
      pdf_path,pages,taille_ko,soumis_par,valide_le,statut)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),'validee')")
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),'validee')")
     ->execute([$newId, $sub['titre'], $sub['matiere'], $sub['niveau'], $sub['classe'],
-               $sub['annee'], $sub['type'], $sub['periode'], $sub['examen'],
+               $sub['annee'], $sub['type'], $sub['periode'], $sub['examen'], $metaJson,
                $sub['etablissement_id'], $sub['ville'], $published['pdf_path'],
                $published['pages'], $published['taille_ko'],
                $sub['soumis_par']]);
@@ -1279,13 +1313,15 @@ if ($action === 'remplacer') {
   // Publier la nouvelle à la place
   $newId = uuid();
   $published = publish_soumission_to_epreuve($cfg, $sub, $newId);
+  $metaJson = $sub['meta_niveau'] ?? null;
+  if (is_array($metaJson)) $metaJson = json_encode($metaJson, JSON_UNESCAPED_UNICODE);
 
   db()->prepare("INSERT INTO epreuves
-    (id,titre,matiere,niveau,classe,annee,type,periode,examen,etablissement_id,ville,
+    (id,titre,matiere,niveau,classe,annee,type,periode,examen,meta_niveau,etablissement_id,ville,
      pdf_path,pages,taille_ko,soumis_par,valide_le,statut)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),'validee')")
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),'validee')")
     ->execute([$newId, $sub['titre'], $sub['matiere'], $sub['niveau'], $sub['classe'],
-               $sub['annee'], $sub['type'], $sub['periode'], $sub['examen'],
+               $sub['annee'], $sub['type'], $sub['periode'], $sub['examen'], $metaJson,
                $sub['etablissement_id'], $sub['ville'], $published['pdf_path'],
                $published['pages'], $published['taille_ko'],
                $sub['soumis_par']]);

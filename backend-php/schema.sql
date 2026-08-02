@@ -20,19 +20,20 @@ CREATE TABLE etablissements (
   id    INT AUTO_INCREMENT PRIMARY KEY,
   nom   VARCHAR(180) NOT NULL UNIQUE,
   ville VARCHAR(80) NOT NULL,
-  niveau ENUM('college','lycee','mixte') NOT NULL DEFAULT 'mixte'
+  niveau ENUM('college','lycee','mixte','universite') NOT NULL DEFAULT 'mixte'
 ) ENGINE=InnoDB;
 
 CREATE TABLE epreuves (
   id            CHAR(36) PRIMARY KEY,
   titre         VARCHAR(220) NOT NULL,
   matiere       VARCHAR(80)  NOT NULL,
-  niveau        ENUM('college','lycee') NOT NULL,
-  classe        VARCHAR(20)  NOT NULL,
+  niveau        ENUM('college','lycee','universite','concours') NOT NULL,
+  classe        VARCHAR(80)  NOT NULL,
   annee         SMALLINT     NOT NULL,
   type          ENUM('devoir','composition','examen') NOT NULL,
-  periode       ENUM('T1','T2','T3','S1','S2') NULL,
+  periode       VARCHAR(40) NULL,
   examen        ENUM('CEPD','BEPC','BAC1','BAC2') NULL,
+  meta_niveau   JSON NULL,
   etablissement_id INT NULL,
   ville         VARCHAR(80) NOT NULL,
   pdf_path      VARCHAR(255) NOT NULL,
@@ -55,12 +56,13 @@ CREATE TABLE soumissions (
   id            CHAR(36) PRIMARY KEY,
   titre         VARCHAR(220) NOT NULL,
   matiere       VARCHAR(80)  NOT NULL,
-  niveau        ENUM('college','lycee') NOT NULL,
-  classe        VARCHAR(20)  NOT NULL,
+  niveau        ENUM('college','lycee','universite','concours') NOT NULL,
+  classe        VARCHAR(80)  NOT NULL,
   annee         SMALLINT     NOT NULL,
   type          ENUM('devoir','composition','examen') NOT NULL,
-  periode       ENUM('T1','T2','T3','S1','S2') NULL,
+  periode       VARCHAR(40) NULL,
   examen        ENUM('CEPD','BEPC','BAC1','BAC2') NULL,
+  meta_niveau   JSON NULL,
   etablissement_id INT NULL,
   ville         VARCHAR(80) NOT NULL,
   images_json   JSON NOT NULL,
@@ -172,9 +174,19 @@ CREATE TABLE matieres (
 
 CREATE TABLE classes (
   nom    VARCHAR(40) NOT NULL,
-  niveau ENUM('college','lycee') NOT NULL,
+  niveau ENUM('college','lycee','universite','concours') NOT NULL,
   ordre  SMALLINT NOT NULL DEFAULT 0,
   PRIMARY KEY (nom, niveau)
+) ENGINE=InnoDB;
+
+CREATE TABLE concours_ref (
+  nom   VARCHAR(120) NOT NULL PRIMARY KEY,
+  ordre SMALLINT NOT NULL DEFAULT 0
+) ENGINE=InnoDB;
+
+CREATE TABLE filieres_universite (
+  nom   VARCHAR(120) NOT NULL PRIMARY KEY,
+  ordre SMALLINT NOT NULL DEFAULT 0
 ) ENGINE=InnoDB;
 
 CREATE TABLE contact_messages (
