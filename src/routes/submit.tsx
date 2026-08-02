@@ -139,8 +139,11 @@ function SubmitPage() {
       if (matiereChoice === MATIERE_AUTRE && matiereAutre.trim().length < 2) {
         return toast.error("Précise la matière (2 caractères minimum).");
       }
-      if (type !== "examen" && (!etablissement.trim() || !periode)) {
-        return toast.error("Établissement et période requis pour ce type.");
+      if (type !== "examen" && !periode) {
+        return toast.error("Période requise pour ce type.");
+      }
+      if (type === "devoir" && !etablissement.trim()) {
+        return toast.error("Établissement requis pour un devoir.");
       }
       if (type === "examen" && !examen) return toast.error("Choisis l'examen national.");
     } else if (niveau === "universite") {
@@ -166,7 +169,7 @@ function SubmitPage() {
         fd.append("classe", classe);
         fd.append("type", type);
         if (type !== "examen") {
-          fd.append("etablissement", etablissement.trim());
+          if (etablissement.trim()) fd.append("etablissement", etablissement.trim());
           fd.append("periode", periode);
         } else {
           fd.append("examen", examen);
@@ -368,7 +371,15 @@ function SubmitPage() {
                     </Select>
                   </FormField>
                   <FormField label="Type">
-                    <Select value={type} onValueChange={(v) => setType(v as typeof type)}>
+                    <Select
+                      value={type}
+                      onValueChange={(v) => {
+                        const next = v as typeof type;
+                        setType(next);
+                        if (next !== "devoir") setEtablissement("");
+                        if (next !== "examen") setExamen("");
+                      }}
+                    >
                       <SelectTrigger className={formSelectClass}><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="devoir">Devoir</SelectItem>
@@ -379,14 +390,16 @@ function SubmitPage() {
                   </FormField>
                   {type !== "examen" && (
                     <>
-                      <FormField label="Établissement" className="sm:col-span-2">
-                        <Input list="submit-etablissements" className={formInputClass} value={etablissement} onChange={(e) => setEtablissement(e.target.value)} required />
-                        {etablissementSuggestions.length > 0 && (
-                          <datalist id="submit-etablissements">
-                            {etablissementSuggestions.map((e) => <option key={e} value={e} />)}
-                          </datalist>
-                        )}
-                      </FormField>
+                      {type === "devoir" && (
+                        <FormField label="Établissement" className="sm:col-span-2">
+                          <Input list="submit-etablissements" className={formInputClass} value={etablissement} onChange={(e) => setEtablissement(e.target.value)} required />
+                          {etablissementSuggestions.length > 0 && (
+                            <datalist id="submit-etablissements">
+                              {etablissementSuggestions.map((e) => <option key={e} value={e} />)}
+                            </datalist>
+                          )}
+                        </FormField>
+                      )}
                       <FormField label={niveau === "lycee" ? "Semestre" : "Trimestre"} className="sm:col-span-2">
                         <Select value={periode} onValueChange={(v) => setPeriode(v as Periode)} required>
                           <SelectTrigger className={formSelectClass}><SelectValue placeholder="Choisir" /></SelectTrigger>

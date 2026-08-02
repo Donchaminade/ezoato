@@ -108,10 +108,15 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
   bool get _formValid {
     if (_niveau == null || (_pdfPath == null && _images.isEmpty)) return false;
     if (_niveau == 'college' || _niveau == 'lycee') {
+      final needsPeriode = _type != 'examen';
+      final needsEtablissement = _type == 'devoir';
       return _titreController.text.trim().isNotEmpty &&
           _classe != null &&
           _matiere != null &&
           _ville != null &&
+          (!needsPeriode || _periode != null) &&
+          (!needsEtablissement ||
+              _etablissementController.text.trim().isNotEmpty) &&
           (_type != 'examen' || _examen != null);
     }
     if (_niveau == 'universite') {
@@ -402,6 +407,9 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
                             onChanged: (v) => setState(() {
                               _type = v ?? 'devoir';
                               if (_type != 'examen') _examen = null;
+                              if (_type != 'devoir') {
+                                _etablissementController.clear();
+                              }
                             }),
                           ),
                         ),
@@ -433,11 +441,13 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
                         items: niveau == 'lycee' ? const ['S1', 'S2'] : const ['T1', 'T2', 'T3'],
                         onChanged: (v) => setState(() => _periode = v),
                       ),
-                      EzoaTextField(
-                        label: 'Établissement',
-                        controller: _etablissementController,
-                        prefixIcon: LucideIcons.school,
-                      ),
+                      if (_type == 'devoir')
+                        EzoaTextField(
+                          label: 'Établissement',
+                          controller: _etablissementController,
+                          prefixIcon: LucideIcons.school,
+                          onChanged: (_) => setState(() {}),
+                        ),
                     ],
                   ],
                   if (niveau == 'universite') ...[
