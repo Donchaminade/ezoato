@@ -9,8 +9,19 @@ import '../storage/secure_storage.dart';
 import '../../shared/models/models.dart';
 
 class ApiException implements Exception {
-  ApiException(this.message);
+  ApiException(this.message, {this.statusCode});
   final String message;
+  final int? statusCode;
+
+  bool get isUnauthorized => statusCode == 401;
+
+  /// Erreur typique d'absence de réseau / timeout (pas une réponse HTTP).
+  bool get isNetworkError =>
+      statusCode == null &&
+      (message.contains('joindre') ||
+          message.contains('connexion') ||
+          message.contains('réseau') ||
+          message.contains('network'));
 
   @override
   String toString() => message;
@@ -42,7 +53,10 @@ class ApiClient {
               DioException(
                 requestOptions: error.requestOptions,
                 response: error.response,
-                error: ApiException(data['error'] as String),
+                error: ApiException(
+                  data['error'] as String,
+                  statusCode: error.response?.statusCode,
+                ),
               ),
             );
             return;
@@ -127,16 +141,23 @@ class ApiClient {
   }
 
   Exception _wrap(DioException e) {
-    if (e.error is ApiException) return e.error! as ApiException;
-
-    final data = e.response?.data;
-    if (data is Map && data['error'] is String) {
-      return ApiException(data['error'] as String);
+    if (e.error is ApiException) {
+      final existing = e.error! as ApiException;
+      if (existing.statusCode != null) return existing;
+      return ApiException(
+        existing.message,
+        statusCode: e.response?.statusCode,
+      );
     }
 
     final status = e.response?.statusCode;
+    final data = e.response?.data;
+    if (data is Map && data['error'] is String) {
+      return ApiException(data['error'] as String, statusCode: status);
+    }
+
     if (status != null) {
-      return ApiException('Erreur API ($status)');
+      return ApiException('Erreur API ($status)', statusCode: status);
     }
 
     final type = e.type;
@@ -456,12 +477,15 @@ class ApiClient {
     );
   }
 
+  /// Profil courant. Renvoie `null` uniquement si 401 (session invalide).
+  /// Les erreurs réseau / serveur sont propagées via [ApiException].
   Future<User?> me() async {
     try {
       final data = await _get<Map<String, dynamic>>('/auth/me');
       return User.fromJson(data);
-    } catch (_) {
-      return null;
+    } on ApiException catch (e) {
+      if (e.isUnauthorized) return null;
+      rethrow;
     }
   }
 

@@ -132,6 +132,18 @@ class User {
   final String? etablissement;
   final String? profilType;
   final String? createdAt;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'nom': nom,
+        'email': email,
+        'role': role,
+        if (telephone != null) 'telephone': telephone,
+        if (ville != null) 'ville': ville,
+        if (classe != null) 'classe': classe,
+        if (etablissement != null) 'etablissement': etablissement,
+        if (createdAt != null) 'createdAt': createdAt,
+      };
 }
 
 class UserProfile extends User {

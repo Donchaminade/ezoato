@@ -56,9 +56,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           );
       if (mounted) context.go('/home');
     } catch (e) {
-      final msg = e is MobileAccessDeniedException
-          ? e.message
-          : e.toString().replaceFirst('ApiException: ', '');
+      final String msg;
+      if (e is MobileAccessDeniedException) {
+        msg = e.message;
+      } else if (e is OfflineAuthException) {
+        msg = e.message;
+      } else {
+        msg = e.toString().replaceFirst('ApiException: ', '');
+      }
       setState(() => _error = msg);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
