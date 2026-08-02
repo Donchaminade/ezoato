@@ -69,7 +69,7 @@
 
     .slide-kicker {
       font-family: var(--font-display);
-      font-size: 0.75rem;
+      font-size: 0.9rem;
       font-weight: 600;
       letter-spacing: 0.16em;
       text-transform: uppercase;
@@ -80,7 +80,7 @@
     .slide h1 {
       font-family: var(--font-display);
       font-weight: 700;
-      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      font-size: clamp(2.8rem, 7vw, 5rem);
       line-height: 1.05;
       letter-spacing: -0.03em;
       max-width: 16ch;
@@ -89,7 +89,7 @@
     .slide h2 {
       font-family: var(--font-display);
       font-weight: 700;
-      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-size: clamp(2.4rem, 5.5vw, 4rem);
       line-height: 1.08;
       letter-spacing: -0.03em;
       max-width: 18ch;
@@ -97,7 +97,7 @@
     }
 
     .slide .lead {
-      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      font-size: clamp(1.2rem, 2.3vw, 1.55rem);
       line-height: 1.5;
       color: var(--muted);
       max-width: 36ch;
@@ -134,7 +134,7 @@
     .slogan {
       margin-top: 1.25rem;
       font-family: var(--font-display);
-      font-size: clamp(1.15rem, 2.5vw, 1.5rem);
+      font-size: clamp(1.35rem, 2.8vw, 1.75rem);
       font-weight: 500;
       color: var(--tg-gold);
       letter-spacing: 0.02em;
@@ -205,7 +205,7 @@
       display: flex;
       gap: 0.85rem;
       align-items: flex-start;
-      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      font-size: clamp(1.15rem, 2vw, 1.4rem);
       line-height: 1.4;
       color: var(--text);
     }
@@ -450,7 +450,7 @@
 
     .ask-amount {
       font-family: var(--font-display);
-      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-size: clamp(2.6rem, 5.5vw, 4.2rem);
       font-weight: 700;
       color: var(--tg-gold);
       margin: 0.5rem 0 1.5rem;
@@ -510,7 +510,7 @@
 
     .big-num {
       font-family: var(--font-display);
-      font-size: clamp(2rem, 4.5vw, 2.85rem);
+      font-size: clamp(2.35rem, 5vw, 3.35rem);
       font-weight: 700;
       color: var(--tg-gold);
       line-height: 1;
@@ -685,15 +685,75 @@
         break-after: auto;
       }
     }
+
+    /* Full-bleed exported slide assets */
+    .slide.slide-art {
+      padding: 0;
+      padding-bottom: 0;
+      background: #0B1220;
+    }
+    .slide.slide-art img.slide-png {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+      background: #0B1220;
+    }
+    .deck.mode-art .slide:not(.slide-art) { display: none !important; }
+    .deck.mode-html .slide.slide-art { display: none !important; }
+    .mode-toggle {
+      position: fixed;
+      top: 0.85rem;
+      right: 1rem;
+      z-index: 40;
+      display: flex;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+    }
+    .mode-toggle button {
+      border: 1px solid var(--line);
+      background: rgba(11,18,32,0.75);
+      color: var(--muted);
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-weight: 600;
+    }
+    .mode-toggle button.active {
+      color: var(--ink);
+      background: var(--tg-gold);
+      border-color: var(--tg-gold);
+    }
+    @media print {
+      .mode-toggle { display: none !important; }
+      .deck.mode-html .slide.slide-art { display: none !important; }
+      .deck.mode-art .slide:not(.slide-art) { display: none !important; }
+      .deck.mode-art .slide.slide-art {
+        display: flex !important;
+        opacity: 1 !important;
+        position: relative !important;
+        page-break-after: always;
+        break-after: page;
+        height: 100vh;
+      }
+      .deck.mode-art .slide.slide-art img.slide-png {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+    }
+
   </style>
 </head>
 <body>
   <p class="hint">← → / Espace · F plein écran</p>
 
-  <div class="deck" id="deck" role="region" aria-label="Pitch deck EZOA-TO">
+  <div class="deck mode-art" id="deck" role="region" aria-label="Pitch deck EZOA-TO">
 
     <!-- 1. Cover -->
-    <section class="slide active" data-title="Couverture" aria-label="Diapositive 1 — Couverture">
+    <section class="slide" data-title="Couverture" aria-label="Diapositive 1 — Couverture">
       <div class="cover-center">
         <div class="brand-row">
           <img src="../../mobile/assets/images/logo-ezoa.png" alt="EZOA-TO" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
@@ -936,6 +996,46 @@
         sans equity si préféré.
       </p>
     </section>
+
+
+    <!-- Visuels PNG (assets/) -->
+    <section class="slide slide-art active" data-title="Couverture" data-art="01" aria-label="Diapositive 1 - Couverture (visuel PNG)">
+      <img class="slide-png" src="assets/slide-01-cover.png" alt="EZOA-TO slide 1: Couverture" />
+    </section>
+    <section class="slide slide-art" data-title="Probleme" data-art="02" aria-label="Diapositive 2 - Probleme (visuel PNG)">
+      <img class="slide-png" src="assets/slide-02-problem.png" alt="EZOA-TO slide 2: Probleme" />
+    </section>
+    <section class="slide slide-art" data-title="Solution" data-art="03" aria-label="Diapositive 3 - Solution (visuel PNG)">
+      <img class="slide-png" src="assets/slide-03-solution.png" alt="EZOA-TO slide 3: Solution" />
+    </section>
+    <section class="slide slide-art" data-title="Produit" data-art="04" aria-label="Diapositive 4 - Produit (visuel PNG)">
+      <img class="slide-png" src="assets/slide-04-product.png" alt="EZOA-TO slide 4: Produit" />
+    </section>
+    <section class="slide slide-art" data-title="Marche" data-art="05" aria-label="Diapositive 5 - Marche (visuel PNG)">
+      <img class="slide-png" src="assets/slide-05-market.png" alt="EZOA-TO slide 5: Marche" />
+    </section>
+    <section class="slide slide-art" data-title="Business" data-art="06" aria-label="Diapositive 6 - Business (visuel PNG)">
+      <img class="slide-png" src="assets/slide-06-business.png" alt="EZOA-TO slide 6: Business" />
+    </section>
+    <section class="slide slide-art" data-title="Traction" data-art="07" aria-label="Diapositive 7 - Traction (visuel PNG)">
+      <img class="slide-png" src="assets/slide-07-traction.png" alt="EZOA-TO slide 7: Traction" />
+    </section>
+    <section class="slide slide-art" data-title="Positionnement" data-art="08" aria-label="Diapositive 8 - Positionnement (visuel PNG)">
+      <img class="slide-png" src="assets/slide-08-competition.png" alt="EZOA-TO slide 8: Positionnement" />
+    </section>
+    <section class="slide slide-art" data-title="Go-to-market" data-art="09" aria-label="Diapositive 9 - Go-to-market (visuel PNG)">
+      <img class="slide-png" src="assets/slide-09-gtm.png" alt="EZOA-TO slide 9: Go-to-market" />
+    </section>
+    <section class="slide slide-art" data-title="Equipe" data-art="10" aria-label="Diapositive 10 - Equipe (visuel PNG)">
+      <img class="slide-png" src="assets/slide-10-team.png" alt="EZOA-TO slide 10: Equipe" />
+    </section>
+    <section class="slide slide-art" data-title="Roadmap" data-art="11" aria-label="Diapositive 11 - Roadmap (visuel PNG)">
+      <img class="slide-png" src="assets/slide-11-roadmap.png" alt="EZOA-TO slide 11: Roadmap" />
+    </section>
+    <section class="slide slide-art" data-title="Besoin" data-art="12" aria-label="Diapositive 12 - Besoin (visuel PNG)">
+      <img class="slide-png" src="assets/slide-12-ask.png" alt="EZOA-TO slide 12: Besoin" />
+    </section>
+
   </div>
 
   <footer class="chrome" aria-label="Navigation">
@@ -949,10 +1049,22 @@
 
   <script>
     (function () {
-      const slides = Array.from(document.querySelectorAll(".slide"));
+      const deck = document.getElementById("deck");
+      const modeArtBtn = document.getElementById("modeArt");
+      const modeHtmlBtn = document.getElementById("modeHtml");
+      let mode = deck.classList.contains("mode-html") ? "html" : "art";
+
+      function visibleSlides() {
+        return Array.from(document.querySelectorAll(
+          mode === "art" ? ".slide.slide-art" : ".slide:not(.slide-art)"
+        ));
+      }
+
+      let slides = visibleSlides();
+
       const dotsEl = document.getElementById("dots");
       const slideNum = document.getElementById("slideNum");
-      const total = slides.length;
+      let total = () => slides.length;
       let index = 0;
 
       slides.forEach((slide, i) => {
@@ -965,13 +1077,14 @@
         dotsEl.appendChild(btn);
       });
 
-      const dots = Array.from(dotsEl.querySelectorAll(".dot-btn"));
+      let dots = Array.from(dotsEl.querySelectorAll(".dot-btn"));
 
       function go(i) {
-        index = Math.max(0, Math.min(total - 1, i));
+        index = Math.max(0, Math.min(total() - 1, i));
+        document.querySelectorAll(".slide").forEach((s) => s.classList.remove("active"));
         slides.forEach((s, n) => s.classList.toggle("active", n === index));
         dots.forEach((d, n) => d.classList.toggle("active", n === index));
-        slideNum.textContent = (index + 1) + " / " + total;
+        slideNum.textContent = (index + 1) + " / " + total();
         history.replaceState(null, "", "#" + (index + 1));
       }
 
@@ -1014,8 +1127,35 @@
         touchX = null;
       }, { passive: true });
 
+
+      function setMode(next) {
+        mode = next;
+        deck.classList.toggle("mode-art", mode === "art");
+        deck.classList.toggle("mode-html", mode === "html");
+        modeArtBtn.classList.toggle("active", mode === "art");
+        modeHtmlBtn.classList.toggle("active", mode === "html");
+        dotsEl.innerHTML = "";
+        slides = visibleSlides();
+        const totalLocal = slides.length;
+        slides.forEach((slide, i) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "dot-btn" + (i === 0 ? " active" : "");
+          btn.setAttribute("role", "tab");
+          btn.setAttribute("aria-label", "Aller a la diapositive " + (i + 1) + " - " + (slide.dataset.title || ""));
+          btn.addEventListener("click", () => go(i));
+          dotsEl.appendChild(btn);
+        });
+        dots = Array.from(dotsEl.querySelectorAll(".dot-btn"));
+        go(0);
+      }
+      modeArtBtn.addEventListener("click", () => setMode("art"));
+      modeHtmlBtn.addEventListener("click", () => setMode("html"));
+
+
       const hash = parseInt(location.hash.replace("#", ""), 10);
-      if (hash >= 1 && hash <= total) go(hash - 1);
+      if (hash >= 1 && hash <= total()) go(hash - 1);
+      else go(0);
     })();
   </script>
 </body>

@@ -10,7 +10,7 @@ Présentation professionnelle pour investisseurs, partenaires et établissements
 | [`SPEAKER-NOTES.md`](./SPEAKER-NOTES.md) | Points de discussion + sources / méthodologie marché |
 | [`assets/`](./assets/) (`slide-01-cover.png` … `slide-12-ask.png`) | Captures / visuels PNG des 12 slides (export, aperçu, partage) |
 
-Le HTML n’embarque pas les PNG en fond : ce sont des assets annexes. Pour présenter, ouvrir le HTML.
+Par defaut le HTML affiche les **PNG** de `assets/` (plein cadre). Bouton *HTML editable* pour la version texte agrandie. Les PNG restent aussi utilisables seuls pour partage / export.
 
 ## Checklist envoi investisseur
 
