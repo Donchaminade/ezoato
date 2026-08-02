@@ -125,6 +125,37 @@ $college = validate_soumission_payload([
 ]);
 assert_true($college['niveau'] === 'college' && $college['periode'] === 'T2', 'college devoir OK');
 
+$compositionSansEtab = validate_soumission_payload([
+  'niveau' => 'college',
+  'titre' => 'Composition Maths',
+  'matiere' => 'Mathématiques',
+  'classe' => '3e',
+  'annee' => 2024,
+  'type' => 'composition',
+  'periode' => 'T1',
+  'ville' => 'Lomé',
+]);
+assert_true(
+  $compositionSansEtab['type'] === 'composition' && $compositionSansEtab['etablissement'] === null,
+  'composition sans établissement OK'
+);
+
+try {
+  validate_soumission_payload([
+    'niveau' => 'college',
+    'titre' => 'Devoir sans etab',
+    'matiere' => 'Mathématiques',
+    'classe' => '3e',
+    'annee' => 2024,
+    'type' => 'devoir',
+    'periode' => 'T1',
+    'ville' => 'Lomé',
+  ]);
+  assert_true(false, 'devoir sans établissement doit échouer');
+} catch (RuntimeException $e) {
+  assert_true(str_contains($e->getMessage(), 'Établissement'), 'devoir sans etab → fail');
+}
+
 $univ = validate_soumission_payload([
   'niveau' => 'universite',
   'titre' => 'Examen Droit civil',

@@ -163,9 +163,14 @@ function validate_soumission_payload(array $in): array {
       $periode = null;
       $etablissement = null;
     } else {
+      // devoir : établissement requis (spécifique à un établissement)
+      // composition : établissement optionnel
       $examen = null;
-      if (!$etablissement || !$periode) {
-        fail('Établissement et période requis pour ce type');
+      if (!$periode) {
+        fail('Période requise pour ce type');
+      }
+      if ($type === 'devoir' && !$etablissement) {
+        fail('Établissement requis pour un devoir');
       }
       $periodesOk = $niveau === 'lycee' ? ['S1', 'S2'] : ['T1', 'T2', 'T3'];
       if (!in_array($periode, $periodesOk, true)) {
