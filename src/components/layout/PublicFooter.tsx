@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Flag } from "lucide-react";
 import { EzoaLogo } from "@/components/branding/EzoaLogo";
 import { EZOA_BRAND } from "@/lib/branding";
+import { PITCH_DECK_HREF } from "@/lib/pitch";
 
 export function PublicFooter() {
   return (
@@ -23,6 +24,17 @@ export function PublicFooter() {
             <li><Link to="/about" className="hover:text-foreground">À propos</Link></li>
             <li><Link to="/partenariat" className="hover:text-foreground">Partenariat</Link></li>
             <li><Link to="/faq" className="hover:text-foreground">FAQ</Link></li>
+            <li>
+              <a
+                href={PITCH_DECK_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground"
+                title="Pitch investisseur"
+              >
+                Sponsoriser
+              </a>
+            </li>
           </ul>
         </div>
         <div>
