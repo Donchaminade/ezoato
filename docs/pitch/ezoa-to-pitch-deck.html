@@ -971,6 +971,25 @@
       color: var(--tg-gold);
     }
 
+    .closing-slide .contact-block a.site-home {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      margin-top: 0.35rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(52, 211, 153, 0.45);
+      background: rgba(0, 106, 78, 0.4);
+      color: var(--tg-green-bright);
+      font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+    }
+
+    .closing-slide .contact-block a.site-home:hover {
+      border-color: rgba(255, 206, 0, 0.55);
+      color: var(--tg-gold);
+      background: rgba(0, 106, 78, 0.65);
+    }
+
     @media (max-width: 960px) {
       .closing-slide h1 {
         font-size: clamp(3rem, 11vw, 4.5rem);
@@ -983,6 +1002,9 @@
       }
       .closing-slide .contact-block a {
         font-size: clamp(1.2rem, 4vw, 1.45rem);
+      }
+      .closing-slide .contact-block a.site-home {
+        font-size: clamp(1.05rem, 3.6vw, 1.25rem);
       }
     }
 
@@ -1056,6 +1078,7 @@
 
     .nav-btns {
       display: flex;
+      align-items: center;
       gap: 0.5rem;
     }
 
@@ -1076,6 +1099,26 @@
       color: var(--tg-green-bright);
     }
 
+    .nav-btns .site-home {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      background: rgba(0, 106, 78, 0.5);
+      color: var(--tg-green-bright);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .nav-btns .site-home:hover {
+      border-color: rgba(255, 206, 0, 0.55);
+      color: var(--tg-gold);
+      background: rgba(0, 106, 78, 0.75);
+    }
+
     .slide-num {
       font-variant-numeric: tabular-nums;
       font-size: 0.8rem;
@@ -1083,10 +1126,35 @@
       min-width: 4.5rem;
     }
 
-    .hint {
+    .site-home-fixed {
       position: fixed;
       top: 1rem;
       right: 1.25rem;
+      z-index: 45;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.5rem 0.95rem;
+      border-radius: 8px;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      background: rgba(0, 106, 78, 0.55);
+      color: var(--tg-green-bright);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      backdrop-filter: blur(8px);
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .site-home-fixed:hover {
+      border-color: rgba(255, 206, 0, 0.55);
+      color: var(--tg-gold);
+      background: rgba(0, 106, 78, 0.8);
+    }
+
+    .hint {
+      position: fixed;
+      top: 1rem;
+      left: 1.25rem;
       z-index: 40;
       font-size: 0.7rem;
       color: var(--muted);
@@ -1113,7 +1181,7 @@
         background: var(--ink);
       }
 
-      .chrome, .hint { display: none !important; }
+      .chrome, .hint, .site-home-fixed { display: none !important; }
 
       .slide {
         position: relative;
@@ -1147,6 +1215,7 @@
   </style>
 </head>
 <body>
+  <a class="site-home-fixed" href="/">Voir la page web</a>
   <p class="hint">← → / Espace · F plein écran</p>
 
   <div class="deck" id="deck" role="region" aria-label="Pitch deck EZOA-TO">
@@ -1607,6 +1676,7 @@
           <div class="contact-block">
             <a href="mailto:infoezoato@gmail.com">infoezoato@gmail.com</a>
             <a href="https://github.com/Donchaminade" target="_blank" rel="noopener noreferrer">github.com/Donchaminade</a>
+            <a class="site-home" href="/">Voir la page web</a>
           </div>
         </div>
         <figure class="slide-visual">
@@ -1621,6 +1691,7 @@
     <div class="slide-num" id="slideNum">1 / 14</div>
     <div class="dots" id="dots" aria-label="Diapositives"></div>
     <div class="nav-btns">
+      <a class="site-home" href="/">Voir la page web</a>
       <button type="button" id="btnPrev" aria-label="Précédent">←</button>
       <button type="button" id="btnNext" aria-label="Suivant">→</button>
     </div>
