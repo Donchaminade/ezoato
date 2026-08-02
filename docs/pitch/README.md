@@ -25,7 +25,7 @@ Avant d’envoyer le pack :
 
 - [ ] Ouvrir le HTML dans Chrome/Edge et parcourir les **14 slides** (plein écran **F**)
 - [ ] Vérifier logo + capture (`mobile/assets/images/logo-ezoa.png`, `mobile/flutter_02.png`) — ouvrir depuis la racine du dépôt
-- [ ] Confirmer l’**email de contact** (`contact@ezoa.tg` dans le deck — remplacer si boîte réelle différente)
+- [x] Email de contact confirmé : `infoezoato@gmail.com`
 - [ ] Relire la slide **Traction** : aucun MAU / revenu inventé ; statut « produit opérationnel / prêt pilote »
 - [ ] Relire **Financement** : ask fixe **25 M FCFA** + tableau d’allocation ; slide **Projections** labellisée *projections indicatives*
 - [ ] Joindre ou tenir prêt `SPEAKER-NOTES.md` (glossaire + sources) pour questions diligence

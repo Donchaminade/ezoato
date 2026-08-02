@@ -925,22 +925,65 @@
       margin-bottom: 0.55rem;
     }
 
+    /* Merci / closing — larger type to fill the column */
+    .closing-slide .slide-copy {
+      gap: 0.45rem;
+    }
+
+    .closing-slide h1 {
+      font-size: clamp(3.75rem, 9vw, 6.75rem);
+      margin-bottom: 0.1rem;
+      max-width: 12ch;
+    }
+
+    .closing-slide h2 {
+      font-size: clamp(1.75rem, 3.4vw, 2.65rem);
+      margin-bottom: 0.55rem;
+      max-width: 22ch;
+    }
+
+    .closing-slide .bullet-list {
+      gap: 0.7rem;
+      margin-top: 0.35rem;
+    }
+
+    .closing-slide .bullet-list li {
+      font-size: clamp(1.45rem, 2.7vw, 1.95rem);
+      line-height: 1.35;
+    }
+
     .closing-slide .contact-block {
-      margin-top: 0.75rem;
+      margin-top: 1.15rem;
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.55rem;
     }
 
     .closing-slide .contact-block a {
       color: var(--tg-green-bright);
       text-decoration: none;
-      font-weight: 600;
-      font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+      font-weight: 700;
+      font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+      letter-spacing: -0.01em;
     }
 
     .closing-slide .contact-block a:hover {
       color: var(--tg-gold);
+    }
+
+    @media (max-width: 960px) {
+      .closing-slide h1 {
+        font-size: clamp(3rem, 11vw, 4.5rem);
+      }
+      .closing-slide h2 {
+        font-size: clamp(1.4rem, 5vw, 1.9rem);
+      }
+      .closing-slide .bullet-list li {
+        font-size: clamp(1.25rem, 4.2vw, 1.55rem);
+      }
+      .closing-slide .contact-block a {
+        font-size: clamp(1.2rem, 4vw, 1.45rem);
+      }
     }
 
     .big-num {
@@ -1125,7 +1168,7 @@
         </div>
         <div class="cover-meta">
           <div><strong>Équipe</strong> Chaminade D. Adjolou (Fondateur · CEO &amp; CTO) · Divine HIBA</div>
-          <div><strong>Contact</strong> contact@ezoa.tg · github.com/Donchaminade</div>
+          <div><strong>Contact</strong> infoezoato@gmail.com · github.com/Donchaminade</div>
           <div><strong>Stack</strong> Flutter · React · PHP/MySQL</div>
           <div><strong>Marché</strong> Togo · Afrique de l’Ouest francophone</div>
         </div>
@@ -1562,7 +1605,7 @@
             <li><span class="nowrap"><em>Archive. Révise. Excelle.</em></span></li>
           </ul>
           <div class="contact-block">
-            <a href="mailto:contact@ezoa.tg">contact@ezoa.tg</a>
+            <a href="mailto:infoezoato@gmail.com">infoezoato@gmail.com</a>
             <a href="https://github.com/Donchaminade" target="_blank" rel="noopener noreferrer">github.com/Donchaminade</a>
           </div>
         </div>

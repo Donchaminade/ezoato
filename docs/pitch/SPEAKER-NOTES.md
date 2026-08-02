@@ -3,7 +3,7 @@
 Durée indicative : **10–14 minutes** (14 slides). Une idée par slide.  
 Tous les chiffres marché et revenus ci-dessous sont des **estimations / projections indicatives** ; jamais des résultats réalisés.
 
-**Contact deck :** contact@ezoa.tg · https://github.com/Donchaminade  
+**Contact deck :** infoezoato@gmail.com · https://github.com/Donchaminade  
 **Équipe :** Chaminade Dondah Adjolou (Fondateur principal · CEO & CTO · Développeur) · Divine HIBA (PM & BA)
 
 ---
@@ -34,7 +34,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 - Se présenter : **Chaminade Dondah Adjolou**, fondateur principal, CEO & CTO et développeur d’**EZOA-TO** ; présenter **Divine HIBA**, Project Manager & Business Analyst.
 - Slogan : *Archive. Révise. Excelle.* — promesse claire pour élèves et parents.
 - Adapter l’accroche : investisseurs (opportunité + ask 25 M) / partenaires / chefs d’établissement (accès & qualité).
-- Contact : `contact@ezoa.tg` (à confirmer / rediriger vers boîte réelle) + GitHub du fondateur.
+- Contact : `infoezoato@gmail.com` + GitHub du fondateur.
 
 ---
 
@@ -285,7 +285,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 - Clôturer : *le passé scolaire du Togo, au service de l’avenir des élèves.*
 - Proposer clairement : **démo** → **cadre pilote lycée** → **call diligence / term sheet**.
-- Laisser contact visible : `contact@ezoa.tg` · GitHub fondateur.
+- Laisser contact visible : `infoezoato@gmail.com` · GitHub fondateur.
 - Ne pas improviser de traction chiffrée en réponse aux questions — renvoyer aux preuves à venir.
 
 ---
