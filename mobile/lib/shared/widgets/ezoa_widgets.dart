@@ -6,12 +6,15 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/theme/ezoa_theme.dart';
 import '../models/models.dart';
+import 'epreuve_card_overlay.dart';
 import 'epreuve_thumbnail.dart';
 import 'ezoa_glass_card.dart';
 import 'ezoa_glass_header.dart';
 import 'ezoa_gradient_background.dart';
 import 'ezoa_scroll_reveal.dart';
 
+export 'epreuve_card_overlay.dart';
+export 'epreuve_meta_labels.dart';
 export 'ezoa_glass_card.dart';
 export 'ezoa_glass_header.dart';
 export 'ezoa_gradient_background.dart';
@@ -446,43 +449,68 @@ class EzoaSearchField extends StatelessWidget {
     this.hintText = 'Rechercher…',
     this.enabled = true,
     this.onChanged,
+    this.onClear,
+    this.margin = const EdgeInsets.fromLTRB(16, 8, 16, 8),
   });
 
   final TextEditingController controller;
   final String hintText;
   final bool enabled;
   final ValueChanged<String>? onChanged;
+  final VoidCallback? onClear;
+  final EdgeInsetsGeometry margin;
 
   @override
   Widget build(BuildContext context) {
     final pal = EzoaColors.of(context);
 
     return EzoaGlassCard(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      margin: margin,
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       enableShine: false,
       blurSigma: 14,
-      child: TextField(
-        controller: controller,
-        enabled: enabled,
-        onChanged: onChanged,
-        style: GoogleFonts.inter(
-          color: pal.text,
-          fontWeight: FontWeight.w300,
-        ),
-        decoration: InputDecoration(
-          hintText: hintText,
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          filled: false,
-          prefixIcon: Icon(
-            LucideIcons.search,
-            size: 20,
-            color: enabled ? pal.accent : pal.textFaint,
-          ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-        ),
+      child: ValueListenableBuilder<TextEditingValue>(
+        valueListenable: controller,
+        builder: (context, value, _) {
+          final hasText = value.text.isNotEmpty;
+          return TextField(
+            controller: controller,
+            enabled: enabled,
+            onChanged: onChanged,
+            style: GoogleFonts.inter(
+              color: pal.text,
+              fontWeight: FontWeight.w300,
+            ),
+            decoration: InputDecoration(
+              hintText: hintText,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              filled: false,
+              prefixIcon: Icon(
+                LucideIcons.search,
+                size: 20,
+                color: enabled ? pal.accent : pal.textFaint,
+              ),
+              suffixIcon: hasText && enabled
+                  ? IconButton(
+                      tooltip: 'Effacer la recherche',
+                      onPressed: () {
+                        controller.clear();
+                        onChanged?.call('');
+                        onClear?.call();
+                      },
+                      icon: Icon(
+                        LucideIcons.x,
+                        size: 18,
+                        color: pal.textDim,
+                      ),
+                    )
+                  : null,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          );
+        },
       ),
     );
   }
@@ -717,9 +745,12 @@ class EpreuveGridCard extends StatelessWidget {
     this.isFavorite = false,
     this.isOffline = false,
     this.type = 'epreuve',
+    this.periode,
+    this.examen,
     this.revealIndex,
     this.epreuve,
     this.previewImage,
+    this.showPriceBadge = false,
   });
 
   final String titre;
@@ -731,6 +762,8 @@ class EpreuveGridCard extends StatelessWidget {
   final bool isFavorite;
   final bool isOffline;
   final String type;
+  final String? periode;
+  final String? examen;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final int? revealIndex;
@@ -741,21 +774,66 @@ class EpreuveGridCard extends StatelessWidget {
   /// Aperçu produit (fichier local hors ligne, ou ImageProvider réseau).
   final ImageProvider? previewImage;
 
+  /// Affiche le badge GRATUIT / prix (Archives).
+  final bool showPriceBadge;
+
   static const _gradients = [
     [Color(0xFF006A4E), Color(0xFF004D38)],
-    [Color(0xFF4338CA), Color(0xFF312E81)],
     [Color(0xFF0E7490), Color(0xFF155E75)],
-    [Color(0xFF7C3AED), Color(0xFF5B21B6)],
     [Color(0xFFB45309), Color(0xFF92400E)],
+    [Color(0xFF1A2220), Color(0xFF121816)],
+    [Color(0xFF365314), Color(0xFF1A2E05)],
   ];
+
+  String? get _resolvedPeriode => periode ?? epreuve?.periode;
+  String? get _resolvedExamen => examen ?? epreuve?.examen;
+  String get _resolvedType => epreuve?.type ?? type;
+
+  String? get _priceLabel {
+    final e = epreuve;
+    if (e == null) return showPriceBadge ? 'GRATUIT' : null;
+    if (e.requiresPayment == true && e.prixFcfa != null) {
+      return '${e.prixFcfa} F';
+    }
+    // Badge opaque GRATUIT/PAYANT toujours visible sur cartes produit.
+    return 'GRATUIT';
+  }
+
+  bool get _isPaid {
+    final e = epreuve;
+    return e != null && e.requiresPayment == true && e.prixFcfa != null;
+  }
 
   @override
   Widget build(BuildContext context) {
     final pal = EzoaColors.of(context);
     final gradient = _gradients[matiere.hashCode.abs() % _gradients.length];
-    final placeholderIcon = type == 'examen'
+    final placeholderIcon = _resolvedType == 'examen'
         ? LucideIcons.graduationCap
         : LucideIcons.fileText;
+
+    Widget? statusTrailing;
+    if (isFavorite || isOffline) {
+      statusTrailing = Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A2220),
+          borderRadius: BorderRadius.circular(7),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isFavorite)
+              Icon(LucideIcons.heart, color: pal.error, size: 12),
+            if (isOffline) ...[
+              if (isFavorite) const SizedBox(width: 5),
+              Icon(LucideIcons.hardDrive, color: pal.emerald, size: 12),
+            ],
+          ],
+        ),
+      );
+    }
 
     final card = EzoaGlassCard(
       margin: EdgeInsets.zero,
@@ -767,7 +845,7 @@ class EpreuveGridCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            height: 82,
+            height: 104,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -805,26 +883,15 @@ class EpreuveGridCard extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.85),
                     ),
                   ),
-                if (isFavorite || isOffline)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (isFavorite)
-                          Icon(LucideIcons.heart, color: pal.error, size: 14),
-                        if (isOffline) ...[
-                          if (isFavorite) const SizedBox(width: 6),
-                          Icon(
-                            LucideIcons.hardDrive,
-                            color: pal.emerald,
-                            size: 14,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+                EpreuvePreviewChrome(
+                  matiere: matiere,
+                  type: _resolvedType,
+                  periode: _resolvedPeriode,
+                  examen: _resolvedExamen,
+                  priceLabel: _priceLabel,
+                  isPaid: _isPaid,
+                  topTrailing: statusTrailing,
+                ),
               ],
             ),
           ),
@@ -850,7 +917,6 @@ class EpreuveGridCard extends StatelessWidget {
                     spacing: 4,
                     runSpacing: 4,
                     children: [
-                      _EpreuveMiniBadge(label: matiere),
                       if (classe.isNotEmpty && classe != '—')
                         _EpreuveMiniBadge(label: classe),
                       if (annee > 0) _EpreuveMiniBadge(label: '$annee'),
@@ -944,7 +1010,7 @@ class EpreuvesGrid extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        mainAxisExtent: 204,
+        mainAxisExtent: 228,
       ),
       itemCount: itemCount,
       itemBuilder: itemBuilder,

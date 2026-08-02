@@ -39,6 +39,7 @@ $bind = function(string $col, string $key) use (&$where, &$args) {
 };
 $bind('matiere','matiere'); $bind('niveau','niveau'); $bind('classe','classe');
 $bind('type','type'); $bind('ville','ville'); $bind('examen','examen');
+$bind('periode','periode');
 if (!empty($_GET['annee'])) { $where[] = 'annee = ?'; $args[] = (int)$_GET['annee']; }
 
 if (!empty($_GET['q'])) {
