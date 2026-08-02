@@ -27,7 +27,7 @@ export const Route = createFileRoute("/about")({
       {
         name: "description",
         content:
-          "Découvrez EZOA-TO : mission, archives, tarifs, validation, contributeurs et fonctionnement de la plateforme togolaise d'épreuves scolaires.",
+          "Découvrez EZOA-TO : archives collège, lycée, université et concours, abonnement Pro, validation anti-doublons — la plateforme togolaise d'épreuves.",
       },
     ],
   }),
@@ -45,7 +45,7 @@ function AboutPage() {
       <PageHero
         badge={<PageHeroBadge icon={Flag}>{EZOA_BRAND.fullName}</PageHeroBadge>}
         title="Tout savoir sur EZOA-TO"
-        description="Mission, archives, tarifs, validation et communauté — la référence pour comprendre la plateforme d'épreuves scolaires du Togo."
+        description="Du collège aux concours, sur mobile et sur le web — mission, tarifs Pro, qualité des archives et communauté éducative togolaise."
         primaryImage="group"
       />
 

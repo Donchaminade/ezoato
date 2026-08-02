@@ -25,7 +25,7 @@ En **2024**, j’ai arrêté de le traiter comme une fatalité. L’idée était
 
 En **2025 et 2026**, on l’a construite. Pas une maquette : un produit opérationnel. Divine HIBA, Project Manager et Business Analyst, a aidé à structurer la vision — besoins terrain, priorités, cohérence métier — pendant que je portais le produit et la technique.
 
-Aujourd’hui, EZOA-TO sert le socle CEPD, BEPC, BAC, avec les devoirs et compositions ; la contribution communautaire alimente le catalogue sous validation ; et l’abonnement Pro à **1 000 FCFA pour six mois** reste un micropaiement — moins cher qu’une liasse de photocopies mal classées, plus fiable qu’un PDF sans source.
+Aujourd’hui, EZOA-TO couvre **quatre niveaux** — collège, lycée, université, concours — avec le socle CEPD, BEPC, BAC, les devoirs et compositions ; la contribution communautaire alimente le catalogue sous validation anti-doublons ; et l’abonnement Pro à **1 000 FCFA pour six mois** reste un micropaiement — moins cher qu’une liasse de photocopies mal classées, plus fiable qu’un PDF sans source.
 
 On ne vend pas du rêve. On construit l’endroit où la révision ne dépend plus du hasard d’un groupe WhatsApp.
 
