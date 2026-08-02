@@ -20,7 +20,9 @@ Tous les chiffres marché et revenus ci-dessous sont des **estimations / project
 | **SAM** | Serviceable Available Market — marché accessible | ~370 k (Togo × smartphone / internet utile) |
 | **SOM** | Serviceable Obtainable Market — marché obtenable | 3–8 k Pro payants à 18–24 mois |
 | **AO** | Afrique de l’Ouest | Zone d’expansion francophone |
-| **CEPD / BEPC / BAC** | Examens nationaux togolais | Connus du public local ; préciser si pitch international |
+| **CEPD / BEPC / BAC** | Certificat d’études du premier degré / Brevet d’études du premier cycle / Baccalauréat | Socle secondaire général |
+| **CAP / BT / BTS** | Certificat d’aptitude professionnelle / Brevet de technicien / Brevet de technicien supérieur | Filières professionnelles & post-secondaire |
+| **Concours** | Concours nationaux (écoles, accès sélectif ; upside fonction publique) | Demande forte, propension à payer plus haute |
 | **MAU** | Monthly Active Users — utilisateurs actifs mensuels | **Ne pas inventer** de MAU |
 
 Sur les slides, les abréviations sont développées ou glossées à la **première occurrence**.
@@ -39,7 +41,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 ## 2. Problème
 
 - Au Togo, les sujets circulent encore surtout via WhatsApp, photocopies, groupes Facebook et PDF épars.
-- Pas d’endroit unique, fiable, filtrable par classe / matière / examen national (CEPD, BEPC, BAC).
+- Pas d’endroit unique, fiable, filtrable par classe / matière / examen national (CEPD, BEPC, BAC — puis CAP, BT, BTS, concours).
 - Inégalité d’accès à la révision → impact sur les résultats — le réseau social décide, pas le mérite.
 
 ---
@@ -47,6 +49,8 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 ## 3. Solution
 
 - EZOA-TO = bibliothèque nationale d’épreuves (web + mobile).
+- Socle immédiat : **CEPD, BEPC, BAC** + devoirs / compositions.
+- Expansion crédible (même logique archive) : **CAP, BT, BTS**, puis **concours nationaux** (écoles / accès sélectif ; upside concours de la fonction publique — rester prudent, pas promettre le catalogue complet dès le seed).
 - Chercher, consulter, télécharger ; favoris et hors ligne pour le terrain (3G, lycée).
 - Qualité : soumissions communautaires + **validation humaine** avant publication.
 
@@ -55,6 +59,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 ## 4. Produit / démo
 
 - Montrer 30–60 s : Archives → fiche PDF → compte (favoris / bibliothèque / Pro).
+- Filtrage par examen : positionner le produit comme **plateforme multi-examens** (secondaire général → pro / post-secondaire), pas uniquement BAC.
 - Flux contributeur : photo → PDF → admin → récompense portefeuille → retrait Mobile Money.
 - Stack crédible : Flutter, React, PHP/MySQL — **produit opérationnel**, pas une maquette.
 
@@ -113,6 +118,12 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 - Objectif **pre-traction → early traction** : **3 000–8 000** abonnés Pro à 18–24 mois.
 - Logique : **~1–2 %** du SAM (~370 k) = 3,7–7,4 k — cohérent avec un pilote lycées puis couverture nationale progressive.
 - **Ne pas présenter comme engagement contractuel** — objectif de pilotage (voir aussi slide 13 projections).
+
+### Upside filières pro & concours (oral)
+
+- Le SAM slide (~370 k) est ancré sur le **secondaire général**. Au Togo, **CAP / BT** (enseignement technique & professionnel) et **BTS** (post-bac court) élargissent l’adresseable sans changer le modèle produit.
+- Les **concours** (écoles sélectives, formations, et plus tard concours administratifs) ont souvent une **propension à payer plus élevée** que la révision scolaire de base — packs / Pro plus faciles à justifier pour candidats motivés.
+- À l’oral : « Le tableau de base reste secondaire ; CAP / BTS / concours = **upside de volume et d’ARPU**, pas encore dans le SOM chiffré. »
 
 ### Mobile Money (facilitateur de monétisation)
 
@@ -173,7 +184,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 - **Pilotes** : 3–5 lycées (Lomé + 1–2 régions) — accès Pro découverte pour mesurer conversion.
 - Ambassadeurs élèves / profs contributeurs récompensés.
-- Campagnes WhatsApp / Facebook calées sur calendrier CEPD / BEPC / BAC.
+- Campagnes WhatsApp / Facebook calées sur calendrier CEPD / BEPC / BAC (puis sessions CAP / BT / BTS / concours).
 - **B2B écoles** (indicatif) : licence annuelle établissement = accès classes + canal de dépôt de sujets ; prix à co-construire (ex. forfait selon effectif).
 - Notifications ciblées par classe = rappel utile, pas spam.
 
@@ -191,7 +202,8 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 ## 11. Roadmap 6 / 12 / 18 mois
 
 - **6 mois** : 3–5 lycées pilotes, catalogue examens clés, Mobile Money stable, Play Store, premiers Pro + KPIs.
-- **12 mois** : couverture nationale CEPD / BEPC / BAC, offre licence établissements, rétention Pro, réseau contributeurs.
+- **12 mois** : couverture nationale **CEPD / BEPC / BAC**, offre licence établissements, rétention Pro, réseau contributeurs.
+- **12–18 mois** : ouverture **CAP, BT, BTS** et premiers **concours nationaux** (catalogue ciblé, contributeurs filières techniques / centres de formation) — upside marché hors secondaire général.
 - **18 mois** : 1er pays voisin Afrique de l’Ouest francophone, corrigés / parcours, dialogue Ministère de l’Éducation / partenaires éducation.
 
 ---
@@ -247,6 +259,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 - Revenu annuel approximatif = **nb d’abonnés Pro × 2 000 FCFA** (renouvellement annuel implicit).
 - Pas de revenus B2B écoles dans le tableau (upside non compté).
+- **Upside CAP / BT / BTS / concours non inclus** dans le tableau Pro de base : plus d’élèves / candidats adressables + propension à payer souvent plus haute sur les concours (packs ou Pro ciblés). À verbaliser comme **projection d’expansion**, pas comme revenu déjà modélisé.
 - Pas de churn / saisonnalité examens modélisés finement — scénarios d’ordre de grandeur.
 - Cohérence SOM : médian 24 mois ≈ **5 000 Pro** ; ambitieux ≈ **8 000 Pro** (haut de fourchette SOM).
 
