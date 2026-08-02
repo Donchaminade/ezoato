@@ -648,19 +648,21 @@ class _WalletCardBody extends ConsumerWidget {
 }
 
 /// Raccourcis hors barre de navigation : Bibliothèque et Hors ligne.
-class _QuickActionsRow extends StatelessWidget {
+class _QuickActionsRow extends ConsumerWidget {
   const _QuickActionsRow();
 
   static const _spacing = 8.0;
 
   @override
-  Widget build(BuildContext context) {
-    final actions = [
-      (
-        LucideIcons.library,
-        'Bibliothèque',
-        () => context.push('/account/bibliotheque'),
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isOnline = ref.watch(isOnlineProvider);
+    final actions = <(IconData, String, VoidCallback)>[
+      if (isOnline)
+        (
+          LucideIcons.library,
+          'Bibliothèque',
+          () => context.push('/account/bibliotheque'),
+        ),
       (
         LucideIcons.hardDrive,
         'Hors ligne',
