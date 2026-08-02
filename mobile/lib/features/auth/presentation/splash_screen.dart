@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/onboarding/onboarding_provider.dart';
 import '../../../core/theme/ezoa_theme.dart';
 import '../data/auth_repository.dart';
 
@@ -71,8 +72,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   void _route() {
     if (!mounted) return;
     final auth = ref.read(authProvider);
-    if (auth.isLoading) {
+    final onboarding = ref.read(onboardingProvider);
+    if (auth.isLoading || !onboarding.loaded) {
       Future<void>.delayed(const Duration(milliseconds: 300), _route);
+      return;
+    }
+    if (!onboarding.completed) {
+      context.go('/onboarding');
       return;
     }
     if (auth.isAuthenticated) {
@@ -85,6 +91,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     ref.listen(authProvider, (_, __) => _route());
+    ref.listen(onboardingProvider, (_, __) => _route());
 
     final bottomPad = MediaQuery.sizeOf(context).height * 0.18;
 

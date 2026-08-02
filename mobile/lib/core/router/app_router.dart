@@ -15,6 +15,7 @@ import '../../features/account/presentation/soumissions_screen.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/presentation/forgot_password_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/onboarding_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/reset_password_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
@@ -25,6 +26,7 @@ import '../../features/epreuves/presentation/main_shell_screen.dart';
 import '../../features/favorites/presentation/favoris_screen.dart';
 import '../../features/offline/presentation/offline_library_screen.dart';
 import '../../features/submit/presentation/submit_screen.dart';
+import '../onboarding/onboarding_provider.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -35,6 +37,7 @@ final _shellNavigatorAccountKey = GlobalKey<NavigatorState>(debugLabel: 'account
 
 final routerProvider = Provider<GoRouter>((ref) {
   final auth = ref.watch(authProvider);
+  final onboarding = ref.watch(onboardingProvider);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -44,18 +47,36 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuth = auth.isAuthenticated;
       final path = state.matchedLocation;
       final isSplash = path == '/';
+      final isOnboarding = path == '/onboarding';
       final isAuthRoute = path == '/login' ||
           path == '/register' ||
           path == '/forgot-password' ||
           path == '/reset-password';
 
-      if (isLoading) return isSplash ? null : '/';
-      if (!isAuth && !isAuthRoute && !isSplash) return '/login';
+      if (isLoading || !onboarding.loaded) {
+        return isSplash ? null : '/';
+      }
+
+      if (!onboarding.completed && !isOnboarding && !isSplash) {
+        return '/onboarding';
+      }
+
+      if (onboarding.completed && isOnboarding) {
+        return isAuth ? '/home' : '/login';
+      }
+
+      if (!isAuth && !isAuthRoute && !isSplash && !isOnboarding) {
+        return '/login';
+      }
       if (isAuth && isAuthRoute) return '/home';
       return null;
     },
     routes: [
       GoRoute(path: '/', builder: (_, __) => const SplashScreen()),
+      GoRoute(
+        path: '/onboarding',
+        builder: (_, __) => const OnboardingScreen(),
+      ),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
       GoRoute(
