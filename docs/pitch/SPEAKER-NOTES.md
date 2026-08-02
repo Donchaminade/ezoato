@@ -4,7 +4,7 @@ Durée indicative : **10–14 minutes** (14 slides). Une idée par slide.
 Tous les chiffres marché et revenus ci-dessous sont des **estimations / projections indicatives** ; jamais des résultats réalisés.
 
 **Contact deck :** contact@ezoa.tg · https://github.com/Donchaminade  
-**Équipe :** Chaminade Dondah Adjolou (CEO & CTO) · Divine HIBA (PM & BA)
+**Équipe :** Chaminade Dondah Adjolou (Fondateur principal · CEO & CTO · Développeur) · Divine HIBA (PM & BA)
 
 ---
 
@@ -31,7 +31,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 ## 1. Couverture
 
-- Se présenter : **Chaminade Dondah Adjolou**, CEO & CTO d’**EZOA-TO** ; présenter **Divine HIBA**, Project Manager & Business Analyst.
+- Se présenter : **Chaminade Dondah Adjolou**, fondateur principal, CEO & CTO et développeur d’**EZOA-TO** ; présenter **Divine HIBA**, Project Manager & Business Analyst.
 - Slogan : *Archive. Révise. Excelle.* — promesse claire pour élèves et parents.
 - Adapter l’accroche : investisseurs (opportunité + ask 25 M) / partenaires / chefs d’établissement (accès & qualité).
 - Contact : `contact@ezoa.tg` (à confirmer / rediriger vers boîte réelle) + GitHub du fondateur.
@@ -192,7 +192,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 ## 10. Équipe
 
-- **Chaminade Dondah Adjolou** — CEO & CTO : vision, produit, tech (mobile, web, backend, paiements).
+- **Chaminade Dondah Adjolou** — Fondateur principal · CEO & CTO · Développeur : vision, architecture et développement produit (mobile, web, backend, paiements).
 - **Divine HIBA** — Project Manager & Business Analyst : pilotage, besoins métier, coordination terrain / écoles.
 - Rôles ouverts (**recrutement prévu**) : ops contenu / validation, partenariats établissements, growth.
 - Ne pas inventer d’autres membres.

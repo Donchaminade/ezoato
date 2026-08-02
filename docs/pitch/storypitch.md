@@ -1,7 +1,7 @@
 # Histoire d’ouverture — EZOA-TO
 
 Histoire de fondation destinée au **début du pitch** (avant le deck).  
-À dire à la première personne par **Chaminade Dondah Adjolou** (CEO & CTO).
+À dire à la première personne par **Chaminade Dondah Adjolou** (Fondateur principal · CEO & CTO · Développeur).
 
 > **Cadre narratif :** récit composé pour le pitch — ancré dans le vécu scolaire togolais (CEPD, BEPC, BAC) et dans le parcours réel du produit (web + mobile, Pro, contribution). Les dates personnelles ci-dessous sont une **arc crédible pour l’oral**, pas une biographie officielle vérifiée année par année. Les faits produit (archives scolaires Togo, prix Pro, contribution) sont réels.
 
@@ -15,7 +15,7 @@ Au Togo, avant un examen, le stress n’est pas seulement dans la salle. Il est 
 
 ## Version longue (2–3 min)
 
-Je m’appelle Chaminade Dondah Adjolou. Je suis CEO et CTO d’EZOA-TO.
+Je m’appelle Chaminade Dondah Adjolou. Je suis fondateur principal, CEO, CTO et développeur d’EZOA-TO.
 
 Si vous avez passé un examen national au Togo, vous connaissez la scène. La veille du BEPC ou du BAC, on rafraîchit WhatsApp. Quelqu’un envoie un PDF. Quelqu’un d’autre dit « c’est l’ancien ». Une photocopie circule dans la cour. Les parents paient. Les élèves stressent. Et l’accès à de bons sujets dépend encore trop souvent de qui vous connaissez, pas de ce que vous méritez.
 
