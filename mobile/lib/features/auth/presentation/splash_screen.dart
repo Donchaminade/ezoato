@@ -19,12 +19,14 @@ class SplashScreen extends ConsumerStatefulWidget {
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   static const _bg = Color(0xFFFAFAFA);
-  static const _holdDuration = Duration(milliseconds: 1600);
+  /// Durée minimale d'affichage du splash avant navigation.
+  static const _holdDuration = Duration(seconds: 4);
 
   late final AnimationController _controller;
   late final Animation<double> _logoFade;
   late final Animation<double> _logoScale;
   late final Animation<double> _titleFade;
+  bool _holdComplete = false;
 
   @override
   void initState() {
@@ -60,7 +62,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
 
     _controller.forward();
-    Future<void>.delayed(_holdDuration, _route);
+    Future<void>.delayed(_holdDuration, () {
+      if (!mounted) return;
+      _holdComplete = true;
+      _route();
+    });
   }
 
   @override
@@ -70,7 +76,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   void _route() {
-    if (!mounted) return;
+    if (!mounted || !_holdComplete) return;
     final auth = ref.read(authProvider);
     final onboarding = ref.read(onboardingProvider);
     if (auth.isLoading || !onboarding.loaded) {
