@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/theme/ezoa_theme.dart';
+import '../models/models.dart';
+import 'epreuve_thumbnail.dart';
 import 'ezoa_glass_card.dart';
 import 'ezoa_glass_header.dart';
 import 'ezoa_gradient_background.dart';
@@ -716,6 +718,7 @@ class EpreuveGridCard extends StatelessWidget {
     this.isOffline = false,
     this.type = 'epreuve',
     this.revealIndex,
+    this.epreuve,
   });
 
   final String titre;
@@ -730,6 +733,9 @@ class EpreuveGridCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final int? revealIndex;
+
+  /// Si fourni, affiche la miniature d'aperçu (sinon dégradé + icône).
+  final Epreuve? epreuve;
 
   static const _gradients = [
     [Color(0xFF006A4E), Color(0xFF004D38)],
@@ -762,17 +768,25 @@ class EpreuveGridCard extends StatelessWidget {
                 colors: gradient,
               ),
             ),
+            clipBehavior: Clip.antiAlias,
             child: Stack(
+              fit: StackFit.expand,
               children: [
-                Center(
-                  child: Icon(
-                    type == 'examen'
-                        ? LucideIcons.graduationCap
-                        : LucideIcons.fileText,
-                    size: 30,
-                    color: Colors.white.withValues(alpha: 0.85),
+                if (epreuve != null)
+                  EpreuveThumbnail(
+                    epreuve: epreuve!,
+                    placeholderIconSize: 30,
+                  )
+                else
+                  Center(
+                    child: Icon(
+                      type == 'examen'
+                          ? LucideIcons.graduationCap
+                          : LucideIcons.fileText,
+                      size: 30,
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
                   ),
-                ),
                 if (isFavorite || isOffline)
                   Positioned(
                     top: 8,

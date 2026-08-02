@@ -113,6 +113,7 @@ class _FavorisScreenState extends ConsumerState<FavorisScreen> {
                 ville: e.ville,
                 telechargements: e.telechargements,
                 type: e.type,
+                epreuve: e,
                 isFavorite: true,
                 revealIndex: i,
                 onTap: () => context.push('/epreuve/${e.id}'),

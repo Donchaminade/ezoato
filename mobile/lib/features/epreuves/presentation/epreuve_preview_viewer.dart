@@ -1,17 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/security/secure_screen.dart';
+import '../../../core/storage/secure_storage.dart';
 import '../../../core/theme/ezoa_theme.dart';
 import '../../../shared/models/models.dart';
+import '../../../shared/widgets/epreuve_thumbnail.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
 
-/// URL de la page N de l'aperçu (`GET /epreuves/{id}/preview?page=N`).
-String epreuvePreviewPageUrl(String epreuveId, int page) {
-  return '${Env.apiUrl}/epreuves/$epreuveId/preview?page=$page';
-}
+export '../../../shared/widgets/epreuve_thumbnail.dart' show epreuvePreviewPageUrl;
 
 /// Ouvre la visionneuse d'aperçu plein écran (pages feuilletables + zoom).
 void showEpreuvePreview(
@@ -32,7 +31,7 @@ void showEpreuvePreview(
 }
 
 /// Carte « Aperçu » : miniature ou paywall si épreuve payante non débloquée.
-class EpreuvePreviewCard extends StatelessWidget {
+class EpreuvePreviewCard extends ConsumerWidget {
   const EpreuvePreviewCard({
     super.key,
     required this.epreuve,
@@ -47,7 +46,7 @@ class EpreuvePreviewCard extends StatelessWidget {
   final VoidCallback? onUnlock;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (locked) {
       return EpreuvePreviewPaywall(
         pages: epreuve.pages,
@@ -70,32 +69,12 @@ class EpreuvePreviewCard extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             child: SizedBox(
               height: 190,
-              child: CachedNetworkImage(
-                imageUrl: epreuvePreviewPageUrl(epreuve.id, 1),
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-                progressIndicatorBuilder: (context, _, progress) => Center(
-                  child: SizedBox(
-                    width: 26,
-                    height: 26,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      value: progress.progress,
-                    ),
-                  ),
-                ),
-                errorWidget: (context, _, _) => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(LucideIcons.imageOff, size: 28, color: pal.textDim),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Aperçu indisponible',
-                        style: EzoaTypography.bodySmall(context),
-                      ),
-                    ],
-                  ),
+              child: ColoredBox(
+                color: pal.subtleFill,
+                child: EpreuveThumbnail(
+                  epreuve: epreuve,
+                  showLockWhenPaid: false,
+                  placeholderIconSize: 36,
                 ),
               ),
             ),
@@ -292,20 +271,56 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
   }
 }
 
-class _PreviewPage extends StatelessWidget {
+class _PreviewPage extends ConsumerStatefulWidget {
   const _PreviewPage({required this.url});
 
   final String url;
 
   @override
+  ConsumerState<_PreviewPage> createState() => _PreviewPageState();
+}
+
+class _PreviewPageState extends ConsumerState<_PreviewPage> {
+  Map<String, String> _headers = const {};
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadHeaders());
+  }
+
+  Future<void> _loadHeaders() async {
+    final token = await ref.read(secureStorageProvider).getToken();
+    if (!mounted) return;
+    setState(() {
+      _headers = (token != null && token.isNotEmpty)
+          ? {'Authorization': 'Bearer $token'}
+          : const {};
+      _ready = true;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final pal = EzoaColors.of(context);
+
+    if (!_ready) {
+      return const Center(
+        child: SizedBox(
+          width: 32,
+          height: 32,
+          child: CircularProgressIndicator(strokeWidth: 2.5),
+        ),
+      );
+    }
 
     return InteractiveViewer(
       maxScale: 5,
       child: Center(
         child: CachedNetworkImage(
-          imageUrl: url,
+          imageUrl: widget.url,
+          httpHeaders: _headers,
           fit: BoxFit.contain,
           progressIndicatorBuilder: (context, _, progress) => SizedBox(
             width: 32,
