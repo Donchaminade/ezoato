@@ -52,8 +52,8 @@
       inset: 0;
       display: none;
       flex-direction: column;
-      padding: clamp(1rem, 2.5vw, 2rem) clamp(1.25rem, 3.5vw, 3rem);
-      padding-bottom: 4rem;
+      padding: clamp(0.85rem, 2vw, 1.65rem) clamp(1.1rem, 3vw, 2.5rem);
+      padding-bottom: 3.75rem;
       opacity: 0;
       transform: translateY(10px);
       transition: opacity 0.35s ease, transform 0.35s ease;
@@ -67,18 +67,18 @@
 
     .slide-kicker {
       font-family: var(--font-display);
-      font-size: clamp(0.85rem, 1.4vw, 1rem);
+      font-size: clamp(0.95rem, 1.5vw, 1.1rem);
       font-weight: 600;
       letter-spacing: 0.16em;
       text-transform: uppercase;
       color: var(--tg-green-bright);
-      margin-bottom: 0.55rem;
+      margin-bottom: 0.35rem;
     }
 
     .slide h1 {
       font-family: var(--font-display);
       font-weight: 700;
-      font-size: clamp(3.2rem, 8vw, 6rem);
+      font-size: clamp(3.4rem, 8.5vw, 6.25rem);
       line-height: 1.02;
       letter-spacing: -0.03em;
       max-width: 14ch;
@@ -87,22 +87,22 @@
     .slide h2 {
       font-family: var(--font-display);
       font-weight: 700;
-      font-size: clamp(1.95rem, 4vw, 3.25rem);
-      line-height: 1.08;
+      font-size: clamp(2.15rem, 4.4vw, 3.55rem);
+      line-height: 1.1;
       letter-spacing: -0.03em;
-      max-width: 18ch;
-      margin-bottom: 1rem;
+      max-width: 20ch;
+      margin-bottom: 0.65rem;
     }
 
     .slide .lead {
-      font-size: clamp(1.25rem, 2.4vw, 1.65rem);
+      font-size: clamp(1.35rem, 2.5vw, 1.75rem);
       line-height: 1.45;
       color: var(--muted);
       max-width: 34ch;
     }
 
     .slide .sub {
-      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      font-size: clamp(1.05rem, 1.6vw, 1.25rem);
       color: var(--muted);
       max-width: 48ch;
       line-height: 1.5;
@@ -112,14 +112,14 @@
     .slide-split {
       flex: 1;
       display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-      gap: clamp(1rem, 2.5vw, 2.25rem);
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+      gap: clamp(0.75rem, 2vw, 1.75rem);
       align-items: center;
       min-height: 0;
     }
 
     .slide-split.reverse {
-      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
     }
 
     .slide-split.reverse .slide-copy { order: 2; }
@@ -130,7 +130,7 @@
       flex-direction: column;
       justify-content: center;
       min-width: 0;
-      gap: 0.35rem;
+      gap: 0.2rem;
     }
 
     .slide-visual {
@@ -172,6 +172,13 @@
         order: -1;
       }
       .slide h1, .slide h2 { max-width: none; }
+      .bullet-list li,
+      .nowrap {
+        white-space: normal;
+      }
+      .bullet-list li {
+        font-size: clamp(1.05rem, 3.6vw, 1.3rem);
+      }
     }
 
     /* —— Cover full-bleed —— */
@@ -294,17 +301,18 @@
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-      margin-top: 0.25rem;
-      max-width: 38ch;
+      gap: 0.45rem;
+      margin-top: 0.15rem;
+      max-width: none;
+      width: 100%;
     }
 
     .bullet-list li {
       display: flex;
-      gap: 0.65rem;
-      align-items: flex-start;
-      font-size: clamp(1.1rem, 1.9vw, 1.35rem);
-      line-height: 1.35;
+      gap: 0.55rem;
+      align-items: baseline;
+      font-size: clamp(1.2rem, 2.1vw, 1.48rem);
+      line-height: 1.4;
       font-weight: 500;
       color: var(--text);
     }
@@ -315,13 +323,17 @@
       font-family: var(--font-display);
       font-weight: 700;
       color: var(--tg-gold);
-      margin-top: 0.05em;
-      line-height: 1.3;
+      line-height: 1.4;
     }
 
     .bullet-list li strong {
       color: var(--tg-green-bright);
       font-weight: 700;
+    }
+
+    /* Keep short pitch lines / money phrases on one line */
+    .nowrap {
+      white-space: nowrap;
     }
 
     .card {
@@ -506,10 +518,10 @@
 
     .ask-amount {
       font-family: var(--font-display);
-      font-size: clamp(2.6rem, 5.5vw, 4rem);
+      font-size: clamp(2.85rem, 5.8vw, 4.25rem);
       font-weight: 700;
       color: var(--tg-gold);
-      margin: 0.15rem 0 0.75rem;
+      margin: 0.1rem 0 0.45rem;
       line-height: 1;
     }
 
@@ -757,11 +769,11 @@
           <p class="slide-kicker">Le problème</p>
           <h2>Les épreuves se perdent.</h2>
           <ul class="bullet-list">
-            <li>Accès fragmenté aux épreuves (WhatsApp, photocopies)</li>
-            <li>Temps perdu avant les examens</li>
-            <li>Pas de source fiable locale au Togo</li>
-            <li>Révisions inégales — le réseau social décide, pas le mérite</li>
-            <li>Aucun filtre classe / matière / examen national</li>
+            <li><span class="nowrap">Accès fragmenté (WhatsApp, photocopies)</span></li>
+            <li><span class="nowrap">Temps perdu avant les examens</span></li>
+            <li><span class="nowrap">Pas de source fiable locale au Togo</span></li>
+            <li><span class="nowrap">Révisions inégales — le réseau décide</span></li>
+            <li><span class="nowrap">Aucun filtre classe / matière / examen</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
@@ -777,11 +789,11 @@
           <p class="slide-kicker">La solution</p>
           <h2>Une archive nationale, dans la poche.</h2>
           <ul class="bullet-list">
-            <li>Bibliothèque CEPD · BEPC · BAC + devoirs / compositions</li>
-            <li>Web + mobile — chercher, télécharger, réviser</li>
-            <li>Favoris, PDF, mode hors ligne</li>
-            <li>Soumission communautaire + validation humaine</li>
-            <li>Promesse : Archive. Révise. Excelle.</li>
+            <li><span class="nowrap">CEPD · BEPC · BAC + devoirs / compositions</span></li>
+            <li><span class="nowrap">Web + mobile — chercher, télécharger, réviser</span></li>
+            <li><span class="nowrap">Favoris, PDF, mode hors ligne</span></li>
+            <li><span class="nowrap">Soumission communautaire + validation humaine</span></li>
+            <li><span class="nowrap">Promesse : Archive. Révise. Excelle.</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
@@ -797,11 +809,11 @@
           <p class="slide-kicker">Produit</p>
           <h2>App &amp; web opérationnels.</h2>
           <ul class="bullet-list">
-            <li>Archives filtrables (ville, matière, classe, examen)</li>
-            <li>Soumettre : photos → PDF → validation admin</li>
-            <li>Pro + achat à l’unité (Mobile Money)</li>
-            <li>Compte : favoris, bibliothèque, hors ligne</li>
-            <li>Stack : Flutter · React · PHP/MySQL</li>
+            <li><span class="nowrap">Archives filtrables (ville, matière, classe)</span></li>
+            <li><span class="nowrap">Soumettre : photos → PDF → validation</span></li>
+            <li><span class="nowrap">Pro + achat à l’unité (Mobile&nbsp;Money)</span></li>
+            <li><span class="nowrap">Compte : favoris, bibliothèque, hors ligne</span></li>
+            <li><span class="nowrap">Stack : Flutter · React · PHP/MySQL</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
@@ -817,11 +829,11 @@
           <p class="slide-kicker">Marché</p>
           <h2>Togo → AO francophone.</h2>
           <ul class="bullet-list">
-            <li><strong>~912 k</strong> élèves secondaire Togo (MEN 2024-25)</li>
-            <li><strong>TAM ~10 M</strong> — secondaire AO francophone</li>
-            <li><strong>SAM ~370 k</strong> — accès smartphone / internet utile</li>
-            <li><strong>SOM 3–8 k</strong> Pro payants (18–24 mois)</li>
-            <li>Estimations labellisées — détail en notes orateur</li>
+            <li><span class="nowrap"><strong>~912&nbsp;k</strong> élèves secondaire Togo (MEN)</span></li>
+            <li><span class="nowrap"><strong>TAM ~10&nbsp;M</strong> — secondaire AO francophone</span></li>
+            <li><span class="nowrap"><strong>SAM ~370&nbsp;k</strong> — smartphone / internet utile</span></li>
+            <li><span class="nowrap"><strong>SOM 3–8&nbsp;k</strong> Pro payants (18–24&nbsp;mois)</span></li>
+            <li><span class="nowrap">Estimations — détail en notes orateur</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
@@ -835,13 +847,13 @@
       <div class="slide-split">
         <div class="slide-copy">
           <p class="slide-kicker">Business model</p>
-          <h2>Freemium + Mobile Money.</h2>
+          <h2>Freemium + <span class="nowrap">Mobile&nbsp;Money</span>.</h2>
           <ul class="bullet-list">
-            <li>Devoirs &amp; compositions gratuits</li>
-            <li>Pro : <strong>1&nbsp;000 FCFA / 6 mois</strong> (examens illimités)</li>
-            <li>À l’unité : 100–200 FCFA / examen</li>
-            <li>Contributeurs ~1&nbsp;000 FCFA / soumission validée</li>
-            <li>Paiements : Flooz &amp; T-Money</li>
+            <li><span class="nowrap">Devoirs &amp; compositions gratuits</span></li>
+            <li><span class="nowrap">Pro&nbsp;: <strong>1&nbsp;000&nbsp;FCFA&nbsp;/&nbsp;6&nbsp;mois</strong> (examens illimités)</span></li>
+            <li><span class="nowrap">À l’unité&nbsp;: 100–200&nbsp;FCFA / examen</span></li>
+            <li><span class="nowrap">Contributeurs&nbsp;: ~1&nbsp;000&nbsp;FCFA / soumission validée</span></li>
+            <li><span class="nowrap">Paiements&nbsp;: Flooz &amp; T-Money</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
@@ -857,11 +869,11 @@
           <p class="slide-kicker">Traction</p>
           <h2>Produit prêt. Preuve terrain à lancer.</h2>
           <ul class="bullet-list">
-            <li>Produit bout en bout opérationnel (pas une maquette)</li>
-            <li>Mobile Money intégré — freemium monétisable</li>
-            <li>Aucun MAU / revenu inventé</li>
-            <li>Prochaines preuves : pilotes lycées, épreuves validées, 1<sup>ers</sup> Pro</li>
-            <li>Ambassadeurs &amp; partenariats écoles à ouvrir</li>
+            <li><span class="nowrap">Produit bout en bout (pas une maquette)</span></li>
+            <li><span class="nowrap">Mobile&nbsp;Money intégré — freemium monétisable</span></li>
+            <li><span class="nowrap">Aucun MAU / revenu inventé</span></li>
+            <li><span class="nowrap">Prochaines preuves : pilotes, 1<sup>ers</sup> Pro</span></li>
+            <li><span class="nowrap">Ambassadeurs &amp; partenariats écoles</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
@@ -877,11 +889,11 @@
           <p class="slide-kicker">Positionnement</p>
           <h2>Pas un drive WhatsApp.</h2>
           <ul class="bullet-list">
-            <li>Statu quo : WhatsApp, photocopies, PDF Facebook</li>
-            <li>Apps révision génériques — peu locales</li>
-            <li>EZOA-TO : focus Togo + validation humaine</li>
-            <li>Flooz / T-Money · contributeurs rémunérés · hors ligne</li>
-            <li>Concurrent réel = le chaos informel</li>
+            <li><span class="nowrap">Statu quo : WhatsApp, photocopies, PDF</span></li>
+            <li><span class="nowrap">Apps révision génériques — peu locales</span></li>
+            <li><span class="nowrap">EZOA-TO : focus Togo + validation humaine</span></li>
+            <li><span class="nowrap">Flooz / T-Money · contributeurs · hors ligne</span></li>
+            <li><span class="nowrap">Concurrent réel = le chaos informel</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
@@ -895,13 +907,13 @@
       <div class="slide-split reverse">
         <div class="slide-copy">
           <p class="slide-kicker">Go-to-market</p>
-          <h2>Écoles, élèves, Mobile Money.</h2>
+          <h2>Écoles, élèves, <span class="nowrap">Mobile&nbsp;Money</span>.</h2>
           <ul class="bullet-list">
-            <li>Pilotes : 3–5 lycées (Lomé / régions)</li>
-            <li>Ambassadeurs élèves &amp; profs récompensés</li>
-            <li>Campagnes WhatsApp / Facebook — pics examens</li>
-            <li>Licence B2B établissements (forfait annuel)</li>
-            <li>Notifications ciblées par classe</li>
+            <li><span class="nowrap">Pilotes : 3–5 lycées (Lomé / régions)</span></li>
+            <li><span class="nowrap">Ambassadeurs élèves &amp; profs récompensés</span></li>
+            <li><span class="nowrap">Campagnes WhatsApp / Facebook — examens</span></li>
+            <li><span class="nowrap">Licence B2B établissements (forfait annuel)</span></li>
+            <li><span class="nowrap">Notifications ciblées par classe</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
@@ -917,11 +929,11 @@
           <p class="slide-kicker">Équipe</p>
           <h2>Produit, tech &amp; terrain.</h2>
           <ul class="bullet-list">
-            <li><strong>Chaminade D. Adjolou</strong> — CEO &amp; CTO</li>
-            <li>Vision, architecture, mobile / web / backend / paiements</li>
-            <li><strong>Divine HIBA</strong> — Project Manager &amp; BA</li>
-            <li>Pilotage, besoins métier, coordination écoles</li>
-            <li>À recruter : ops contenu · partenariats · growth</li>
+            <li><span class="nowrap"><strong>Chaminade D. Adjolou</strong> — CEO &amp; CTO</span></li>
+            <li><span class="nowrap">Vision, architecture, mobile / web / backend</span></li>
+            <li><span class="nowrap"><strong>Divine HIBA</strong> — Project Manager &amp; BA</span></li>
+            <li><span class="nowrap">Pilotage, besoins métier, coordination écoles</span></li>
+            <li><span class="nowrap">À recruter : ops contenu · partenariats · growth</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
@@ -935,13 +947,13 @@
       <div class="slide-split reverse">
         <div class="slide-copy">
           <p class="slide-kicker">Roadmap</p>
-          <h2>6 · 12 · 18 mois.</h2>
+          <h2><span class="nowrap">6 · 12 · 18&nbsp;mois.</span></h2>
           <ul class="bullet-list">
-            <li><strong>6 mois</strong> — pilotes lycées, MM stables, Play Store, 1<sup>ers</sup> Pro</li>
-            <li><strong>12 mois</strong> — couverture CEPD / BEPC / BAC nationale</li>
-            <li>Licence établissements + réseau contributeurs</li>
-            <li><strong>18 mois</strong> — 1<sup>er</sup> pays voisin (AO francophone)</li>
-            <li>Corrigés, parcours révision, dialogue MEN</li>
+            <li><span class="nowrap"><strong>6&nbsp;mois</strong> — pilotes, MM stables, Play Store, 1<sup>ers</sup> Pro</span></li>
+            <li><span class="nowrap"><strong>12&nbsp;mois</strong> — couverture CEPD / BEPC / BAC</span></li>
+            <li><span class="nowrap">Licence établissements + réseau contributeurs</span></li>
+            <li><span class="nowrap"><strong>18&nbsp;mois</strong> — 1<sup>er</sup> pays voisin (AO francophone)</span></li>
+            <li><span class="nowrap">Corrigés, parcours révision, dialogue MEN</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
@@ -956,13 +968,13 @@
         <div class="slide-copy">
           <p class="slide-kicker">Besoin · Pre-seed / seed</p>
           <h2>Accélérer le pilote national.</h2>
-          <p class="ask-amount">25–50 M FCFA</p>
+          <p class="ask-amount"><span class="nowrap">25–50&nbsp;M&nbsp;FCFA</span></p>
           <ul class="bullet-list">
-            <li>Indicatif · ticket type <strong>35 M FCFA</strong> (~53 kUSD)</li>
-            <li>Produit &amp; infra — 35&nbsp;%</li>
-            <li>Contenu &amp; validation — 25&nbsp;%</li>
-            <li>Acquisition &amp; écoles — 25&nbsp;%</li>
-            <li>Ops &amp; conformité paiements — 15&nbsp;% · aussi ouvert partenariats / mécénat</li>
+            <li><span class="nowrap">Indicatif · ticket type <strong>35&nbsp;M&nbsp;FCFA</strong> (~53&nbsp;kUSD)</span></li>
+            <li><span class="nowrap">Produit &amp; infra — 35&nbsp;%</span></li>
+            <li><span class="nowrap">Contenu &amp; validation — 25&nbsp;%</span></li>
+            <li><span class="nowrap">Acquisition &amp; écoles — 25&nbsp;%</span></li>
+            <li><span class="nowrap">Ops &amp; conformité — 15&nbsp;% · ouvert partenariats</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
