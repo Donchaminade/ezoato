@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/ezoa_theme.dart';
 
-/// Dark glassmorphism card with blur, border, shadow and optional press shine.
+/// Soft surface card — fill léger, ombre discrète, shine optionnel.
 class EzoaGlassCard extends StatefulWidget {
   const EzoaGlassCard({
     super.key,
@@ -15,8 +15,8 @@ class EzoaGlassCard extends StatefulWidget {
     this.padding = const EdgeInsets.all(16),
     this.margin = const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
     this.borderRadius = 16,
-    this.enableShine = true,
-    this.blurSigma = 16,
+    this.enableShine = false,
+    this.blurSigma = 8,
     this.expand = false,
   });
 
@@ -44,11 +44,9 @@ class _EzoaGlassCardState extends State<EzoaGlassCard>
   @override
   void initState() {
     super.initState();
-    // Sweep « glossy shine » : calque dégradé qui traverse la carte
-    // (équivalent -translate-x-full → translate-x-full, duration-1000).
     _shineController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 800),
     );
   }
 
@@ -81,9 +79,9 @@ class _EzoaGlassCardState extends State<EzoaGlassCard>
         boxShadow: [
           BoxShadow(
             color: pal.shadow,
-            blurRadius: 24,
+            blurRadius: 12,
             spreadRadius: 0,
-            offset: const Offset(0, 8),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -101,7 +99,7 @@ class _EzoaGlassCardState extends State<EzoaGlassCard>
                 decoration: BoxDecoration(
                   color: pal.glassFill,
                   borderRadius: radius,
-                  border: Border.all(color: pal.borderStrong),
+                  border: Border.all(color: pal.border),
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -125,7 +123,6 @@ class _EzoaGlassCardState extends State<EzoaGlassCard>
                         return const SizedBox.shrink();
                       }
                       final eased = Curves.easeInOut.transform(t);
-                      // Diagonale satinée from-transparent via-white/10 to-transparent.
                       return DecoratedBox(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -165,7 +162,7 @@ class _EzoaGlassCardState extends State<EzoaGlassCard>
             onTapUp: (_) => _setPressed(false),
             onTapCancel: () => _setPressed(false),
             borderRadius: radius,
-            splashColor: pal.accent.withValues(alpha: 0.08),
+            splashColor: EzoaColors.primary.withValues(alpha: 0.08),
             highlightColor: pal.subtleFill,
             child: AnimatedScale(
               scale: _pressed ? 0.98 : 1.0,
@@ -182,7 +179,7 @@ class _EzoaGlassCardState extends State<EzoaGlassCard>
   }
 }
 
-/// Compact glass stat tile for dashboard metrics.
+/// Compact soft stat tile for dashboard metrics.
 ///
 /// Ne retourne PAS d'`Expanded` : c'est au parent de décider du flex
 /// (`Expanded(child: EzoaGlassStat(...))` dans un Row), sinon un usage hors

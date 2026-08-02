@@ -64,25 +64,25 @@ class _GridPainter extends CustomPainter {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
 
-    // Halo indigo ambiant en haut.
+    // Halo émeraude discret en haut (pas d’indigo).
     final glowTop = Paint()
       ..shader = RadialGradient(
-        center: const Alignment(0.4, -0.5),
-        radius: 0.9,
+        center: const Alignment(0.3, -0.55),
+        radius: 0.85,
         colors: [
-          EzoaColors.accentBlue.withValues(alpha: pal.isDark ? 0.08 : 0.07),
+          EzoaColors.primary.withValues(alpha: pal.isDark ? 0.06 : 0.05),
           Colors.transparent,
         ],
       ).createShader(fullRect);
     canvas.drawRect(fullRect, glowTop);
 
-    // Halo émeraude EZOA discret en bas à gauche.
+    // Halo émeraude encore plus doux en bas à gauche.
     final glowBottom = Paint()
       ..shader = RadialGradient(
         center: const Alignment(-0.6, 0.9),
-        radius: 0.8,
+        radius: 0.75,
         colors: [
-          EzoaColors.primary.withValues(alpha: pal.isDark ? 0.07 : 0.06),
+          EzoaColors.primary.withValues(alpha: pal.isDark ? 0.05 : 0.04),
           Colors.transparent,
         ],
       ).createShader(fullRect);
@@ -119,7 +119,7 @@ class _GridPainter extends CustomPainter {
     canvas.drawPath(
       curve2,
       curvePaint
-        ..color = pal.accent.withValues(alpha: pal.isDark ? 0.035 : 0.08),
+        ..color = EzoaColors.primary.withValues(alpha: pal.isDark ? 0.04 : 0.06),
     );
   }
 

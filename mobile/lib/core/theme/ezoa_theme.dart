@@ -3,20 +3,23 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// Constantes de marque (identiques dans les deux modes) + accès à la
 /// palette résolue selon la brightness courante via [EzoaColors.of].
+///
+/// Charte soft / épurée : émeraude #006A4E, or #FFCE00 en micro-accent,
+/// fonds off-white ou charcoal doux — pas d’indigo / violet AI.
 class EzoaColors {
   // Brand
   static const primary = Color(0xFF006A4E);
   static const primaryDark = Color(0xFF004D38);
-  static const accent = Color(0xFFA5B4FC);
-  static const accentBlue = Color(0xFF6366F1);
+  static const accent = Color(0xFF2D8A6E); // émeraude lisible (liens, focus)
+  static const accentBlue = Color(0xFF2D8A6E); // alias rétrocompat → émeraude
   static const emerald = Color(0xFF34D399);
   static const gold = Color(0xFFFFCE00);
   static const error = Color(0xFFF87171);
 
-  // Dark premium palette (valeurs historiques, mode sombre)
-  static const zinc950 = Color(0xFF09090B);
-  static const cobaltNight = Color(0xFF1E2436);
-  static const cobaltDeep = Color(0xFF181E30);
+  // Surfaces sombres soft (charcoal, pas noir pur)
+  static const zinc950 = Color(0xFF121816);
+  static const cobaltNight = Color(0xFF1A2220);
+  static const cobaltDeep = Color(0xFF161C1A);
   static const zinc300 = Color(0xFFD4D4D8);
   static const zinc400 = Color(0xFFA1A1AA);
   static const zinc500 = Color(0xFF71717A);
@@ -25,8 +28,8 @@ class EzoaColors {
   static EzoaPalette of(BuildContext context) => EzoaPalette.of(context);
 }
 
-/// Palette résolue selon la brightness : sombre = rendu historique
-/// « Glassmorphism Dark Premium », clair = même charte sur fond clair.
+/// Palette résolue selon la brightness : soft editorial, surfaces plates,
+/// ombres légères — héritage glass allégé.
 class EzoaPalette {
   const EzoaPalette({
     required this.brightness,
@@ -109,89 +112,88 @@ class EzoaPalette {
   static EzoaPalette of(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark ? dark : light;
 
-  /// Rendu sombre historique (valeurs inchangées).
+  /// Mode sombre soft : charcoal verdâtre, surfaces mates, peu de shine.
   static const dark = EzoaPalette(
     brightness: Brightness.dark,
-    text: Colors.white,
-    textMuted: EzoaColors.zinc300,
-    textDim: EzoaColors.zinc400,
-    textFaint: EzoaColors.zinc500,
-    accent: EzoaColors.accent,
+    text: Color(0xFFF4F4F5),
+    textMuted: Color(0xFFD4D4D8),
+    textDim: Color(0xFFA1A1AA),
+    textFaint: Color(0xFF71717A),
+    accent: EzoaColors.emerald,
     emerald: EzoaColors.emerald,
     gold: EzoaColors.gold,
     error: EzoaColors.error,
     background: EzoaColors.zinc950,
-    surfaceSolid: Color(0xFF12141C),
+    surfaceSolid: Color(0xFF1A2220),
     border: Color(0x14FFFFFF),
-    borderStrong: Color(0x1AFFFFFF),
-    glassFill: Color(0x0DFFFFFF),
-    glassSheenTop: Color(0x14FFFFFF),
-    glassSheenBottom: Color(0x05FFFFFF),
+    borderStrong: Color(0x1FFFFFFF),
+    glassFill: Color(0xE61A2220),
+    glassSheenTop: Color(0xE61A2220),
+    glassSheenBottom: Color(0xD9161C1A),
     subtleFill: Color(0x0DFFFFFF),
-    inputFill: Color(0x0AFFFFFF),
-    shadow: Color(0x59000000),
-    shadowStrong: Color(0x73000000),
-    capsuleFill: Color(0x0FFFFFFF),
-    navBarFill: Color(0xC7181E30),
-    appBarFillTop: Color(0xD9181E30),
-    appBarFillBottom: Color(0x66181E30),
-    dialogBg: EzoaColors.cobaltNight,
-    offlineFill: Color(0xD952525B),
+    inputFill: Color(0x14FFFFFF),
+    shadow: Color(0x33000000),
+    shadowStrong: Color(0x40000000),
+    capsuleFill: Color(0xE6FFFFFF),
+    navBarFill: Color(0xE61A2220),
+    appBarFillTop: Color(0xF2121816),
+    appBarFillBottom: Color(0xCC121816),
+    dialogBg: Color(0xFF1A2220),
+    offlineFill: Color(0xD93F3F46),
     offlineText: EzoaColors.zinc300,
     gridLine: Color(0x06FFFFFF),
-    curveLine: Color(0x0AFFFFFF),
+    curveLine: Color(0x08FFFFFF),
     progressTrack: Color(0x1AFFFFFF),
-    shineStrong: Color(0x1AFFFFFF),
-    shineSoft: Color(0x0AFFFFFF),
+    shineStrong: Color(0x0DFFFFFF),
+    shineSoft: Color(0x05FFFFFF),
     gradientStops: [
       EzoaColors.zinc950,
       EzoaColors.cobaltDeep,
-      EzoaColors.cobaltNight,
+      Color(0xFF1A2220),
       EzoaColors.cobaltDeep,
       EzoaColors.zinc950,
     ],
   );
 
-  /// Mode clair : même charte (vert EZOA, indigo, emerald) sur fond
-  /// zinc-50 / bleu très pâle, panneaux blanc/70, textes zinc-900/600.
+  /// Mode clair : off-white #FAFAFA, CTAs émeraude, or en micro-accent.
   static const light = EzoaPalette(
     brightness: Brightness.light,
     text: Color(0xFF18181B),
-    textMuted: Color(0xFF52525B),
+    textMuted: Color(0xFF3F3F46),
     textDim: Color(0xFF71717A),
     textFaint: Color(0xFFA1A1AA),
-    accent: Color(0xFF4F46E5),
+    accent: EzoaColors.primary,
     emerald: Color(0xFF059669),
     gold: Color(0xFFB45309),
     error: Color(0xFFDC2626),
     background: Color(0xFFFAFAFA),
     surfaceSolid: Colors.white,
-    border: Color(0x14000000),
-    borderStrong: Color(0x1F000000),
-    glassFill: Color(0xB3FFFFFF),
-    glassSheenTop: Color(0xD9FFFFFF),
-    glassSheenBottom: Color(0x8CFFFFFF),
-    subtleFill: Color(0x0A000000),
+    border: Color(0x12000000),
+    borderStrong: Color(0x1A000000),
+    glassFill: Color(0xF2FFFFFF),
+    glassSheenTop: Color(0xFAFFFFFF),
+    glassSheenBottom: Color(0xF2FFFFFF),
+    subtleFill: Color(0x08000000),
     inputFill: Color(0x0A000000),
-    shadow: Color(0x1A0F172A),
-    shadowStrong: Color(0x240F172A),
-    capsuleFill: Color(0xA6FFFFFF),
-    navBarFill: Color(0xD9FFFFFF),
-    appBarFillTop: Color(0xE0FFFFFF),
-    appBarFillBottom: Color(0x8CFFFFFF),
+    shadow: Color(0x0F0F172A),
+    shadowStrong: Color(0x180F172A),
+    capsuleFill: Color(0xF2FFFFFF),
+    navBarFill: Color(0xF2FFFFFF),
+    appBarFillTop: Color(0xFAFFFFFF),
+    appBarFillBottom: Color(0xE6FFFFFF),
     dialogBg: Colors.white,
     offlineFill: Color(0xEBE4E4E7),
     offlineText: Color(0xFF3F3F46),
-    gridLine: Color(0x09000000),
-    curveLine: Color(0x0D000000),
+    gridLine: Color(0x07000000),
+    curveLine: Color(0x0A000000),
     progressTrack: Color(0x14000000),
-    shineStrong: Color(0x73FFFFFF),
-    shineSoft: Color(0x33FFFFFF),
+    shineStrong: Color(0x33FFFFFF),
+    shineSoft: Color(0x14FFFFFF),
     gradientStops: [
       Color(0xFFFAFAFA),
-      Color(0xFFF1F5F9),
-      Color(0xFFE3ECF8),
-      Color(0xFFF1F5F9),
+      Color(0xFFF5F7F6),
+      Color(0xFFEEF5F2),
+      Color(0xFFF5F7F6),
       Color(0xFFFAFAFA),
     ],
   );
@@ -203,12 +205,14 @@ class EzoaTypography {
         fontWeight: FontWeight.w800,
         color: EzoaColors.of(context).text,
         letterSpacing: -0.5,
+        height: 1.25,
       );
 
   static TextStyle titleMedium(BuildContext context) => GoogleFonts.spaceGrotesk(
         fontSize: 18,
         fontWeight: FontWeight.w700,
         color: EzoaColors.of(context).text,
+        height: 1.3,
       );
 
   static TextStyle titleSmall(BuildContext context) => GoogleFonts.spaceGrotesk(
@@ -219,14 +223,14 @@ class EzoaTypography {
 
   static TextStyle body(BuildContext context) => GoogleFonts.inter(
         fontSize: 15,
-        fontWeight: FontWeight.w300,
+        fontWeight: FontWeight.w400,
         color: EzoaColors.of(context).textMuted,
         height: 1.5,
       );
 
   static TextStyle bodySmall(BuildContext context) => GoogleFonts.inter(
         fontSize: 13,
-        fontWeight: FontWeight.w300,
+        fontWeight: FontWeight.w400,
         color: EzoaColors.of(context).textDim,
       );
 
@@ -257,7 +261,7 @@ class EzoaTheme {
     final colorScheme = isDark
         ? ColorScheme.dark(
             primary: EzoaColors.primary,
-            secondary: pal.accent,
+            secondary: EzoaColors.gold,
             surface: pal.surfaceSolid,
             error: pal.error,
             onPrimary: Colors.white,
@@ -265,7 +269,7 @@ class EzoaTheme {
           )
         : ColorScheme.light(
             primary: EzoaColors.primary,
-            secondary: pal.accent,
+            secondary: EzoaColors.gold,
             surface: pal.surfaceSolid,
             error: pal.error,
             onPrimary: Colors.white,
@@ -298,11 +302,11 @@ class EzoaTheme {
           color: pal.text,
         ),
         bodyLarge: bodyFont.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w400,
           color: pal.textMuted,
         ),
         bodyMedium: bodyFont.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w400,
           color: pal.textMuted,
         ),
         labelSmall: GoogleFonts.jetBrainsMono(
@@ -339,7 +343,7 @@ class EzoaTheme {
         fillColor: pal.inputFill,
         hintStyle: GoogleFonts.inter(
           color: pal.textFaint,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w400,
         ),
         labelStyle: GoogleFonts.inter(
           color: pal.textDim,
@@ -355,7 +359,7 @@ class EzoaTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: pal.accent, width: 1.5),
+          borderSide: const BorderSide(color: EzoaColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -369,7 +373,7 @@ class EzoaTheme {
           foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(50),
           elevation: 0,
-          shadowColor: EzoaColors.primary.withValues(alpha: 0.4),
+          shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           textStyle: GoogleFonts.spaceGrotesk(
             fontWeight: FontWeight.w700,
@@ -379,7 +383,7 @@ class EzoaTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: pal.accent,
+          foregroundColor: EzoaColors.primary,
           minimumSize: const Size.fromHeight(50),
           side: BorderSide(color: pal.borderStrong),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -391,15 +395,14 @@ class EzoaTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: pal.accent,
+          foregroundColor: EzoaColors.primary,
           textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500),
         ),
       ),
-      // Aligné sur EzoaGlassNavBar (capsule custom de 64 px) : sélection en
-      // vert drapeau togolais, défaut noir, aucun violet/indigo.
+      // Aligné sur EzoaGlassNavBar : sélection émeraude, défaut zinc.
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.transparent,
-        indicatorColor: EzoaColors.primary.withValues(alpha: 0.14),
+        indicatorColor: EzoaColors.primary.withValues(alpha: 0.12),
         elevation: 0,
         height: 64,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
@@ -413,14 +416,14 @@ class EzoaTheme {
           return GoogleFonts.inter(
             fontSize: 11,
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF18181B),
+            color: pal.textDim,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const IconThemeData(color: EzoaColors.primary, size: 22);
           }
-          return const IconThemeData(color: Color(0xFF18181B), size: 22);
+          return IconThemeData(color: pal.textDim, size: 22);
         }),
       ),
       dividerTheme: DividerThemeData(color: pal.border),
@@ -441,7 +444,7 @@ class EzoaTheme {
         behavior: SnackBarBehavior.floating,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: pal.accent,
+        color: EzoaColors.primary,
         circularTrackColor: pal.progressTrack,
       ),
       switchTheme: SwitchThemeData(

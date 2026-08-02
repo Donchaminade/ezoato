@@ -137,13 +137,13 @@ class EzoaGlassLoader extends StatelessWidget {
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.all(20),
       enableShine: false,
-      blurSigma: 20,
+      blurSigma: 8,
       child: SizedBox(
         width: size,
         height: size,
         child: CircularProgressIndicator(
           strokeWidth: 2.5,
-          color: EzoaColors.of(context).accent.withValues(alpha: 0.9),
+          color: EzoaColors.primary.withValues(alpha: 0.9),
         ),
       ),
     );
@@ -245,7 +245,7 @@ class EzoaButton extends StatelessWidget {
     } else if (variant == EzoaButtonVariant.secondary) {
       button = ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: EzoaColors.accentBlue,
+          backgroundColor: EzoaColors.primaryDark,
           foregroundColor: Colors.white,
         ),
         onPressed: enabled ? onPressed : null,
@@ -422,7 +422,7 @@ class _EzoaTextFieldState extends State<EzoaTextField> {
         onChanged: widget.onChanged,
         style: GoogleFonts.inter(
           color: pal.text,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w400,
         ),
         decoration: InputDecoration(
           labelText: widget.label,
@@ -508,6 +508,7 @@ class EmptyState extends StatelessWidget {
           enableShine: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
                 icon,
@@ -944,6 +945,8 @@ class StatChip extends StatelessWidget {
 }
 
 /// Centered auth form layout with glass card and wave footer.
+/// Layout auth : une seule colonne scrollable (logo + formulaire),
+/// rythme 8/12/16/24 — pas de logo collé en haut + formulaire poussé en bas.
 class EzoaAuthLayout extends StatelessWidget {
   const EzoaAuthLayout({
     super.key,
@@ -961,7 +964,7 @@ class EzoaAuthLayout extends StatelessWidget {
   final bool showBack;
   final VoidCallback? onBack;
 
-  /// Formulaire court (connexion) : carte centrée dans la zone sous le logo (clavier fermé).
+  /// Logo légèrement plus compact (écrans courts / login).
   final bool compactHeader;
 
   Widget _formCard(BuildContext context) {
@@ -971,9 +974,17 @@ class EzoaAuthLayout extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(title, style: EzoaTypography.titleLarge(context)),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: EzoaTypography.titleLarge(context),
+          ),
           const SizedBox(height: 8),
-          Text(subtitle, style: EzoaTypography.body(context)),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: EzoaTypography.body(context),
+          ),
           const SizedBox(height: 24),
           ...children,
         ],
@@ -982,6 +993,7 @@ class EzoaAuthLayout extends StatelessWidget {
   }
 
   Widget _logoHeader(BuildContext context) {
+    final logoHeight = compactHeader ? 72.0 : 80.0;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -990,6 +1002,9 @@ class EzoaAuthLayout extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: IconButton(
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               icon: Icon(
                 LucideIcons.arrowLeft,
                 color: EzoaColors.of(context).textMuted,
@@ -997,42 +1012,35 @@ class EzoaAuthLayout extends StatelessWidget {
               onPressed: onBack,
             ),
           ),
-        const SizedBox(height: 8),
-        const Center(child: EzoaLogo(height: 88)),
-        SizedBox(height: compactHeader ? 12 : 32),
+        if (showBack) const SizedBox(height: 8),
+        Center(child: EzoaLogo(height: logoHeight)),
+        const SizedBox(height: 16),
       ],
     );
   }
 
-  /// Logo fixe en haut, formulaire scrollable en dessous. Structure unique pour
-  /// éviter la perte de focus quand le clavier ouvre (pas de bascule de layout).
+  /// Bloc unique logo + carte : centré verticalement si assez court,
+  /// sinon défile depuis le haut (clavier / register long).
   Widget _buildBody(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return EzoaFormScroll(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+          minHeight: constraints.maxHeight,
+          centerWhenShort: true,
           child: EzoaContentWidth(
             maxWidth: 480,
-            child: _logoHeader(context),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _logoHeader(context),
+                _formCard(context),
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return EzoaFormScroll(
-                padding: EdgeInsets.fromLTRB(24, compactHeader ? 4 : 0, 24, 32),
-                minHeight: constraints.maxHeight,
-                centerWhenShort: compactHeader,
-                child: EzoaContentWidth(
-                  maxWidth: 480,
-                  child: _formCard(context),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -1141,22 +1149,22 @@ class EzoaGlassNavBar extends StatelessWidget {
                       borderRadius: radius,
                       boxShadow: [
                         BoxShadow(
-                          color: pal.shadowStrong,
-                          blurRadius: 28,
-                          offset: const Offset(0, 10),
+                          color: pal.shadow,
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
                         ),
                       ],
                     ),
                     child: ClipRRect(
                       borderRadius: radius,
                       child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                         child: Container(
                           decoration: BoxDecoration(
                             color: fill,
                             borderRadius: radius,
                             border: Border.all(
-                              color: Colors.black.withValues(alpha: 0.08),
+                              color: Colors.black.withValues(alpha: 0.06),
                             ),
                           ),
                           child: Row(
@@ -1215,9 +1223,9 @@ class EzoaGlassNavBar extends StatelessWidget {
                             boxShadow: [
                               BoxShadow(
                                 color: EzoaColors.primary
-                                    .withValues(alpha: 0.45),
-                                blurRadius: 18,
-                                offset: const Offset(0, 6),
+                                    .withValues(alpha: 0.28),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),

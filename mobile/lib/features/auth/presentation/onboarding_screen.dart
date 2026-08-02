@@ -130,13 +130,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 28),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const Spacer(flex: 1),
                           Expanded(
                             flex: 7,
-                            child: Image.asset(
-                              page.asset,
-                              fit: BoxFit.contain,
+                            child: Center(
+                              child: Image.asset(
+                                page.asset,
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 28),
@@ -170,6 +173,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               Padding(
                 padding: EdgeInsets.fromLTRB(28, 8, 28, 16 + bottomInset),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
