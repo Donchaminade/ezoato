@@ -1,10 +1,29 @@
 # Notes orateur — Pitch EZOA-TO
 
-Durée indicative : **8–12 minutes**. Une idée par slide.  
-Tous les chiffres marché ci-dessous sont des **estimations** ; les slides portent la mention « estimations / sources ».
+Durée indicative : **10–14 minutes** (14 slides). Une idée par slide.  
+Tous les chiffres marché et revenus ci-dessous sont des **estimations / projections indicatives** ; jamais des résultats réalisés.
 
 **Contact deck :** contact@ezoa.tg · https://github.com/Donchaminade  
 **Équipe :** Chaminade Dondah Adjolou (CEO & CTO) · Divine HIBA (PM & BA)
+
+---
+
+## Glossaire (à verbaliser si besoin)
+
+| Abréviation | Forme complète | Note orale |
+|-------------|----------------|------------|
+| **MM** | Mobile Money | Flooz / T-Money au Togo |
+| **MEN** | Ministère de l’Éducation nationale (et de la Formation) | Source effectifs élèves |
+| **Pro** | Abonnement Pro EZOA-TO | 1 000 FCFA / 6 mois |
+| **1ers Pro** | Premiers abonnements Pro payants | Preuve de monétisation |
+| **TAM** | Total Addressable Market — marché total adressable | ~10 M élèves secondaire AO francophone |
+| **SAM** | Serviceable Available Market — marché accessible | ~370 k (Togo × smartphone / internet utile) |
+| **SOM** | Serviceable Obtainable Market — marché obtenable | 3–8 k Pro payants à 18–24 mois |
+| **AO** | Afrique de l’Ouest | Zone d’expansion francophone |
+| **CEPD / BEPC / BAC** | Examens nationaux togolais | Connus du public local ; préciser si pitch international |
+| **MAU** | Monthly Active Users — utilisateurs actifs mensuels | **Ne pas inventer** de MAU |
+
+Sur les slides, les abréviations sont développées ou glossées à la **première occurrence**.
 
 ---
 
@@ -12,7 +31,7 @@ Tous les chiffres marché ci-dessous sont des **estimations** ; les slides porte
 
 - Se présenter : **Chaminade Dondah Adjolou**, CEO & CTO d’**EZOA-TO** ; présenter **Divine HIBA**, Project Manager & Business Analyst.
 - Slogan : *Archive. Révise. Excelle.* — promesse claire pour élèves et parents.
-- Adapter l’accroche : investisseurs (opportunité + ask) / partenaires / chefs d’établissement (accès & qualité).
+- Adapter l’accroche : investisseurs (opportunité + ask 25 M) / partenaires / chefs d’établissement (accès & qualité).
 - Contact : `contact@ezoa.tg` (à confirmer / rediriger vers boîte réelle) + GitHub du fondateur.
 
 ---
@@ -47,16 +66,16 @@ Tous les chiffres marché ci-dessous sont des **estimations** ; les slides porte
 
 | Couche | Chiffre slide | Logique |
 |--------|---------------|---------|
-| **TAM** | ~10 M élèves | Secondaire AO francophone (éducation digitale / annales) |
-| **SAM** | ~370 k | Élèves secondaire Togo × accès smartphone / internet |
-| **SOM** | 3–8 k | Abonnés Pro payants à 18–24 mois |
+| **TAM** (marché total adressable) | ~10 M élèves | Secondaire Afrique de l’Ouest francophone (éducation digitale / annales) |
+| **SAM** (marché accessible) | ~370 k | Élèves secondaire Togo × accès smartphone / internet |
+| **SOM** (marché obtenable) | 3–8 k | Abonnés Pro payants à 18–24 mois |
 
 ### Base Togo (effectif réel)
 
 - **~912 400** élèves du secondaire général en 2024-2025 :
   - 697 532 premier cycle (collège)
   - 214 868 second cycle (lycée)
-- Source : Ministère / DPSSE — plateforme planification éducation Togo  
+- Source : Ministère de l’Éducation nationale / DPSSE — plateforme planification éducation Togo  
   https://planifeducation.gouv.tg/dpsse/
 - Contexte historique UIS / Banque mondiale : ~711 k élèves secondaire général (2018) — la tendance est à la hausse ; le chiffre MEN 2024-25 est la référence opérationnelle.  
   https://www.indexmundi.com/facts/togo/indicator/SE.SEC.ENRL.GC  
@@ -93,8 +112,7 @@ Tous les chiffres marché ci-dessous sont des **estimations** ; les slides porte
 
 - Objectif **pre-traction → early traction** : **3 000–8 000** abonnés Pro à 18–24 mois.
 - Logique : **~1–2 %** du SAM (~370 k) = 3,7–7,4 k — cohérent avec un pilote lycées puis couverture nationale progressive.
-- Revenu indicatif à 5 000 Pro × 2 000 FCFA/an (1 000 FCFA / 6 mois) ≈ **10 M FCFA / an** — ordre de grandeur early-stage, pas une projection garantie.
-- **Ne pas présenter comme engagement contractuel** — objectif de pilotage.
+- **Ne pas présenter comme engagement contractuel** — objectif de pilotage (voir aussi slide 13 projections).
 
 ### Mobile Money (facilitateur de monétisation)
 
@@ -134,18 +152,19 @@ Tous les chiffres marché ci-dessous sont des **estimations** ; les slides porte
 
 - **Honnêteté** : produit opérationnel / prêt pilote — **pas** de MAU ni de revenus inventés.
 - Vrai aujourd’hui : parcours bout en bout (archives, soumission, admin, Pro, paiements MM), stack mobile + web + API, itération GitHub.
-- Prochaines preuves à collecter (et à mettre à jour dans le deck) : n° d’épreuves validées, lycées pilotes signés, 1ers paiements Pro, taux de rétention 6 mois.
+- Prochaines preuves à collecter (et à mettre à jour dans le deck) : n° d’épreuves validées, lycées pilotes signés, premiers paiements Pro, taux de rétention 6 mois.
 - Formulation investisseur : *le risque est l’exécution go-to-market, pas l’existence du produit.*
 
 ---
 
-## 8. Concurrence / positionnement
+## 8. Concurrence / positionnement (tableau)
 
 - Concurrent réel = **chaos informel** : WhatsApp, photocopies, Facebook, PDF dispersés.
-- Apps francophones de révision (ex. Nomad Education, OkpaBac) = plutôt cours / quiz / annales multi-pays — **peu d’archive nationale togolais + validation + Flooz/T-Money + contributeurs rémunérés**.  
+- Tableau slide : Fiabilité · Recherche · Hors ligne · Paiement · Validation — EZOA-TO en ligne mise en avant.
+- Apps francophones de révision (ex. Nomad Education, OkpaBac) = plutôt cours / quiz / annales multi-pays — **peu d’archive nationale togolaise + validation + Flooz/T-Money + contributeurs rémunérés**.  
   https://www.nomadeducation.fr/nos-engagements/afrique  
   https://okpabac.com/
-- Différenciateurs EZOA : focus Togo, validation humaine, MM local, offline, portefeuille contributeur.
+- Différenciateurs EZOA : focus Togo, validation humaine, Mobile Money local, offline, portefeuille contributeur.
 - Ne pas dénigrer ; montrer le passage du « bricolage » à une **archive de confiance**.
 
 ---
@@ -171,37 +190,90 @@ Tous les chiffres marché ci-dessous sont des **estimations** ; les slides porte
 
 ## 11. Roadmap 6 / 12 / 18 mois
 
-- **6 mois** : 3–5 lycées pilotes, catalogue examens clés, MM stable, Play Store, premiers Pro + KPIs.
+- **6 mois** : 3–5 lycées pilotes, catalogue examens clés, Mobile Money stable, Play Store, premiers Pro + KPIs.
 - **12 mois** : couverture nationale CEPD / BEPC / BAC, offre licence établissements, rétention Pro, réseau contributeurs.
-- **18 mois** : 1er pays voisin AO francophone, corrigés / parcours, dialogue MEN / partenaires éducation.
+- **18 mois** : 1er pays voisin Afrique de l’Ouest francophone, corrigés / parcours, dialogue Ministère de l’Éducation / partenaires éducation.
 
 ---
 
-## 12. Besoin / levée
+## 12. Financement — ask verrouillé 25 M FCFA
 
-### Proposition indicative
+### Ticket
 
 | Élément | Valeur |
 |---------|--------|
-| **Fourchette** | **25–50 M FCFA** (~38–76 kUSD) |
-| **Ticket central proposé** | **35 M FCFA** (~53 kEUR / ~58 kUSD) |
-| **Stade** | Pre-seed / seed early |
+| **Ask** | **25 M FCFA** (fixe, pas une fourchette) |
+| **Équivalent indicatif** | ≈ **~38 k USD** (taux ~650–660 FCFA / USD — arrondir à l’oral) |
+| **Stade** | Ticket **seed / pré-amorçage** — adapté pré-seed / MVP opérationnel |
+| **Pourquoi 25 M est raisonnable** | Runway lean pour pilotes + contenu + stores + Mobile Money, sans sur-levier avant traction |
 
-*Taux indicatif : ~655 FCFA pour 1 EUR et ~600 FCFA pour 1 USD — arrondir à l’oral.*
+### Allocation des fonds (somme = 25 M FCFA)
 
-### Allocation des fonds (sur ticket type 35 M)
+| Poste | % | Montant FCFA | Usage |
+|-------|---|--------------|--------|
+| Produit & infra | **35 %** | **8,75 M** | Stores, perf, offline, fiabilité API, UX paiement |
+| Contenu & validation | **25 %** | **6,25 M** | Catalogue exams, ops validation, récompenses contributeurs |
+| Acquisition & écoles | **25 %** | **6,25 M** | Pilotes lycées, ambassadeurs, campagnes examens |
+| Ops & conformité | **15 %** | **3,75 M** | Flooz/T-Money, support, légal / conformité |
+| **Total** | **100 %** | **25 M** | |
 
-| Poste | % | Usage |
-|-------|---|--------|
-| Produit & infra | **35 %** | Stores, perf, offline, fiabilité API, UX paiement |
-| Contenu & validation | **25 %** | Catalogue exams, ops validation, récompenses contributeurs |
-| Acquisition & écoles | **25 %** | Pilotes lycées, ambassadeurs, campagnes examens |
-| Ops & conformité paiements | **15 %** | Intégrations Flooz/T-Money, support, légal / conformité |
+### Jalons débloqués avec 25 M
+
+- Publication stores + Mobile Money stable en production  
+- 3–5 lycées pilotes + premiers abonnements Pro  
+- Couverture catalogue examens nationaux prioritaires  
+- Base contributeurs / validation opérationnelle  
+- KPIs mesurables pour une prochaine round éventuellement
 
 ### Alternatives soft
 
 - Partenariats écoles, incubateurs, mécénat éducation — sans equity si préféré.
+
+---
+
+## 13. Projections & unit economics (confiance investisseur)
+
+**Label obligatoire à l’oral et sur la slide :** *projections indicatives — pas des résultats réalisés.*
+
+### Unit economics
+
+| Métrique | Valeur |
+|----------|--------|
+| Prix Pro | **1 000 FCFA / 6 mois** |
+| ARPU annuel (si renouvellement) | **~2 000 FCFA / abonné / an** |
+| Achat à l’unité | 100–200 FCFA / examen (complément, non modélisé ici) |
+
+### Hypothèses de projection (conservateur / médian / ambitieux)
+
+- Revenu annuel approximatif = **nb d’abonnés Pro × 2 000 FCFA** (renouvellement annuel implicit).
+- Pas de revenus B2B écoles dans le tableau (upside non compté).
+- Pas de churn / saisonnalité examens modélisés finement — scénarios d’ordre de grandeur.
+- Cohérence SOM : médian 24 mois ≈ **5 000 Pro** ; ambitieux ≈ **8 000 Pro** (haut de fourchette SOM).
+
+| Horizon | Conservateur | Médian | Ambitieux |
+|---------|--------------|--------|-----------|
+| **12 mois** | 800 Pro · ~**1,6 M** FCFA/an | 2 000 Pro · ~**4 M** | 4 000 Pro · ~**8 M** |
+| **24 mois** | 2 500 Pro · ~**5 M** FCFA/an | 5 000 Pro · ~**10 M** | 8 000 Pro · ~**16 M** |
+
+### Break-even (narrative)
+
+- Ops lean post-pilote : ordre de grandeur **~5–7 M FCFA / an** (petite équipe + infra + validation).
+- Seuil : **5–7 M ÷ 2 000 ≈ 2 500–3 500 abonnés Pro** pour couvrir ces ops (hors croissance agressive).
+- Le ticket 25 M finance la **phase d’acquisition** jusqu’à ce seuil ; la rentabilité n’est pas promise à 12 mois (scénario médian 12 mois ≈ 4 M < ops).
+
+### Pourquoi 25 M suffit (rappel)
+
+- Assez pour exécuter GTM + contenu sans dilution massive pré-traction.
+- Trop peu pour « scale pan-africain » — assumer : c’est un **ticket de validation**, pas un Series A.
+
+---
+
+## 14. Merci / prochaines étapes
+
 - Clôturer : *le passé scolaire du Togo, au service de l’avenir des élèves.*
+- Proposer clairement : **démo** → **cadre pilote lycée** → **call diligence / term sheet**.
+- Laisser contact visible : `contact@ezoa.tg` · GitHub fondateur.
+- Ne pas improviser de traction chiffrée en réponse aux questions — renvoyer aux preuves à venir.
 
 ---
 

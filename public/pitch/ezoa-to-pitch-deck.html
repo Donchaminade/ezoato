@@ -577,6 +577,100 @@
       line-height: 1.4;
     }
 
+    .disclaimer {
+      margin-top: 0.55rem;
+      font-size: 0.72rem;
+      color: var(--tg-gold);
+      letter-spacing: 0.03em;
+      font-weight: 600;
+      max-width: 48ch;
+      line-height: 1.35;
+    }
+
+    .table-scroll {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 0.2rem;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.35rem;
+      font-size: clamp(0.72rem, 1.15vw, 0.88rem);
+      line-height: 1.3;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 0.42rem 0.45rem;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .data-table th {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.78em;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--tg-green-bright);
+      background: rgba(0, 106, 78, 0.22);
+    }
+
+    .data-table td {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .data-table tr.highlight td {
+      background: rgba(0, 106, 78, 0.28);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .data-table .yes { color: var(--tg-green-bright); font-weight: 700; }
+    .data-table .no { color: var(--muted); }
+    .data-table .mid { color: var(--tg-gold); }
+
+    .data-table.compact th,
+    .data-table.compact td {
+      padding: 0.35rem 0.4rem;
+      font-size: inherit;
+    }
+
+    .data-table .num {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--tg-gold);
+      white-space: nowrap;
+    }
+
+    .slide-copy .ask-amount + .sub {
+      margin-bottom: 0.55rem;
+    }
+
+    .closing-slide .contact-block {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .closing-slide .contact-block a {
+      color: var(--tg-green-bright);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+    }
+
+    .closing-slide .contact-block a:hover {
+      color: var(--tg-gold);
+    }
+
     .big-num {
       font-family: var(--font-display);
       font-size: clamp(2.6rem, 5.5vw, 3.75rem);
@@ -761,7 +855,7 @@
           <div><strong>Équipe</strong> Chaminade D. Adjolou · Divine HIBA</div>
           <div><strong>Contact</strong> contact@ezoa.tg · github.com/Donchaminade</div>
           <div><strong>Stack</strong> Flutter · React · PHP/MySQL</div>
-          <div><strong>Marché</strong> Togo · AO francophone</div>
+          <div><strong>Marché</strong> Togo · Afrique de l’Ouest francophone</div>
         </div>
       </div>
     </section>
@@ -815,7 +909,7 @@
           <ul class="bullet-list">
             <li><span class="nowrap">Archives filtrables (ville, matière, classe)</span></li>
             <li><span class="nowrap">Soumettre : photos → PDF → validation</span></li>
-            <li><span class="nowrap">Pro + achat à l’unité (Mobile&nbsp;Money)</span></li>
+            <li><span class="nowrap">Pro + achat à l’unité (Mobile&nbsp;Money / MM)</span></li>
             <li><span class="nowrap">Compte : favoris, bibliothèque, hors ligne</span></li>
             <li><span class="nowrap">Stack : Flutter · React · PHP/MySQL</span></li>
           </ul>
@@ -831,12 +925,12 @@
       <div class="slide-split reverse">
         <div class="slide-copy">
           <h1>Marché</h1>
-          <h2>Togo → AO francophone.</h2>
+          <h2>Togo → Afrique de l’Ouest francophone.</h2>
           <ul class="bullet-list">
-            <li><span class="nowrap"><strong>~912&nbsp;k</strong> élèves secondaire Togo (MEN)</span></li>
-            <li><span class="nowrap"><strong>TAM ~10&nbsp;M</strong> — secondaire AO francophone</span></li>
-            <li><span class="nowrap"><strong>SAM ~370&nbsp;k</strong> — smartphone / internet utile</span></li>
-            <li><span class="nowrap"><strong>SOM 3–8&nbsp;k</strong> Pro payants (18–24&nbsp;mois)</span></li>
+            <li><span class="nowrap"><strong>~912&nbsp;k</strong> élèves secondaire (Ministère de l’Éducation nationale)</span></li>
+            <li><span class="nowrap"><strong>TAM ~10&nbsp;M</strong> (marché total adressable) — secondaire régional</span></li>
+            <li><span class="nowrap"><strong>SAM ~370&nbsp;k</strong> (marché accessible) — smartphone / net</span></li>
+            <li><span class="nowrap"><strong>SOM 3–8&nbsp;k</strong> (marché obtenable) — Pro payants, 18–24&nbsp;mois</span></li>
             <li><span class="nowrap">Estimations — détail en notes orateur</span></li>
           </ul>
         </div>
@@ -874,9 +968,9 @@
           <h2>Produit prêt. Preuve terrain à lancer.</h2>
           <ul class="bullet-list">
             <li><span class="nowrap">Produit bout en bout (pas une maquette)</span></li>
-            <li><span class="nowrap">Mobile&nbsp;Money intégré — freemium monétisable</span></li>
-            <li><span class="nowrap">Aucun MAU / revenu inventé</span></li>
-            <li><span class="nowrap">Prochaines preuves : pilotes, 1<sup>ers</sup> Pro</span></li>
+            <li><span class="nowrap">Mobile&nbsp;Money (MM) intégré — freemium monétisable</span></li>
+            <li><span class="nowrap">Aucun utilisateur actif / revenu inventé</span></li>
+            <li><span class="nowrap">Preuves à venir : pilotes, premiers abonnements Pro</span></li>
             <li><span class="nowrap">Ambassadeurs &amp; partenariats écoles</span></li>
           </ul>
         </div>
@@ -891,14 +985,56 @@
       <div class="slide-split">
         <div class="slide-copy">
           <h1>Concurrence</h1>
-          <h2>Pas un drive WhatsApp.</h2>
-          <ul class="bullet-list">
-            <li><span class="nowrap">Statu quo : WhatsApp, photocopies, PDF</span></li>
-            <li><span class="nowrap">Apps révision génériques — peu locales</span></li>
-            <li><span class="nowrap">EZOA-TO : focus Togo + validation humaine</span></li>
-            <li><span class="nowrap">Flooz / T-Money · contributeurs · hors ligne</span></li>
-            <li><span class="nowrap">Concurrent réel = le chaos informel</span></li>
-          </ul>
+          <h2>Le chaos informel, pas une app.</h2>
+          <div class="table-scroll">
+            <table class="data-table compact" aria-label="Comparaison EZOA-TO vs alternatives">
+              <thead>
+                <tr>
+                  <th>Alternative</th>
+                  <th>Fiabilité</th>
+                  <th>Recherche</th>
+                  <th>Hors ligne</th>
+                  <th>Paiement</th>
+                  <th>Validation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>WhatsApp</td>
+                  <td class="no">Faible</td>
+                  <td class="no">Non</td>
+                  <td class="mid">Partiel</td>
+                  <td class="no">Non</td>
+                  <td class="no">Non</td>
+                </tr>
+                <tr>
+                  <td>Photocopies</td>
+                  <td class="mid">Variable</td>
+                  <td class="no">Non</td>
+                  <td class="yes">Oui</td>
+                  <td class="mid">Cash</td>
+                  <td class="no">Non</td>
+                </tr>
+                <tr>
+                  <td>PDF dispersés</td>
+                  <td class="no">Faible</td>
+                  <td class="no">Non</td>
+                  <td class="yes">Oui</td>
+                  <td class="no">Non</td>
+                  <td class="no">Non</td>
+                </tr>
+                <tr class="highlight">
+                  <td>EZOA-TO</td>
+                  <td class="yes">Haute</td>
+                  <td class="yes">Oui</td>
+                  <td class="yes">Oui</td>
+                  <td class="yes">Flooz / T-Money</td>
+                  <td class="yes">Humaine</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="footnote">Paiement = Mobile Money local. Concurrent réel = dispersion, pas une EdTech togolaise.</p>
         </div>
         <figure class="slide-visual">
           <img src="assets/slide-08-competition.png" alt="Illustration positionnement concurrentiel" />
@@ -953,11 +1089,11 @@
           <h1>Roadmap</h1>
           <h2><span class="nowrap">6 · 12 · 18&nbsp;mois.</span></h2>
           <ul class="bullet-list">
-            <li><span class="nowrap"><strong>6&nbsp;mois</strong> — pilotes, MM stables, Play Store, 1<sup>ers</sup> Pro</span></li>
+            <li><span class="nowrap"><strong>6&nbsp;mois</strong> — pilotes, Mobile&nbsp;Money stable, Play Store, premiers Pro</span></li>
             <li><span class="nowrap"><strong>12&nbsp;mois</strong> — couverture CEPD / BEPC / BAC</span></li>
             <li><span class="nowrap">Licence établissements + réseau contributeurs</span></li>
-            <li><span class="nowrap"><strong>18&nbsp;mois</strong> — 1<sup>er</sup> pays voisin (AO francophone)</span></li>
-            <li><span class="nowrap">Corrigés, parcours révision, dialogue MEN</span></li>
+            <li><span class="nowrap"><strong>18&nbsp;mois</strong> — 1<sup>er</sup> pays voisin (Afrique de l’Ouest)</span></li>
+            <li><span class="nowrap">Corrigés, parcours, dialogue Ministère de l’Éducation</span></li>
           </ul>
         </div>
         <figure class="slide-visual">
@@ -970,19 +1106,119 @@
     <section class="slide" data-title="Financement demandé" aria-label="Diapositive 12 — Financement demandé">
       <div class="slide-split">
         <div class="slide-copy">
-          <h1>Financement demandé</h1>
-          <h2>Accélérer le pilote national.</h2>
-          <p class="ask-amount"><span class="nowrap">25–50&nbsp;M&nbsp;FCFA</span></p>
-          <ul class="bullet-list">
-            <li><span class="nowrap">Indicatif · ticket type <strong>35&nbsp;M&nbsp;FCFA</strong> (~53&nbsp;kUSD)</span></li>
-            <li><span class="nowrap">Produit &amp; infra — 35&nbsp;%</span></li>
-            <li><span class="nowrap">Contenu &amp; validation — 25&nbsp;%</span></li>
-            <li><span class="nowrap">Acquisition &amp; écoles — 25&nbsp;%</span></li>
-            <li><span class="nowrap">Ops &amp; conformité — 15&nbsp;% · ouvert partenariats</span></li>
-          </ul>
+          <h1>Financement</h1>
+          <h2>Ticket seed / pré-amorçage.</h2>
+          <p class="ask-amount"><span class="nowrap">25&nbsp;M&nbsp;FCFA</span></p>
+          <p class="sub">Pour débloquer pilotes, catalogue national et premiers abonnements Pro.</p>
+          <div class="table-scroll">
+            <table class="data-table compact" aria-label="Allocation des fonds">
+              <thead>
+                <tr>
+                  <th>Poste</th>
+                  <th>%</th>
+                  <th>Montant</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Produit &amp; infra</td>
+                  <td>35&nbsp;%</td>
+                  <td class="num">8,75&nbsp;M</td>
+                </tr>
+                <tr>
+                  <td>Contenu &amp; validation</td>
+                  <td>25&nbsp;%</td>
+                  <td class="num">6,25&nbsp;M</td>
+                </tr>
+                <tr>
+                  <td>Acquisition &amp; écoles</td>
+                  <td>25&nbsp;%</td>
+                  <td class="num">6,25&nbsp;M</td>
+                </tr>
+                <tr>
+                  <td>Ops &amp; conformité</td>
+                  <td>15&nbsp;%</td>
+                  <td class="num">3,75&nbsp;M</td>
+                </tr>
+                <tr class="highlight">
+                  <td>Total</td>
+                  <td>100&nbsp;%</td>
+                  <td class="num">25&nbsp;M&nbsp;FCFA</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <figure class="slide-visual">
           <img src="assets/slide-12-ask.png" alt="Illustration besoin de financement" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 13. Projections / rentabilité -->
+    <section class="slide" data-title="Projections" aria-label="Diapositive 13 — Projections et unit economics">
+      <div class="slide-split reverse">
+        <div class="slide-copy">
+          <h1>Projections</h1>
+          <h2>Unit economics &amp; seuil de rentabilité.</h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap">Pro&nbsp;: <strong>1&nbsp;000&nbsp;FCFA / 6&nbsp;mois</strong> → ~2&nbsp;000&nbsp;FCFA / an</span></li>
+            <li><span class="nowrap">Seuil ops lean (~5–7&nbsp;M FCFA/an) ≈ <strong>2,5–3,5&nbsp;k Pro</strong></span></li>
+            <li><span class="nowrap">25&nbsp;M débloque : stores, Mobile&nbsp;Money, pilotes, catalogue, premiers Pro</span></li>
+          </ul>
+          <p class="disclaimer">Projections indicatives — pas des résultats réalisés.</p>
+          <div class="table-scroll">
+            <table class="data-table compact" aria-label="Projections de revenus Pro">
+              <thead>
+                <tr>
+                  <th>Horizon</th>
+                  <th>Conservateur</th>
+                  <th>Médian</th>
+                  <th>Ambitieux</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>12&nbsp;mois</td>
+                  <td>800 Pro<br /><span class="num">~1,6&nbsp;M/an</span></td>
+                  <td>2&nbsp;000 Pro<br /><span class="num">~4&nbsp;M/an</span></td>
+                  <td>4&nbsp;000 Pro<br /><span class="num">~8&nbsp;M/an</span></td>
+                </tr>
+                <tr>
+                  <td>24&nbsp;mois</td>
+                  <td>2&nbsp;500 Pro<br /><span class="num">~5&nbsp;M/an</span></td>
+                  <td>5&nbsp;000 Pro<br /><span class="num">~10&nbsp;M/an</span></td>
+                  <td>8&nbsp;000 Pro<br /><span class="num">~16&nbsp;M/an</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-06-business.png" alt="Illustration monétisation et projections" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 14. Merci / clôture -->
+    <section class="slide closing-slide" data-title="Merci" aria-label="Diapositive 14 — Merci">
+      <div class="slide-split">
+        <div class="slide-copy">
+          <h1>Merci</h1>
+          <h2>Prochaines étapes.</h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap">Démo produit (web + mobile)</span></li>
+            <li><span class="nowrap">Cadre de pilote lycée (3–5 établissements)</span></li>
+            <li><span class="nowrap">Échange diligence / term sheet seed</span></li>
+            <li><span class="nowrap"><em>Archive. Révise. Excelle.</em></span></li>
+          </ul>
+          <div class="contact-block">
+            <a href="mailto:contact@ezoa.tg">contact@ezoa.tg</a>
+            <a href="https://github.com/Donchaminade" target="_blank" rel="noopener noreferrer">github.com/Donchaminade</a>
+          </div>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-01-cover.png" alt="EZOA-TO — archives scolaires du Togo" />
         </figure>
       </div>
     </section>

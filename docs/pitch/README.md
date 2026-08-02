@@ -6,9 +6,9 @@ Présentation professionnelle pour investisseurs, partenaires et établissements
 
 | Fichier | Rôle |
 |---------|------|
-| [`ezoa-to-pitch-deck.html`](./ezoa-to-pitch-deck.html) | Deck principal (12 slides), HTML/CSS/JS — texte FR + PNG intégrés |
-| [`SPEAKER-NOTES.md`](./SPEAKER-NOTES.md) | Points de discussion + sources / méthodologie marché |
-| [`assets/`](./assets/) (`slide-01-cover.png` … `slide-12-ask.png`) | Visuels PNG embarqués dans chaque slide (couverture plein cadre) |
+| [`ezoa-to-pitch-deck.html`](./ezoa-to-pitch-deck.html) | Deck principal (**14 slides**), HTML/CSS/JS — texte FR + PNG intégrés |
+| [`SPEAKER-NOTES.md`](./SPEAKER-NOTES.md) | Notes orateur, glossaire, projections, sources marché |
+| [`assets/`](./assets/) (`slide-01-cover.png` … `slide-12-ask.png`) | Visuels PNG (slides 13–14 réutilisent des assets existants) |
 | `public/pitch/` (copie servie) | Même deck en production : `/pitch/ezoa-to-pitch-deck.html` (CTA **Sponsoriser**) |
 
 Chaque slide (hors couverture) est en **deux colonnes** : titre + puces orales à gauche/droite, PNG illustratif en face. Les puces sont des *talking cues* — l’orateur développe à l’oral (voir `SPEAKER-NOTES.md`). Les PNG restent aussi utilisables seuls pour partage / export.
@@ -17,12 +17,12 @@ Chaque slide (hors couverture) est en **deux colonnes** : titre + puces orales �
 
 Avant d’envoyer le pack :
 
-- [ ] Ouvrir le HTML dans Chrome/Edge et parcourir les **12 slides** (plein écran **F**)
+- [ ] Ouvrir le HTML dans Chrome/Edge et parcourir les **14 slides** (plein écran **F**)
 - [ ] Vérifier logo + capture (`mobile/assets/images/logo-ezoa.png`, `mobile/flutter_02.png`) — ouvrir depuis la racine du dépôt
 - [ ] Confirmer l’**email de contact** (`contact@ezoa.tg` dans le deck — remplacer si boîte réelle différente)
 - [ ] Relire la slide **Traction** : aucun MAU / revenu inventé ; statut « produit opérationnel / prêt pilote »
-- [ ] Relire **Ask** : fourchette 25–50 M FCFA marquée *proposition indicative* ; adapter si négociation déjà engagée
-- [ ] Joindre ou tenir prêt `SPEAKER-NOTES.md` (sources marché) pour questions diligence
+- [ ] Relire **Financement** : ask fixe **25 M FCFA** + tableau d’allocation ; slide **Projections** labellisée *projections indicatives*
+- [ ] Joindre ou tenir prêt `SPEAKER-NOTES.md` (glossaire + sources) pour questions diligence
 - [ ] Exporter un **PDF paysage** (voir ci-dessous) + éventuellement lien GitHub du produit
 - [ ] Message d’accompagnement court : problème → solution → stade produit → ask → prochain call / démo
 - [ ] Ne pas joindre secrets (`.env`, clés API, credentials Mobile Money)
@@ -57,11 +57,11 @@ Avant d’envoyer le pack :
 | Élément | Valeur |
 |---------|--------|
 | Secondaire Togo (MEN 2024-25) | ~912 k élèves |
-| TAM | ~10 M élèves AO francophone |
-| SAM | ~370 k (Togo × accès digital) |
-| SOM | 3–8 k abonnés Pro (18–24 mois) |
-| Prix Pro | 1 000 FCFA / 6 mois |
-| Ask | 25–50 M FCFA (indicatif ; ticket type 35 M) |
+| TAM (marché total adressable) | ~10 M élèves Afrique de l’Ouest francophone |
+| SAM (marché accessible) | ~370 k (Togo × accès digital) |
+| SOM (marché obtenable) | 3–8 k abonnés Pro (18–24 mois) |
+| Prix Pro | 1 000 FCFA / 6 mois (~2 000 FCFA / an) |
+| Ask | **25 M FCFA** (ticket seed / pré-amorçage ; ≈ ~38 k USD) |
 
 Détail, fourchettes et **URLs sources** : [`SPEAKER-NOTES.md`](./SPEAKER-NOTES.md).
 
