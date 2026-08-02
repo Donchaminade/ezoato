@@ -524,7 +524,16 @@ function apply_soumission_corrections(string $id, array $sub, array $body): arra
 function cors(): void {
   $cfg = load_config();
   $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-  if (in_array($origin, $cfg['allowed_origins'], true)) {
+  $allowed = in_array($origin, $cfg['allowed_origins'], true);
+  // Dev local : autoriser Vite/frontend sur IP LAN (ex. http://10.14.202.205:5173)
+  if (!$allowed && $origin !== '' && preg_match(
+    '#^https?://(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$#',
+    $origin
+  )) {
+    $configuredHost = (string)(parse_url((string)($cfg['api_base_url'] ?? ''), PHP_URL_HOST) ?: '');
+    $allowed = in_array($configuredHost, ['localhost', '127.0.0.1', ''], true);
+  }
+  if ($allowed) {
     header("Access-Control-Allow-Origin: $origin");
     header('Access-Control-Allow-Credentials: true');
   }
@@ -673,9 +682,34 @@ function cfg(): array {
   return $c ??= load_config();
 }
 
-function map_epreuve(array $row): array {
+/**
+ * Base URL publique de l'API pour les liens média (thumbnail, PDF…).
+ * En local, si api_base_url pointe vers localhost, on reconstruit l'URL
+ * depuis le Host de la requête (ex. 10.14.202.205) pour les appareils LAN.
+ */
+function api_public_base_url(): string {
   $cfg = cfg();
-  $base = rtrim($cfg['api_base_url'] ?? '', '/');
+  $configured = rtrim((string)($cfg['api_base_url'] ?? ''), '/');
+  $configuredHost = (string)(parse_url($configured, PHP_URL_HOST) ?: '');
+  $loopback = in_array($configuredHost, ['localhost', '127.0.0.1', ''], true);
+  if (!$loopback) {
+    return $configured;
+  }
+
+  $reqHost = (string)($_SERVER['HTTP_HOST'] ?? '');
+  if ($reqHost === '') {
+    return $configured;
+  }
+
+  $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+  $scheme = $https ? 'https' : 'http';
+  $path = (string)(parse_url($configured, PHP_URL_PATH) ?: '');
+  return rtrim($scheme . '://' . $reqHost . $path, '/');
+}
+
+function map_epreuve(array $row): array {
+  $base = api_public_base_url();
   require_once __DIR__ . '/lib/storage-paths.php';
   $metaNiveau = decode_meta_niveau($row['meta_niveau'] ?? null);
   $mapped = [
@@ -927,8 +961,7 @@ function get_corrige_type(string $parentId): ?array {
 }
 
 function map_soumission(array $row): array {
-  $cfg = cfg();
-  $base = rtrim($cfg['api_base_url'] ?? '', '/');
+  $base = api_public_base_url();
   $doublons = $row['doublons_json'] ?? null;
   if (is_string($doublons)) $doublons = json_decode($doublons, true);
   if (!is_array($doublons)) $doublons = [];
@@ -1194,8 +1227,7 @@ function reward_contributor(string $userId): array {
 }
 
 function map_soumission_detail(array $row, bool $forOwner = false): array {
-  $cfg = cfg();
-  $base = rtrim($cfg['api_base_url'] ?? '', '/');
+  $base = api_public_base_url();
   $m = map_soumission($row);
   $m['niveau'] = $row['niveau'];
   $m['periode'] = $row['periode'] ?? null;

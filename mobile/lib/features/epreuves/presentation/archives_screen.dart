@@ -9,6 +9,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/network/connectivity_service.dart';
 import '../../../core/theme/ezoa_theme.dart';
 import '../../../shared/models/models.dart';
+import '../../../shared/widgets/epreuve_thumbnail.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
 import '../../offline/data/offline_repository.dart';
 import '../data/archives_epreuves_provider.dart';
@@ -282,19 +283,6 @@ class _ArchiveEpreuveGridCard extends StatelessWidget {
     [Color(0xFFB45309), Color(0xFF92400E)],
   ];
 
-  IconData get _typeIcon {
-    switch (epreuve.type) {
-      case 'examen':
-        return LucideIcons.graduationCap;
-      case 'composition':
-        return LucideIcons.clipboardList;
-      case 'corrige':
-        return LucideIcons.checkCircle2;
-      default:
-        return LucideIcons.fileText;
-    }
-  }
-
   String get _priceLabel {
     if (epreuve.requiresPayment == true && epreuve.prixFcfa != null) {
       return '${epreuve.prixFcfa} F';
@@ -332,24 +320,17 @@ class _ArchiveEpreuveGridCard extends StatelessWidget {
                   top: Radius.circular(14),
                 ),
               ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: -12,
-                    right: -12,
-                    child: Icon(
-                      LucideIcons.sparkles,
-                      size: 52,
-                      color: Colors.white.withValues(alpha: 0.08),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(14),
+                ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    EpreuveThumbnail(
+                      epreuve: epreuve,
+                      placeholderIconSize: 28,
                     ),
-                  ),
-                  Center(
-                    child: Icon(
-                      _typeIcon,
-                      size: 28,
-                      color: Colors.white.withValues(alpha: 0.88),
-                    ),
-                  ),
                   Positioned(
                     top: 7,
                     left: 7,
@@ -415,7 +396,8 @@ class _ArchiveEpreuveGridCard extends StatelessWidget {
                         label: 'Hors ligne',
                       ),
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

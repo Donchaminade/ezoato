@@ -77,6 +77,41 @@ class Env {
     return 'http://localhost$_apiPath';
   }
 
+  /// Réécrit une URL média (thumbnail, PDF…) pour utiliser le même hôte
+  /// joignable que [apiUrl] (évite localhost renvoyé par l'API en LAN).
+  static String? resolveMediaUrl(String? url) {
+    if (url == null) return null;
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return null;
+
+    final api = Uri.parse(apiUrl);
+    late final Uri media;
+    try {
+      media = Uri.parse(trimmed);
+    } catch (_) {
+      return trimmed;
+    }
+
+    if (!media.hasScheme) {
+      final path = trimmed.startsWith('/') ? trimmed : '/$trimmed';
+      return _normalize('$apiUrl$path');
+    }
+
+    const loopback = {'localhost', '127.0.0.1', '10.0.2.2'};
+    final host = media.host.toLowerCase();
+    if (host.isEmpty || !loopback.contains(host)) {
+      return trimmed;
+    }
+
+    return media
+        .replace(
+          scheme: api.scheme,
+          host: api.host,
+          port: api.hasPort ? api.port : null,
+        )
+        .toString();
+  }
+
   static String _normalize(String url) {
     var u = url.trim();
     while (u.endsWith('/')) {
