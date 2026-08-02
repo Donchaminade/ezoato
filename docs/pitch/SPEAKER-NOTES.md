@@ -184,10 +184,10 @@ Tous les chiffres marché ci-dessous sont des **estimations** ; les slides porte
 | Élément | Valeur |
 |---------|--------|
 | **Fourchette** | **25–50 M FCFA** (~38–76 kUSD) |
-| **Ticket central proposé** | **35 M FCFA** (~53 kUSD / ~53 kEUR) |
+| **Ticket central proposé** | **35 M FCFA** (~53 kEUR / ~58 kUSD) |
 | **Stade** | Pre-seed / seed early |
 
-*Taux indicatif : ~600–655 FCFA pour 1 USD / 1 EUR — arrondir à l’oral.*
+*Taux indicatif : ~655 FCFA pour 1 EUR et ~600 FCFA pour 1 USD — arrondir à l’oral.*
 
 ### Allocation des fonds (sur ticket type 35 M)
 
