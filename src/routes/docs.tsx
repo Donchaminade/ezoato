@@ -21,7 +21,7 @@ const search = z.object({
   q: z.string().optional(),
   ville: z.string().optional(),
   matiere: z.string().optional(),
-  niveau: z.enum(["college", "lycee"]).optional(),
+  niveau: z.enum(["college", "lycee", "universite", "concours"]).optional(),
   type: z.enum(["devoir", "composition", "examen"]).optional(),
   examen: z.string().optional(),
   annee: z.coerce.number().optional(),
@@ -101,12 +101,14 @@ function DocsPage() {
       </div>
       <div>
         <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Niveau</label>
-        <Select value={s.niveau ?? "all"} onValueChange={(v) => setParam("niveau", v === "all" ? undefined : (v as "college" | "lycee"))}>
+        <Select value={s.niveau ?? "all"} onValueChange={(v) => setParam("niveau", v === "all" ? undefined : (v as "college" | "lycee" | "universite" | "concours"))}>
           <SelectTrigger><SelectValue placeholder="Tous" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous</SelectItem>
             <SelectItem value="college">Collège</SelectItem>
             <SelectItem value="lycee">Lycée</SelectItem>
+            <SelectItem value="universite">Université</SelectItem>
+            <SelectItem value="concours">Concours</SelectItem>
           </SelectContent>
         </Select>
       </div>
