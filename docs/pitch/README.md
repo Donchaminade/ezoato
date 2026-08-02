@@ -12,7 +12,12 @@ Présentation professionnelle pour investisseurs, partenaires et établissements
 | [`assets/`](./assets/) (`slide-01-cover.png` … `slide-12-ask.png`) | Visuels PNG (slides 13–14 réutilisent des assets existants) |
 | `public/pitch/` (copie servie) | Même deck en production : `/pitch/ezoa-to-pitch-deck.html` (CTA **Sponsoriser**) |
 
-Chaque slide (hors couverture) est en **deux colonnes** : titre + puces orales à gauche/droite, PNG illustratif en face. Les puces sont des *talking cues* — l’orateur développe à l’oral (voir `SPEAKER-NOTES.md`). Les PNG restent aussi utilisables seuls pour partage / export.
+### Photos équipe (slide Équipe)
+
+Déposer les photos dans `assets/team-chaminade.jpg` et `team-divine.jpg` (carré 400×400 recommandé).  
+Tant que les fichiers sont absents, le deck affiche les initiales (CD / DH) en fallback. Après dépôt, recopier aussi vers `public/pitch/assets/` pour la version servie.
+
+Chaque slide (hors couverture) est en **deux colonnes** : titre + puces orales à gauche/droite, PNG illustratif en face. Les puces sont des *talking cues* — l’orateur développe à l’oral (voir `SPEAKER-NOTES.md`). Les PNG restent aussi utilisables seuls pour partage / export. La slide **Équipe** met en avant des cartes membres (avatar + rôle + bio) plutôt que des puces seules.
 
 ## Checklist envoi investisseur
 

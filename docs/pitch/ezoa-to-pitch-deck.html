@@ -481,43 +481,141 @@
       line-height: 1.35;
     }
 
+    /* —— Team slide (cards + photo slots) —— */
+    .slide-split.team-layout {
+      grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.45fr);
+      align-items: center;
+      gap: 1rem;
+    }
+
     .team-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-      margin-top: 0.25rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 0.45rem;
+      width: 100%;
     }
 
     .team-card {
       display: flex;
       flex-direction: column;
-      gap: 0.2rem;
-      padding: 0.95rem 1.1rem;
-      border-radius: 12px;
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.03);
+      align-items: flex-start;
+      gap: 0.15rem;
+      padding: 1.05rem 1.15rem 1.15rem;
+      border-radius: 16px;
+      border: 1px solid rgba(52, 211, 153, 0.32);
+      background:
+        linear-gradient(165deg, rgba(26, 35, 56, 0.72), rgba(11, 18, 32, 0.55));
+      box-shadow:
+        0 14px 36px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      min-width: 0;
     }
 
     .team-card h3 {
       font-family: var(--font-display);
-      font-size: 1.05rem;
-      font-weight: 600;
+      font-size: clamp(0.98rem, 1.5vw, 1.12rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.25;
+      margin-top: 0.15rem;
     }
 
     .team-card .role {
       color: var(--tg-green-bright);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
+      letter-spacing: 0.01em;
     }
 
     .team-card p.bio {
       color: var(--muted);
-      font-size: 0.85rem;
-      margin-top: 0.2rem;
+      font-size: 0.84rem;
+      margin-top: 0.35rem;
       line-height: 1.4;
     }
 
-    .open-role { opacity: 0.9; border-style: dashed; }
+    .team-card.open-role {
+      grid-column: 1 / -1;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1.1rem;
+      opacity: 0.95;
+      border-style: dashed;
+      border-color: rgba(52, 211, 153, 0.22);
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: none;
+    }
+
+    .team-card.open-role .team-avatar {
+      width: 44px;
+      height: 44px;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .team-card.open-role h3 {
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-top: 0;
+    }
+
+    .team-card.open-role .role {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .team-avatar {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      margin-bottom: 0.45rem;
+      background: linear-gradient(145deg, var(--tg-green), var(--tg-green-deep));
+      border: 2px solid rgba(52, 211, 153, 0.45);
+      box-shadow: 0 6px 18px rgba(0, 106, 78, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: white;
+    }
+
+    .team-avatar-initials {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 0;
+      letter-spacing: 0.04em;
+    }
+
+    .team-avatar img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      display: block;
+    }
+
+    .team-avatar--ghost {
+      background: linear-gradient(145deg, rgba(0, 106, 78, 0.45), rgba(20, 28, 46, 0.9));
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: none;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
 
     .avatar {
       width: 40px;
@@ -532,6 +630,32 @@
       font-size: 0.95rem;
       color: white;
       margin-bottom: 0.4rem;
+    }
+
+    @media (max-width: 960px) {
+      .slide-split.team-layout {
+        grid-template-columns: 1fr;
+      }
+      .slide-split.team-layout .slide-visual {
+        height: min(28vh, 200px);
+      }
+      .team-grid {
+        grid-template-columns: 1fr;
+      }
+      .team-card.open-role {
+        grid-column: auto;
+      }
+    }
+
+    @media (min-width: 961px) and (max-width: 1180px) {
+      .team-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 1.1rem;
+      }
+      .team-card h3 {
+        font-size: 0.95rem;
+      }
     }
 
     .ask-amount {
@@ -1136,17 +1260,47 @@
 
     <!-- 10. Équipe -->
     <section class="slide" data-title="Équipe" aria-label="Diapositive 10 — Équipe">
-      <div class="slide-split">
+      <div class="slide-split team-layout">
         <div class="slide-copy">
           <h1>Équipe</h1>
           <h2>Produit, tech &amp; terrain.</h2>
-          <ul class="bullet-list">
-            <li><span class="nowrap"><strong>Chaminade D. Adjolou</strong> — CEO &amp; CTO</span></li>
-            <li><span class="nowrap">Vision, architecture, mobile / web / backend</span></li>
-            <li><span class="nowrap"><strong>Divine HIBA</strong> — Project Manager &amp; BA</span></li>
-            <li><span class="nowrap">Pilotage, besoins métier, coordination écoles</span></li>
-            <li><span class="nowrap">À recruter : ops contenu · partenariats · growth</span></li>
-          </ul>
+          <div class="team-grid">
+            <article class="team-card">
+              <div class="team-avatar" aria-hidden="true">
+                <span class="team-avatar-initials">CD</span>
+                <img
+                  src="assets/team-chaminade.jpg"
+                  alt=""
+                  onerror="this.remove()"
+                />
+              </div>
+              <h3>Chaminade D. Adjolou</h3>
+              <p class="role">CEO &amp; CTO</p>
+              <p class="bio">Vision, architecture, mobile / web / backend</p>
+            </article>
+            <article class="team-card">
+              <div class="team-avatar" aria-hidden="true">
+                <span class="team-avatar-initials">DH</span>
+                <img
+                  src="assets/team-divine.jpg"
+                  alt=""
+                  onerror="this.remove()"
+                />
+              </div>
+              <h3>Divine HIBA</h3>
+              <p class="role">Project Manager &amp; BA</p>
+              <p class="bio">Pilotage, besoins métier, coordination écoles</p>
+            </article>
+            <aside class="team-card open-role">
+              <div class="team-avatar team-avatar--ghost" aria-hidden="true">
+                <span class="team-avatar-initials">+</span>
+              </div>
+              <div>
+                <h3>À recruter</h3>
+                <p class="role">ops contenu · partenariats · growth</p>
+              </div>
+            </aside>
+          </div>
         </div>
         <figure class="slide-visual">
           <img src="assets/slide-10-team.png" alt="Illustration équipe EZOA-TO" />
