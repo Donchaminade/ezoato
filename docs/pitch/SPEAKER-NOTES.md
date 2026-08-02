@@ -50,7 +50,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 - EZOA-TO = bibliothèque nationale d’épreuves (web + mobile).
 - Socle examens : **CEPD, BEPC, BAC** + devoirs / compositions.
-- **Fonctionnalité livrée (PR #8)** : **4 niveaux** — collège, lycée, université, concours — avec formulaires de soumission adaptatifs et filtres archives. Pas seulement une roadmap 12–18 mois.
+- **Fonctionnalité livrée** : **4 niveaux** — collège, lycée, université, concours — avec formulaires de soumission adaptatifs et filtres archives. Pas seulement une roadmap 12–18 mois.
 - Contenu catalogue CAP / BT / BTS / concours = **prochaine expansion** (remplir les rayons), pas la capacité produit.
 - Chercher, consulter, télécharger ; favoris et hors ligne pour le terrain (3G, lycée).
 - Qualité : soumissions communautaires + **validation humaine** avant publication.
@@ -164,7 +164,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 - **Honnêteté** : produit opérationnel / prêt pilote — **pas** de MAU ni de revenus inventés.
 - Vrai aujourd’hui : parcours bout en bout (archives, soumission, admin, Pro, paiements MM), stack mobile + web + API, itération GitHub.
-- **Fonctionnalité livrée** : 4 niveaux + **détection de doublons admin** (similarité / split UI) — livré sur branche, en cours d’intégration (PR #8 → `dev`), pas encore forcément en prod `master`.
+- **Fonctionnalité livrée** : 4 niveaux + **détection de doublons admin** (similarité / split UI) — produit et pages marketing alignés.
 - Prochaines preuves à collecter (et à mettre à jour dans le deck) : n° d’épreuves validées, lycées pilotes signés, premiers paiements Pro, taux de rétention 6 mois.
 - Formulation investisseur : *le risque est l’exécution go-to-market, pas l’existence du produit.*
 
@@ -203,9 +203,9 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 ## 11. Roadmap 6 / 12 / 18 mois
 
-- **Livré (PR #8)** : modèle **4 niveaux** + formulaires adaptatifs + anti-doublons admin — en déploiement / intégration `dev`.
-- **6 mois** : 3–5 lycées pilotes, catalogue examens clés, Mobile Money stable, Play Store, premiers Pro + KPIs.
-- **12 mois** : **expansion contenu** — couverture nationale CEPD / BEPC / BAC, puis volumes CAP / BT / BTS et concours (catalogue ciblé, contributeurs filières) ; licence établissements ; rétention Pro.
+- **Livré** : modèle **4 niveaux** + formulaires adaptatifs + anti-doublons admin + Pro (1 000 FCFA / 6 mois) + web & mobile.
+- **6 mois** : 3–5 lycées pilotes, catalogue examens clés, Play Store, premiers Pro + KPIs.
+- **12 mois** : **expansion contenu** — couverture nationale CEPD / BEPC / BAC + volumes concours ; puis CAP / BT / BTS ; licence établissements ; rétention Pro.
 - **18 mois** : 1er pays voisin Afrique de l’Ouest francophone, corrigés / parcours, dialogue Ministère de l’Éducation / partenaires éducation.
 
 ---
