@@ -480,10 +480,9 @@ class _AccountOnboardingRow extends ConsumerWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () async {
-          context.go('/home');
-          await Future<void>.delayed(const Duration(milliseconds: 350));
+          await ref.read(onboardingProvider.notifier).reset();
           if (!context.mounted) return;
-          await ref.read(onboardingProvider.notifier).startTour(context);
+          context.go('/onboarding');
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
