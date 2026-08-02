@@ -719,7 +719,7 @@ class _OfflineLibraryHomeGrid extends ConsumerWidget {
     };
 
     final rows = (items.length / 2).ceil();
-    final height = rows * 204.0 + (rows > 1 ? (rows - 1) * 12.0 : 0);
+    final height = rows * 228.0 + (rows > 1 ? (rows - 1) * 12.0 : 0);
 
     return SizedBox(
       height: height,
@@ -730,7 +730,7 @@ class _OfflineLibraryHomeGrid extends ConsumerWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          mainAxisExtent: 204,
+          mainAxisExtent: 228,
         ),
         itemCount: items.length,
         itemBuilder: (context, i) {
@@ -744,6 +744,9 @@ class _OfflineLibraryHomeGrid extends ConsumerWidget {
             ville: e.ville,
             telechargements: e.telechargements,
             type: e.type,
+            periode: e.periode,
+            examen: e.examen,
+            epreuve: e,
             isOffline: true,
             revealIndex: i,
             previewImage:
@@ -765,7 +768,7 @@ class _RecentEpreuveHorizontalCard extends StatelessWidget {
   });
 
   static const width = 280.0;
-  static const height = 188.0;
+  static const height = 208.0;
   static const spacing = 12.0;
 
   final Epreuve epreuve;
@@ -774,10 +777,10 @@ class _RecentEpreuveHorizontalCard extends StatelessWidget {
 
   static const _gradients = [
     [Color(0xFF006A4E), Color(0xFF004D38)],
-    [Color(0xFF4338CA), Color(0xFF312E81)],
     [Color(0xFF0E7490), Color(0xFF155E75)],
-    [Color(0xFF7C3AED), Color(0xFF5B21B6)],
     [Color(0xFFB45309), Color(0xFF92400E)],
+    [Color(0xFF1A2220), Color(0xFF121816)],
+    [Color(0xFF365314), Color(0xFF1A2E05)],
   ];
 
   IconData get _typeIcon {
@@ -792,6 +795,16 @@ class _RecentEpreuveHorizontalCard extends StatelessWidget {
         return LucideIcons.fileText;
     }
   }
+
+  String get _priceLabel {
+    if (epreuve.requiresPayment == true && epreuve.prixFcfa != null) {
+      return '${epreuve.prixFcfa} F';
+    }
+    return 'GRATUIT';
+  }
+
+  bool get _isPaid =>
+      epreuve.requiresPayment == true && epreuve.prixFcfa != null;
 
   @override
   Widget build(BuildContext context) {
@@ -812,7 +825,7 @@ class _RecentEpreuveHorizontalCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(
-              height: 78,
+              height: 96,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -844,53 +857,31 @@ class _RecentEpreuveHorizontalCard extends StatelessWidget {
                             color: Colors.white.withValues(alpha: 0.88),
                           ),
                         ),
-                    Positioned(
-                      top: 7,
-                      left: 7,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.32),
-                          borderRadius: BorderRadius.circular(7),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.22),
-                          ),
-                        ),
-                        child: Text(
-                          epreuve.matiere.toUpperCase(),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 7.5,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                            color: Colors.white.withValues(alpha: 0.95),
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (isOffline)
-                      Positioned(
-                        top: 7,
-                        right: 7,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.35),
-                            borderRadius: BorderRadius.circular(7),
-                            border: Border.all(
-                              color: pal.emerald.withValues(alpha: 0.5),
-                            ),
-                          ),
-                          child: Icon(
-                            LucideIcons.hardDrive,
-                            size: 12,
-                            color: pal.emerald,
-                          ),
-                        ),
+                      EpreuvePreviewChrome(
+                        matiere: epreuve.matiere,
+                        type: epreuve.type,
+                        periode: epreuve.periode,
+                        examen: epreuve.examen,
+                        priceLabel: _priceLabel,
+                        isPaid: _isPaid,
+                        topTrailing: isOffline
+                            ? Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1A2220),
+                                  borderRadius: BorderRadius.circular(7),
+                                  border: Border.all(
+                                    color: EzoaColors.emerald
+                                        .withValues(alpha: 0.45),
+                                  ),
+                                ),
+                                child: Icon(
+                                  LucideIcons.hardDrive,
+                                  size: 12,
+                                  color: pal.emerald,
+                                ),
+                              )
+                            : null,
                       ),
                     ],
                   ),

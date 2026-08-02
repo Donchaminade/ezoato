@@ -13,6 +13,8 @@ import '../../../shared/widgets/epreuve_thumbnail.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
 import '../../offline/data/offline_repository.dart';
 import '../data/archives_epreuves_provider.dart';
+import '../data/archives_filters.dart';
+import 'archives_filter_sheet.dart';
 
 class ArchivesScreen extends ConsumerStatefulWidget {
   const ArchivesScreen({super.key});
@@ -41,6 +43,31 @@ class _ArchivesScreenState extends ConsumerState<ArchivesScreen> {
       _prefetchTriggered.clear();
       ref.read(archivesSearchProvider.notifier).state = v;
     });
+  }
+
+  void _clearSearch() {
+    _debounce?.cancel();
+    _search.clear();
+    _prefetchTriggered.clear();
+    ref.read(archivesSearchProvider.notifier).state = '';
+  }
+
+  void _clearFilters() {
+    _prefetchTriggered.clear();
+    ref.read(archivesFiltersProvider.notifier).state = ArchivesFilters.empty;
+  }
+
+  void _clearSearchAndFilters() {
+    _clearSearch();
+    _clearFilters();
+  }
+
+  Future<void> _openFilters() async {
+    final current = ref.read(archivesFiltersProvider);
+    final result = await showArchivesFilterSheet(context, initial: current);
+    if (result == null || !mounted) return;
+    _prefetchTriggered.clear();
+    ref.read(archivesFiltersProvider.notifier).state = result;
   }
 
   void _maybePrefetch(int index, PaginatedEpreuvesState paginated) {
@@ -92,6 +119,9 @@ class _ArchivesScreenState extends ConsumerState<ArchivesScreen> {
   Widget build(BuildContext context) {
     final isOnline = ref.watch(isOnlineProvider);
     final epreuvesAsync = ref.watch(archivesEpreuvesProvider);
+    final filters = ref.watch(archivesFiltersProvider);
+    final searchQ = ref.watch(archivesSearchProvider);
+    final pal = EzoaColors.of(context);
 
     ref.listen(archivesEpreuvesProvider, (_, next) {
       next.whenData(
@@ -107,12 +137,106 @@ class _ArchivesScreenState extends ConsumerState<ArchivesScreen> {
       child: Column(
         children: [
           const SizedBox(height: 6),
-          EzoaSearchField(
-            controller: _search,
-            hintText: 'Rechercher une épreuve…',
-            enabled: isOnline,
-            onChanged: isOnline ? _onSearchChanged : null,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: EzoaSearchField(
+                    controller: _search,
+                    hintText: 'Rechercher une épreuve…',
+                    enabled: isOnline,
+                    margin: EdgeInsets.zero,
+                    onChanged: isOnline ? _onSearchChanged : null,
+                    onClear: isOnline ? _clearSearch : null,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _FilterIconButton(
+                  enabled: isOnline,
+                  activeCount: filters.activeCount,
+                  onTap: isOnline ? _openFilters : null,
+                ),
+              ],
+            ),
           ),
+          if (filters.isNotEmpty || searchQ.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    if (searchQ.isNotEmpty)
+                      _ActiveClearChip(
+                        label: 'Recherche',
+                        onClear: _clearSearch,
+                      ),
+                    if (filters.annee != null)
+                      _ActiveClearChip(
+                        label: '${filters.annee}',
+                        onClear: () {
+                          _prefetchTriggered.clear();
+                          ref.read(archivesFiltersProvider.notifier).state =
+                              filters.copyWith(clearAnnee: true);
+                        },
+                      ),
+                    if (filters.type != null)
+                      _ActiveClearChip(
+                        label: epreuveTypeLabel(filters.type!),
+                        onClear: () {
+                          _prefetchTriggered.clear();
+                          ref.read(archivesFiltersProvider.notifier).state =
+                              filters.copyWith(
+                            clearType: true,
+                            clearExamen: filters.type == 'examen',
+                          );
+                        },
+                      ),
+                    if (filters.niveau != null)
+                      _ActiveClearChip(
+                        label: epreuveNiveauLabel(filters.niveau!),
+                        onClear: () {
+                          _prefetchTriggered.clear();
+                          ref.read(archivesFiltersProvider.notifier).state =
+                              filters.copyWith(clearNiveau: true);
+                        },
+                      ),
+                    if (filters.periode != null)
+                      _ActiveClearChip(
+                        label: epreuvePeriodeLabel(filters.periode),
+                        onClear: () {
+                          _prefetchTriggered.clear();
+                          ref.read(archivesFiltersProvider.notifier).state =
+                              filters.copyWith(clearPeriode: true);
+                        },
+                      ),
+                    if (filters.examen != null)
+                      _ActiveClearChip(
+                        label: epreuveExamenLabel(filters.examen),
+                        onClear: () {
+                          _prefetchTriggered.clear();
+                          ref.read(archivesFiltersProvider.notifier).state =
+                              filters.copyWith(clearExamen: true);
+                        },
+                      ),
+                    if (filters.isNotEmpty || searchQ.isNotEmpty)
+                      TextButton(
+                        onPressed: _clearSearchAndFilters,
+                        style: TextButton.styleFrom(
+                          foregroundColor: pal.accent,
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text('Tout effacer'),
+                      ),
+                  ],
+                ),
+              ),
+            ),
           Expanded(
             child: !isOnline
                 ? const EmptyState(
@@ -129,11 +253,13 @@ class _ArchivesScreenState extends ConsumerState<ArchivesScreen> {
                         if (items.isEmpty) {
                           return ListView(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            children: const [
-                              SizedBox(height: 80),
+                            children: [
+                              const SizedBox(height: 80),
                               EmptyState(
                                 title: 'Aucun résultat',
-                                message: 'Modifiez votre recherche',
+                                message: filters.isNotEmpty || searchQ.isNotEmpty
+                                    ? 'Modifiez la recherche ou les filtres'
+                                    : 'Modifiez votre recherche',
                                 icon: LucideIcons.searchX,
                               ),
                             ],
@@ -150,7 +276,7 @@ class _ArchivesScreenState extends ConsumerState<ArchivesScreen> {
                                   crossAxisCount: 2,
                                   mainAxisSpacing: 12,
                                   crossAxisSpacing: 12,
-                                  mainAxisExtent: 208,
+                                  mainAxisExtent: 232,
                                 ),
                                 delegate: SliverChildBuilderDelegate(
                                   childCount: items.length,
@@ -194,6 +320,114 @@ class _ArchivesScreenState extends ConsumerState<ArchivesScreen> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FilterIconButton extends StatelessWidget {
+  const _FilterIconButton({
+    required this.enabled,
+    required this.activeCount,
+    required this.onTap,
+  });
+
+  final bool enabled;
+  final int activeCount;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = EzoaColors.of(context);
+    final active = activeCount > 0;
+
+    return EzoaGlassCard(
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.zero,
+      enableShine: false,
+      blurSigma: 14,
+      onTap: onTap,
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(
+              LucideIcons.slidersHorizontal,
+              size: 20,
+              color: !enabled
+                  ? pal.textFaint
+                  : active
+                      ? pal.accent
+                      : pal.textDim,
+            ),
+            if (active)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  width: 16,
+                  height: 16,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: EzoaColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '$activeCount',
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActiveClearChip extends StatelessWidget {
+  const _ActiveClearChip({required this.label, required this.onClear});
+
+  final String label;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = EzoaColors.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onClear,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(10, 6, 8, 6),
+          decoration: BoxDecoration(
+            color: EzoaColors.primary.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: EzoaColors.primary.withValues(alpha: 0.35)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: pal.accent,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(LucideIcons.x, size: 14, color: pal.accent),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -258,8 +492,7 @@ class _ArchivesListFooter extends ConsumerWidget {
   }
 }
 
-/// Carte compacte pour la grille Archives : zone dégradée matière, badges,
-/// titre, méta classe/année et actions téléchargement.
+/// Carte Archives : aperçu produit + badges opaques + bandeau type/période.
 class _ArchiveEpreuveGridCard extends StatelessWidget {
   const _ArchiveEpreuveGridCard({
     required this.epreuve,
@@ -277,10 +510,10 @@ class _ArchiveEpreuveGridCard extends StatelessWidget {
 
   static const _gradients = [
     [Color(0xFF006A4E), Color(0xFF004D38)],
-    [Color(0xFF4338CA), Color(0xFF312E81)],
     [Color(0xFF0E7490), Color(0xFF155E75)],
-    [Color(0xFF7C3AED), Color(0xFF5B21B6)],
     [Color(0xFFB45309), Color(0xFF92400E)],
+    [Color(0xFF1A2220), Color(0xFF121816)],
+    [Color(0xFF365314), Color(0xFF1A2E05)],
   ];
 
   String get _priceLabel {
@@ -308,7 +541,7 @@ class _ArchiveEpreuveGridCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(
-            height: 78,
+            height: 108,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -331,70 +564,30 @@ class _ArchiveEpreuveGridCard extends StatelessWidget {
                       epreuve: epreuve,
                       placeholderIconSize: 28,
                     ),
-                  Positioned(
-                    top: 7,
-                    left: 7,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.32),
-                        borderRadius: BorderRadius.circular(7),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.22),
-                        ),
-                      ),
-                      child: Text(
-                        epreuve.matiere.toUpperCase(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: 7.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                          color: Colors.white.withValues(alpha: 0.95),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 7,
-                    right: 7,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.35),
-                        borderRadius: BorderRadius.circular(7),
-                        border: Border.all(
-                          color: (_isPaid ? EzoaColors.gold : EzoaColors.emerald)
-                              .withValues(alpha: 0.65),
-                        ),
-                      ),
-                      child: Text(
-                        _priceLabel,
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: 7.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.4,
-                          color: _isPaid ? EzoaColors.gold : EzoaColors.emerald,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (isOffline)
-                    Positioned(
-                      bottom: 7,
-                      left: 7,
-                      child: _ArchiveStatusDot(
-                        icon: LucideIcons.hardDrive,
-                        color: pal.emerald,
-                        label: 'Hors ligne',
-                      ),
+                    EpreuvePreviewChrome(
+                      matiere: epreuve.matiere,
+                      type: epreuve.type,
+                      periode: epreuve.periode,
+                      examen: epreuve.examen,
+                      priceLabel: _priceLabel,
+                      isPaid: _isPaid,
+                      topTrailing: isOffline
+                          ? Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1A2220),
+                                borderRadius: BorderRadius.circular(7),
+                                border: Border.all(
+                                  color: EzoaColors.emerald.withValues(alpha: 0.45),
+                                ),
+                              ),
+                              child: Icon(
+                                LucideIcons.hardDrive,
+                                size: 12,
+                                color: pal.emerald,
+                              ),
+                            )
+                          : null,
                     ),
                   ],
                 ),
@@ -458,34 +651,6 @@ class _ArchiveEpreuveGridCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ArchiveStatusDot extends StatelessWidget {
-  const _ArchiveStatusDot({
-    required this.icon,
-    required this.color,
-    required this.label,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: label,
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.35),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withValues(alpha: 0.5)),
-        ),
-        child: Icon(icon, size: 11, color: color),
       ),
     );
   }

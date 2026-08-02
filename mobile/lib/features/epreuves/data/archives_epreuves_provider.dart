@@ -4,8 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/connectivity_service.dart';
 import '../../../shared/models/models.dart';
+import 'archives_filters.dart';
 
 final archivesSearchProvider = StateProvider<String>((ref) => '');
+
+final archivesFiltersProvider =
+    StateProvider<ArchivesFilters>((ref) => ArchivesFilters.empty);
 
 @immutable
 class PaginatedEpreuvesState {
@@ -44,7 +48,7 @@ class PaginatedEpreuvesState {
   }
 }
 
-/// Liste paginée des épreuves Archives avec recherche.
+/// Liste paginée des épreuves Archives avec recherche + filtres.
 ///
 /// - [ArchivesEpreuvesNotifier.perPage] : 20 items (10 rangées en grille 2 col.)
 /// - [ArchivesEpreuvesNotifier.prefetchAhead] : 4 — déclenche le chargement à
@@ -65,18 +69,27 @@ class ArchivesEpreuvesNotifier
       );
     }
     ref.watch(archivesSearchProvider);
+    ref.watch(archivesFiltersProvider);
     return _fetchPage(1);
   }
 
-  Future<PaginatedEpreuvesState> _fetchPage(int page) async {
+  ListEpreuvesParams _params(int page) {
     final q = ref.read(archivesSearchProvider);
-    final result = await ref.read(apiClientProvider).listEpreuves(
-          ListEpreuvesParams(
-            q: q.isEmpty ? null : q,
-            page: page,
-            perPage: perPage,
-          ),
-        );
+    final filters = ref.read(archivesFiltersProvider);
+    return ListEpreuvesParams(
+      q: q.isEmpty ? null : q,
+      annee: filters.annee,
+      type: filters.type,
+      niveau: filters.niveau,
+      periode: filters.periode,
+      examen: filters.examen,
+      page: page,
+      perPage: perPage,
+    );
+  }
+
+  Future<PaginatedEpreuvesState> _fetchPage(int page) async {
+    final result = await ref.read(apiClientProvider).listEpreuves(_params(page));
     return PaginatedEpreuvesState(
       items: result.items,
       currentPage: page,
@@ -104,14 +117,8 @@ class ArchivesEpreuvesNotifier
 
     try {
       final nextPage = current.currentPage + 1;
-      final q = ref.read(archivesSearchProvider);
-      final result = await ref.read(apiClientProvider).listEpreuves(
-            ListEpreuvesParams(
-              q: q.isEmpty ? null : q,
-              page: nextPage,
-              perPage: perPage,
-            ),
-          );
+      final result =
+          await ref.read(apiClientProvider).listEpreuves(_params(nextPage));
       final merged = [...current.items, ...result.items];
       state = AsyncData(
         PaginatedEpreuvesState(
