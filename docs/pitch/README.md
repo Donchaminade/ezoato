@@ -6,9 +6,9 @@ Présentation professionnelle pour investisseurs, partenaires et établissements
 
 | Fichier | Rôle |
 |---------|------|
-| [`ezoa-to-pitch-deck.html`](./ezoa-to-pitch-deck.html) | Deck principal (12 slides), autonome (HTML/CSS/JS) |
+| [`ezoa-to-pitch-deck.html`](./ezoa-to-pitch-deck.html) | Deck principal (12 slides), HTML/CSS/JS (Google Fonts avec fallback hors-ligne) |
 | [`SPEAKER-NOTES.md`](./SPEAKER-NOTES.md) | Points de discussion + sources / méthodologie marché |
-| [`assets/slide-01-cover.png`](./assets/) … [`slide-12-ask.png`](./assets/) | Captures / visuels PNG des 12 slides (export, aperçu, partage) |
+| [`assets/`](./assets/) (`slide-01-cover.png` … `slide-12-ask.png`) | Captures / visuels PNG des 12 slides (export, aperçu, partage) |
 
 Le HTML n’embarque pas les PNG en fond : ce sont des assets annexes. Pour présenter, ouvrir le HTML.
 
