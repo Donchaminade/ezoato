@@ -6,9 +6,9 @@ Présentation professionnelle pour investisseurs, partenaires et établissements
 
 | Fichier | Rôle |
 |---------|------|
-| [`ezoa-to-pitch-deck.html`](./ezoa-to-pitch-deck.html) | Deck principal (12 slides), HTML/CSS/JS — texte FR + PNG intégrés |
+| [`ezoa-to-pitch-deck.html`](./ezoa-to-pitch-deck.html) | Deck principal (12 slides), HTML/CSS/JS — texte FR + PNG intégrés (Google Fonts chargées en ligne ; fallback système hors-ligne) |
 | [`SPEAKER-NOTES.md`](./SPEAKER-NOTES.md) | Points de discussion + sources / méthodologie marché |
-| [`assets/`](./assets/) (`slide-01-cover.png` … `slide-12-ask.png`) | Visuels PNG embarqués dans chaque slide (couverture plein cadre) |
+| [`assets/slide-01-cover.png`](./assets/slide-01-cover.png) … [`assets/slide-12-ask.png`](./assets/slide-12-ask.png) | Visuels PNG embarqués dans chaque slide (couverture plein cadre) |
 
 Chaque slide (hors couverture) est en **deux colonnes** : titre + puces orales à gauche/droite, PNG illustratif en face. Les puces sont des *talking cues* — l’orateur développe à l’oral (voir `SPEAKER-NOTES.md`). Les PNG restent aussi utilisables seuls pour partage / export.
 

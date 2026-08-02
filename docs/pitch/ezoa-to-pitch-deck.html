@@ -1006,7 +1006,6 @@
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "dot-btn" + (i === 0 ? " active" : "");
-        btn.setAttribute("role", "tab");
         btn.setAttribute(
           "aria-label",
           "Aller à la diapositive " + (i + 1) + " — " + (slide.dataset.title || "")
