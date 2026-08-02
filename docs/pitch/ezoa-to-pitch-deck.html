@@ -481,112 +481,75 @@
       line-height: 1.35;
     }
 
-    /* —— Team slide (cards + photo slots) —— */
+    /* —— Team slide (product-style profile cards) —— */
     .slide-split.team-layout {
-      grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.45fr);
-      align-items: center;
-      gap: 1rem;
+      grid-template-columns: 1fr;
+      align-items: stretch;
+      gap: 0.35rem;
+    }
+
+    .slide-split.team-layout .slide-copy {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .slide-split.team-layout h1 {
+      font-size: clamp(2.2rem, 4.8vw, 3.6rem);
+      max-width: none;
+    }
+
+    .slide-split.team-layout h2 {
+      font-size: clamp(1.05rem, 1.8vw, 1.45rem);
+      margin-bottom: 0.55rem;
+      max-width: none;
     }
 
     .team-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-      margin-top: 0.45rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.2rem;
       width: 100%;
+      flex: 1;
+      min-height: 0;
+      align-content: center;
     }
 
     .team-card {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      gap: 0.15rem;
-      padding: 1.05rem 1.15rem 1.15rem;
-      border-radius: 16px;
-      border: 1px solid rgba(52, 211, 153, 0.32);
+      min-width: 0;
+      min-height: 0;
+      border-radius: 18px;
+      border: 1px solid rgba(52, 211, 153, 0.28);
       background:
-        linear-gradient(165deg, rgba(26, 35, 56, 0.72), rgba(11, 18, 32, 0.55));
+        linear-gradient(180deg, rgba(26, 35, 56, 0.88), rgba(11, 18, 32, 0.72));
       box-shadow:
-        0 14px 36px rgba(0, 0, 0, 0.32),
+        0 16px 40px rgba(0, 0, 0, 0.34),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      min-width: 0;
-    }
-
-    .team-card h3 {
-      font-family: var(--font-display);
-      font-size: clamp(0.98rem, 1.5vw, 1.12rem);
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.25;
-      margin-top: 0.15rem;
-    }
-
-    .team-card .role {
-      color: var(--tg-green-bright);
-      font-size: 0.82rem;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-
-    .team-card p.bio {
-      color: var(--muted);
-      font-size: 0.84rem;
-      margin-top: 0.35rem;
-      line-height: 1.4;
-    }
-
-    .team-card.open-role {
-      grid-column: 1 / -1;
-      flex-direction: row;
-      align-items: center;
-      gap: 0.85rem;
-      padding: 0.75rem 1.1rem;
-      opacity: 0.95;
-      border-style: dashed;
-      border-color: rgba(52, 211, 153, 0.22);
-      background: rgba(255, 255, 255, 0.03);
-      box-shadow: none;
-    }
-
-    .team-card.open-role .team-avatar {
-      width: 44px;
-      height: 44px;
-      font-size: 0.85rem;
-      flex-shrink: 0;
-    }
-
-    .team-card.open-role h3 {
-      font-size: 0.92rem;
-      font-weight: 600;
-      margin-top: 0;
-    }
-
-    .team-card.open-role .role {
-      font-size: 0.78rem;
-      font-weight: 500;
-      color: var(--muted);
-    }
-
-    .team-avatar {
-      position: relative;
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
       overflow: hidden;
+    }
+
+    .team-card-media {
+      position: relative;
+      aspect-ratio: 1 / 0.92;
+      width: 100%;
       flex-shrink: 0;
-      margin-bottom: 0.45rem;
-      background: linear-gradient(145deg, var(--tg-green), var(--tg-green-deep));
-      border: 2px solid rgba(52, 211, 153, 0.45);
-      box-shadow: 0 6px 18px rgba(0, 106, 78, 0.35);
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(52, 211, 153, 0.28), transparent 55%),
+        linear-gradient(145deg, var(--tg-green), var(--tg-green-deep));
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--font-display);
       font-weight: 700;
-      font-size: 1.25rem;
-      color: white;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      color: rgba(255, 255, 255, 0.9);
     }
 
     .team-avatar-initials {
@@ -596,10 +559,11 @@
       align-items: center;
       justify-content: center;
       z-index: 0;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
+      user-select: none;
     }
 
-    .team-avatar img {
+    .team-card-media img {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -609,12 +573,151 @@
       display: block;
     }
 
-    .team-avatar--ghost {
-      background: linear-gradient(145deg, rgba(0, 106, 78, 0.45), rgba(20, 28, 46, 0.9));
-      border-color: rgba(255, 255, 255, 0.12);
-      box-shadow: none;
+    .team-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 0.85rem 0.95rem 0.55rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .team-card-name {
+      font-family: var(--font-display);
+      font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .team-role-badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 0.22rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      background: linear-gradient(135deg, var(--tg-gold), #e6b800);
+      border: 1px solid rgba(255, 206, 0, 0.55);
+      box-shadow: 0 2px 10px rgba(255, 206, 0, 0.18);
+    }
+
+    .team-location {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--tg-green-bright);
+      font-size: 0.78rem;
+      font-weight: 550;
+      margin-top: 0.1rem;
+    }
+
+    .team-location svg {
+      width: 0.9rem;
+      height: 0.9rem;
+      flex-shrink: 0;
+      opacity: 0.9;
+    }
+
+    .team-bio {
       color: var(--muted);
-      font-size: 1.1rem;
+      font-size: clamp(0.78rem, 1.15vw, 0.88rem);
+      line-height: 1.4;
+      margin-top: 0.15rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .team-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      list-style: none;
+      margin-top: 0.35rem;
+    }
+
+    .team-tags li {
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--tg-green-bright);
+      background: rgba(0, 106, 78, 0.28);
+      border: 1px solid rgba(52, 211, 153, 0.28);
+      letter-spacing: 0.01em;
+    }
+
+    .team-card-footer {
+      margin-top: auto;
+      padding: 0.55rem 0.95rem 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: rgba(154, 163, 181, 0.85);
+      letter-spacing: 0.02em;
+    }
+
+    .team-card.open-role {
+      border-style: dashed;
+      border-color: rgba(52, 211, 153, 0.28);
+      background: rgba(255, 255, 255, 0.025);
+      box-shadow: none;
+      opacity: 0.92;
+    }
+
+    .team-card.open-role .team-card-media {
+      background:
+        radial-gradient(circle at 50% 40%, rgba(0, 106, 78, 0.35), transparent 60%),
+        linear-gradient(160deg, rgba(20, 28, 46, 0.95), rgba(11, 18, 32, 0.98));
+      color: var(--muted);
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      font-weight: 600;
+    }
+
+    .team-card.open-role .team-role-badge {
+      color: var(--tg-green-bright);
+      background: rgba(0, 106, 78, 0.35);
+      border-color: rgba(52, 211, 153, 0.3);
+      box-shadow: none;
+    }
+
+    .team-card.open-role .team-location {
+      color: var(--muted);
+    }
+
+    .team-card.open-role .team-tags li {
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 960px) {
+      .team-grid {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+        overflow-y: auto;
+      }
+      .team-card-media {
+        aspect-ratio: 16 / 7;
+      }
+    }
+
+    @media (min-width: 961px) and (max-width: 1180px) {
+      .team-card-name {
+        font-size: 1rem;
+      }
+      .team-bio {
+        font-size: 0.76rem;
+      }
+      .team-tags li {
+        font-size: 0.64rem;
+      }
     }
 
     .avatar {
@@ -630,32 +733,6 @@
       font-size: 0.95rem;
       color: white;
       margin-bottom: 0.4rem;
-    }
-
-    @media (max-width: 960px) {
-      .slide-split.team-layout {
-        grid-template-columns: 1fr;
-      }
-      .slide-split.team-layout .slide-visual {
-        height: min(28vh, 200px);
-      }
-      .team-grid {
-        grid-template-columns: 1fr;
-      }
-      .team-card.open-role {
-        grid-column: auto;
-      }
-    }
-
-    @media (min-width: 961px) and (max-width: 1180px) {
-      .team-avatar {
-        width: 60px;
-        height: 60px;
-        font-size: 1.1rem;
-      }
-      .team-card h3 {
-        font-size: 0.95rem;
-      }
     }
 
     .ask-amount {
@@ -1266,7 +1343,7 @@
           <h2>Produit, tech &amp; terrain.</h2>
           <div class="team-grid">
             <article class="team-card">
-              <div class="team-avatar" aria-hidden="true">
+              <div class="team-card-media" aria-hidden="true">
                 <span class="team-avatar-initials">CD</span>
                 <img
                   src="assets/team-chaminade.jpg"
@@ -1274,12 +1351,29 @@
                   onerror="this.remove()"
                 />
               </div>
-              <h3>Chaminade D. Adjolou</h3>
-              <p class="role">CEO &amp; CTO</p>
-              <p class="bio">Vision, architecture, mobile / web / backend</p>
+              <div class="team-card-body">
+                <h3 class="team-card-name">Chaminade D. Adjolou</h3>
+                <span class="team-role-badge">CEO &amp; CTO</span>
+                <p class="team-location">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.8"/>
+                  </svg>
+                  Lomé, Togo
+                </p>
+                <p class="team-bio">Vision, architecture produit et stack mobile / web / backend.</p>
+                <ul class="team-tags">
+                  <li>Flutter</li>
+                  <li>React</li>
+                  <li>PHP</li>
+                  <li>Vision</li>
+                </ul>
+              </div>
+              <footer class="team-card-footer">Équipe fondatrice</footer>
             </article>
+
             <article class="team-card">
-              <div class="team-avatar" aria-hidden="true">
+              <div class="team-card-media" aria-hidden="true">
                 <span class="team-avatar-initials">DH</span>
                 <img
                   src="assets/team-divine.jpg"
@@ -1287,24 +1381,52 @@
                   onerror="this.remove()"
                 />
               </div>
-              <h3>Divine HIBA</h3>
-              <p class="role">Project Manager &amp; BA</p>
-              <p class="bio">Pilotage, besoins métier, coordination écoles</p>
+              <div class="team-card-body">
+                <h3 class="team-card-name">Divine HIBA</h3>
+                <span class="team-role-badge">Project Manager &amp; BA</span>
+                <p class="team-location">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.8"/>
+                  </svg>
+                  Lomé, Togo
+                </p>
+                <p class="team-bio">Pilotage projet, besoins métier et coordination avec les écoles.</p>
+                <ul class="team-tags">
+                  <li>Product</li>
+                  <li>BA</li>
+                  <li>Écoles</li>
+                  <li>Ops</li>
+                </ul>
+              </div>
+              <footer class="team-card-footer">Équipe fondatrice</footer>
             </article>
-            <aside class="team-card open-role">
-              <div class="team-avatar team-avatar--ghost" aria-hidden="true">
+
+            <aside class="team-card open-role" aria-label="Poste ouvert">
+              <div class="team-card-media" aria-hidden="true">
                 <span class="team-avatar-initials">+</span>
               </div>
-              <div>
-                <h3>À recruter</h3>
-                <p class="role">ops contenu · partenariats · growth</p>
+              <div class="team-card-body">
+                <h3 class="team-card-name">À recruter</h3>
+                <span class="team-role-badge">Ops · Growth</span>
+                <p class="team-location">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.8"/>
+                  </svg>
+                  Lomé, Togo
+                </p>
+                <p class="team-bio">Renfort contenu, partenariats écoles et acquisition.</p>
+                <ul class="team-tags">
+                  <li>Contenu</li>
+                  <li>Partenariats</li>
+                  <li>Growth</li>
+                </ul>
               </div>
+              <footer class="team-card-footer">Poste ouvert</footer>
             </aside>
           </div>
         </div>
-        <figure class="slide-visual">
-          <img src="assets/slide-10-team.png" alt="Illustration équipe EZOA-TO" />
-        </figure>
       </div>
     </section>
 
