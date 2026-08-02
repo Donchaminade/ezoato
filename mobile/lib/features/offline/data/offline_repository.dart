@@ -48,6 +48,19 @@ class OfflineRepository {
     return offline;
   }
 
+  /// Chemin conventionnel de la miniature locale (page 1).
+  Future<String> previewPathFor(String id) async {
+    final dir = await _offlineDir();
+    return p.join(dir.path, '$id.preview.jpg');
+  }
+
+  /// Retourne le chemin si le fichier miniature existe.
+  Future<String?> existingPreviewPath(String id) async {
+    final path = await previewPathFor(id);
+    if (await File(path).exists()) return path;
+    return null;
+  }
+
   Future<bool> isAvailable(String id) async {
     final db = await _database();
     final rows = await db.query(
@@ -85,6 +98,17 @@ class OfflineRepository {
     }
   }
 
+  Future<void> _cachePreview(Epreuve epreuve) async {
+    try {
+      final bytes = await _api.downloadEpreuvePreviewBytes(epreuve.id);
+      if (bytes.isEmpty) return;
+      final path = await previewPathFor(epreuve.id);
+      await File(path).writeAsBytes(bytes, flush: true);
+    } catch (_) {
+      // Aperçu optionnel : le PDF hors ligne reste utilisable sans miniature.
+    }
+  }
+
   Future<void> download(Epreuve epreuve) async {
     final bytes = await _api.downloadEpreuveBytes(epreuve.id);
     if (bytes.isEmpty) throw ApiException('Fichier vide');
@@ -92,6 +116,7 @@ class OfflineRepository {
     final dir = await _offlineDir();
     final filePath = p.join(dir.path, '${epreuve.id}.pdf');
     await File(filePath).writeAsBytes(bytes, flush: true);
+    await _cachePreview(epreuve);
 
     final db = await _database();
     await db.insert(
@@ -110,12 +135,16 @@ class OfflineRepository {
           'type': epreuve.type,
           'ville': epreuve.ville,
           'pdfUrl': epreuve.pdfUrl,
+          'pdfPreviewUrl': epreuve.pdfPreviewUrl,
+          'thumbnailUrl': epreuve.thumbnailUrl,
           'pages': epreuve.pages,
           'tailleKo': epreuve.tailleKo,
           'telechargements': epreuve.telechargements,
           'soumisPar': epreuve.soumisPar,
           'soumisLe': epreuve.soumisLe,
           'statut': epreuve.statut,
+          'requiresPayment': epreuve.requiresPayment,
+          'prixFcfa': epreuve.prixFcfa,
         }),
         'local_pdf_path': filePath,
         'downloaded_at': DateTime.now().toIso8601String(),
@@ -153,6 +182,8 @@ class OfflineRepository {
       final file = File(path);
       if (await file.exists()) await file.delete();
     }
+    final preview = File(await previewPathFor(id));
+    if (await preview.exists()) await preview.delete();
     await db.delete('offline_epreuves', where: 'id = ?', whereArgs: [id]);
   }
 }
@@ -163,4 +194,34 @@ final offlineRepositoryProvider = Provider<OfflineRepository>((ref) {
 
 final offlineListProvider = FutureProvider<List<OfflineEpreuve>>((ref) async {
   return ref.watch(offlineRepositoryProvider).listAll();
+});
+
+/// Entrées hors ligne enrichies (métadonnées + chemin miniature locale).
+class OfflineLibraryEntry {
+  const OfflineLibraryEntry({
+    required this.item,
+    this.meta,
+    this.previewPath,
+  });
+
+  final OfflineEpreuve item;
+  final Epreuve? meta;
+  final String? previewPath;
+}
+
+final offlineLibraryEntriesProvider =
+    FutureProvider<List<OfflineLibraryEntry>>((ref) async {
+  final repo = ref.watch(offlineRepositoryProvider);
+  final items = await ref.watch(offlineListProvider.future);
+  final entries = <OfflineLibraryEntry>[];
+  for (final item in items) {
+    entries.add(
+      OfflineLibraryEntry(
+        item: item,
+        meta: repo.parseMetadata(item),
+        previewPath: await repo.existingPreviewPath(item.id),
+      ),
+    );
+  }
+  return entries;
 });

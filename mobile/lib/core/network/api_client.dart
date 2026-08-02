@@ -334,6 +334,23 @@ class ApiClient {
     }
   }
 
+  /// Miniature page 1 (même endpoint que l'aperçu carte / web).
+  Future<List<int>> downloadEpreuvePreviewBytes(
+    String epreuveId, {
+    int page = 1,
+  }) async {
+    try {
+      final res = await _dio.get<List<int>>(
+        '/epreuves/$epreuveId/preview',
+        queryParameters: {'page': page},
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return res.data ?? [];
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
   Future<UserLibrary> getMyLibrary() =>
       _get('/account/library', fromJson: UserLibrary.fromJson);
 
