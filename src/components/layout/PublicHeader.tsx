@@ -1,10 +1,17 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogIn, LogOut, Upload } from "lucide-react";
+import { Handshake, LogIn, LogOut, Upload } from "lucide-react";
 import { EzoaLogo } from "@/components/branding/EzoaLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useAuth } from "@/lib/auth";
 import { dashboardHomeForRole } from "@/lib/dashboard-nav";
+import { PITCH_DECK_HREF } from "@/lib/pitch";
 
 const NAV = [
   { to: "/", label: "Accueil" },
@@ -55,6 +62,29 @@ export function PublicHeader() {
 
           <div className="flex items-center justify-end gap-2.5 sm:gap-3 md:gap-3.5">
             <ThemeToggle className="hidden sm:inline-flex" />
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className={`${NAV_BTN} border-primary/40 text-primary hover:bg-primary/12 hover:!text-primary`}
+                  >
+                    <a
+                      href={PITCH_DECK_HREF}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Sponsoriser — ouvrir le pitch investisseur"
+                    >
+                      <Handshake className="size-3.5" /> Sponsoriser
+                    </a>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  Pitch investisseur — ouvrir le deck
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button
               asChild
               variant="ghost"
