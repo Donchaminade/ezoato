@@ -43,6 +43,7 @@ import type {
   UserLibrary,
   UserProfile,
 } from "./types";
+import { resolveMediaUrl } from "./utils";
 
 const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -271,8 +272,9 @@ export const api = {
   },
 
   async fetchAuthenticatedUrl(url: string): Promise<string> {
+    const resolved = resolveMediaUrl(url) ?? url;
     const token = localStorage.getItem("ezoa_token");
-    const res = await fetch(url, {
+    const res = await fetch(resolved, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     if (!res.ok) throw new Error("Ressource introuvable");

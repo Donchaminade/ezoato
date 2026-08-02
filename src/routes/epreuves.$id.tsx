@@ -11,7 +11,11 @@ import { PageHeroBadge } from "@/components/layout/PageHeroBadge";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AuthenticatedPdf, PORTRAIT_PREVIEW_FRAME } from "@/components/admin/AuthenticatedMedia";
+import {
+  AuthenticatedImage,
+  AuthenticatedPdf,
+  PORTRAIT_PREVIEW_FRAME,
+} from "@/components/admin/AuthenticatedMedia";
 import { PaymentDialog } from "@/components/payments/PaymentDialog";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -208,14 +212,12 @@ function EpreuveDetail() {
                         )}
                       </div>
                     ) : data.thumbnailUrl ? (
-                      <div className={PORTRAIT_PREVIEW_FRAME}>
-                        <img
-                          src={data.thumbnailUrl}
-                          alt={`Aperçu — ${data.titre}`}
-                          className="h-full w-full object-contain"
-                          loading="lazy"
-                        />
-                      </div>
+                      <AuthenticatedImage
+                        url={data.thumbnailUrl}
+                        alt={`Aperçu — ${data.titre}`}
+                        className={PORTRAIT_PREVIEW_FRAME}
+                        imgClassName="absolute inset-0 h-full w-full object-contain"
+                      />
                     ) : user && hasAccess && data.pdfPreviewUrl ? (
                       <AuthenticatedPdf url={data.pdfPreviewUrl} />
                     ) : (
