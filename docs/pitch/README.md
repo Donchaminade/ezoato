@@ -6,11 +6,11 @@ Présentation professionnelle pour investisseurs, partenaires et établissements
 
 | Fichier | Rôle |
 |---------|------|
-| [`ezoa-to-pitch-deck.html`](./ezoa-to-pitch-deck.html) | Deck principal (12 slides), HTML/CSS/JS (Google Fonts avec fallback hors-ligne) |
+| [`ezoa-to-pitch-deck.html`](./ezoa-to-pitch-deck.html) | Deck principal (12 slides), HTML/CSS/JS — texte FR + PNG intégrés |
 | [`SPEAKER-NOTES.md`](./SPEAKER-NOTES.md) | Points de discussion + sources / méthodologie marché |
-| [`assets/`](./assets/) (`slide-01-cover.png` … `slide-12-ask.png`) | Captures / visuels PNG des 12 slides (export, aperçu, partage) |
+| [`assets/`](./assets/) (`slide-01-cover.png` … `slide-12-ask.png`) | Visuels PNG embarqués dans chaque slide (couverture plein cadre) |
 
-Par defaut le HTML affiche les **PNG** de `assets/` (plein cadre). Bouton *HTML editable* pour la version texte agrandie. Les PNG restent aussi utilisables seuls pour partage / export.
+Chaque slide combine le contenu français et le PNG correspondant (`assets/slide-XX-….png`). Les PNG restent aussi utilisables seuls pour partage / export.
 
 ## Checklist envoi investisseur
 
