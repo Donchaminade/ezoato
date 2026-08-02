@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EZOA-TO — Pitch Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-green: #006A4E;
+      --tg-green-deep: #004D38;
+      --tg-green-bright: #34D399;
+      --tg-gold: #FFCE00;
+      --tg-red: #D21034;
+      --ink: #0B1220;
+      --ink-soft: #141C2E;
+      --surface: #1A2338;
+      --text: #F4F7F5;
+      --muted: #9AA3B5;
+      --line: rgba(255, 255, 255, 0.08);
+      --placeholder: #FFCE00;
+      --font-display: "Space Grotesk", system-ui, sans-serif;
+      --font-body: "DM Sans", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--ink);
+      color: var(--text);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    .deck {
+      height: 100vh;
+      height: 100dvh;
+      position: relative;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, rgba(0, 106, 78, 0.35), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 90% 100%, rgba(255, 206, 0, 0.08), transparent 50%),
+        var(--ink);
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1.5rem, 5vw, 4.5rem);
+      padding-bottom: 4.5rem;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .slide-kicker {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tg-green-bright);
+      margin-bottom: 1rem;
+    }
+
+    .slide h1 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      max-width: 16ch;
+    }
+
+    .slide h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      max-width: 18ch;
+      margin-bottom: 1.25rem;
+    }
+
+    .slide .lead {
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 36ch;
+    }
+
+    .slide .sub {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 42ch;
+      line-height: 1.55;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .brand-row img {
+      height: clamp(48px, 8vw, 72px);
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 24px rgba(0, 106, 78, 0.4));
+    }
+
+    .cover-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slogan {
+      margin-top: 1.25rem;
+      font-family: var(--font-display);
+      font-size: clamp(1.15rem, 2.5vw, 1.5rem);
+      font-weight: 500;
+      color: var(--tg-gold);
+      letter-spacing: 0.02em;
+    }
+
+    .tagline {
+      margin-top: 0.75rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 32ch;
+    }
+
+    .cover-meta {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .cover-meta strong {
+      display: block;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    /* Layout helpers */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(1.5rem, 4vw, 3rem);
+      flex: 1;
+      align-content: center;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 1.75rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .slide h1, .slide h2 { max-width: none; }
+    }
+
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .bullet-list li {
+      display: flex;
+      gap: 0.85rem;
+      align-items: flex-start;
+      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .bullet-list li::before {
+      content: "";
+      flex-shrink: 0;
+      width: 10px;
+      height: 10px;
+      margin-top: 0.45em;
+      border-radius: 50%;
+      background: var(--tg-gold);
+      box-shadow: 0 0 0 3px rgba(255, 206, 0, 0.15);
+    }
+
+    .card {
+      background: linear-gradient(160deg, rgba(26, 35, 56, 0.9), rgba(20, 28, 46, 0.7));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 1.35rem 1.4rem;
+    }
+
+    .card h3 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.45rem;
+      color: var(--text);
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .card .price {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--tg-gold);
+      margin: 0.35rem 0 0.5rem;
+    }
+
+    .card .unit {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      background: rgba(0, 106, 78, 0.35);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--tg-green-bright);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .feature-chip {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 1.1rem 1.15rem;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--line);
+    }
+
+    .feature-chip strong {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .feature-chip span {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .demo-visual {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      aspect-ratio: 16 / 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .demo-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    .demo-visual .fallback {
+      padding: 2rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .vs-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 1.25rem;
+      align-items: stretch;
+      margin-top: 1.5rem;
+      flex: 1;
+      align-content: center;
+    }
+
+    .vs-divider {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--tg-gold);
+      opacity: 0.7;
+    }
+
+    @media (max-width: 900px) {
+      .vs-row { grid-template-columns: 1fr; }
+      .vs-divider { writing-mode: horizontal-tb; padding: 0.5rem 0; }
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-top: 1.75rem;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      top: 1.35rem;
+      left: 8%;
+      right: 8%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--tg-green), var(--tg-gold));
+      opacity: 0.35;
+    }
+
+    @media (max-width: 900px) {
+      .timeline { grid-template-columns: 1fr; }
+      .timeline::before { display: none; }
+    }
+
+    .tl-item {
+      position: relative;
+      padding-top: 2.5rem;
+    }
+
+    .tl-item .dot {
+      position: absolute;
+      top: 0.9rem;
+      left: 0;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--tg-gold);
+      box-shadow: 0 0 0 4px rgba(255, 206, 0, 0.2);
+    }
+
+    .tl-item .when {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--tg-green-bright);
+      margin-bottom: 0.5rem;
+    }
+
+    .tl-item ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .tl-item li {
+      font-size: 0.95rem;
+      color: var(--muted);
+      padding-left: 0.85rem;
+      border-left: 2px solid rgba(0, 106, 78, 0.5);
+    }
+
+    .team-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 1.5rem;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      max-width: 360px;
+    }
+
+    .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--tg-green), var(--tg-green-deep));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: white;
+      margin-bottom: 0.75rem;
+    }
+
+    .placeholder {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(255, 206, 0, 0.12);
+      border: 1px dashed rgba(255, 206, 0, 0.45);
+      color: var(--placeholder);
+      font-size: 0.85em;
+      font-weight: 600;
+      font-family: var(--font-body);
+    }
+
+    .ask-amount {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      color: var(--tg-gold);
+      margin: 0.5rem 0 1.5rem;
+    }
+
+    .funds {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.85rem;
+      max-width: 640px;
+    }
+
+    @media (max-width: 700px) {
+      .funds { grid-template-columns: 1fr; }
+    }
+
+    .fund-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1.1rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--line);
+      font-size: 0.95rem;
+    }
+
+    .fund-item span:last-child {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--tg-green-bright);
+    }
+
+    .closing {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      font-size: 1.05rem;
+      color: var(--muted);
+    }
+
+    .closing em {
+      font-style: normal;
+      color: var(--tg-gold);
+      font-family: var(--font-display);
+      font-weight: 600;
+    }
+
+    .footnote {
+      margin-top: auto;
+      padding-top: 1rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      max-width: 70ch;
+      line-height: 1.4;
+    }
+
+    .big-num {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4.5vw, 2.85rem);
+      font-weight: 700;
+      color: var(--tg-gold);
+      line-height: 1;
+      margin: 0.4rem 0 0.5rem;
+    }
+
+    .big-num .suffix {
+      font-size: 0.42em;
+      color: var(--muted);
+      font-weight: 600;
+      margin-left: 0.15em;
+    }
+
+    .card .label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tg-green-bright);
+      margin-bottom: 0.25rem;
+    }
+
+    .ask-note {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: -0.75rem 0 1.25rem;
+    }
+
+    .team-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      margin-top: 0.5rem;
+      align-items: stretch;
+    }
+
+    .team-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+
+    .team-card .role {
+      color: var(--tg-green-bright);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .open-role {
+      opacity: 0.9;
+      border-style: dashed;
+    }
+
+    /* Chrome UI */
+    .chrome {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
+      background: linear-gradient(transparent, rgba(11, 18, 32, 0.92) 40%);
+      pointer-events: none;
+    }
+
+    .chrome > * { pointer-events: auto; }
+
+    .dots {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .dot-btn {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.22);
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .dot-btn:hover { background: rgba(255, 255, 255, 0.45); }
+    .dot-btn.active {
+      background: var(--tg-gold);
+      transform: scale(1.25);
+    }
+
+    .nav-btns {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .nav-btns button {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(26, 35, 56, 0.85);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .nav-btns button:hover {
+      border-color: rgba(52, 211, 153, 0.4);
+      color: var(--tg-green-bright);
+    }
+
+    .slide-num {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.8rem;
+      color: var(--muted);
+      min-width: 4.5rem;
+    }
+
+    .hint {
+      position: fixed;
+      top: 1rem;
+      right: 1.25rem;
+      z-index: 40;
+      font-size: 0.7rem;
+      color: var(--muted);
+      opacity: 0.55;
+      letter-spacing: 0.04em;
+    }
+
+    /* Print / PDF */
+    @media print {
+      @page {
+        size: landscape;
+        margin: 0;
+      }
+
+      body {
+        overflow: visible;
+        background: var(--ink);
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .deck {
+        height: auto;
+        background: var(--ink);
+      }
+
+      .chrome, .hint { display: none !important; }
+
+      .slide {
+        position: relative;
+        display: flex !important;
+        opacity: 1 !important;
+        transform: none !important;
+        page-break-after: always;
+        break-after: page;
+        min-height: 100vh;
+        height: 100vh;
+        padding-bottom: 2rem;
+      }
+
+      .slide:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <p class="hint">← → / Espace · F plein écran</p>
+
+  <div class="deck" id="deck" role="region" aria-label="Pitch deck EZOA-TO">
+
+    <!-- 1. Cover -->
+    <section class="slide active" data-title="Couverture" aria-label="Diapositive 1 — Couverture">
+      <div class="cover-center">
+        <div class="brand-row">
+          <img src="../../mobile/assets/images/logo-ezoa.png" alt="EZOA-TO" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
+          <div class="avatar" style="display:none;width:72px;height:72px;font-size:1.5rem">E</div>
+        </div>
+        <h1>EZOA-TO</h1>
+        <p class="lead" style="margin-top:0.75rem;max-width:28ch">Archives scolaires du Togo</p>
+        <p class="slogan">Archive. Révise. Excelle.</p>
+        <p class="tagline">Le passé scolaire du Togo, au service de ton avenir.</p>
+      </div>
+      <div class="cover-meta">
+        <div><strong>Équipe</strong> Chaminade D. Adjolou · Divine HIBA</div>
+        <div><strong>Contact</strong> contact@ezoa.tg · github.com/Donchaminade</div>
+        <div><strong>Stack</strong> Flutter · React · PHP/MySQL</div>
+        <div><strong>Marché</strong> Togo · AO francophone</div>
+      </div>
+    </section>
+
+    <!-- 2. Problème -->
+    <section class="slide" data-title="Problème" aria-label="Diapositive 2 — Problème">
+      <p class="slide-kicker">Le problème</p>
+      <h2>Les épreuves se perdent. Les élèves cherchent partout.</h2>
+      <ul class="bullet-list">
+        <li>Sujets d’examens et compositions dispersés entre WhatsApp, photocopies et « anciens »</li>
+        <li>Pas d’archive fiable, filtrable par classe, matière, établissement ou examen national</li>
+        <li>Révisions inégales selon le réseau social — pas selon le mérite</li>
+      </ul>
+    </section>
+
+    <!-- 3. Solution -->
+    <section class="slide" data-title="Solution" aria-label="Diapositive 3 — Solution">
+      <p class="slide-kicker">La solution</p>
+      <h2>Une bibliothèque nationale d’épreuves, dans la poche.</h2>
+      <ul class="bullet-list">
+        <li>Accès centralisé web + mobile aux devoirs, compositions et examens (CEPD, BEPC, BAC…)</li>
+        <li>Recherche Archives, favoris, téléchargements PDF, mode hors ligne</li>
+        <li>Contenu vérifié : soumission communautaire + validation humaine avant publication</li>
+      </ul>
+    </section>
+
+    <!-- 4. Produit -->
+    <section class="slide" data-title="Produit" aria-label="Diapositive 4 — Produit">
+      <p class="slide-kicker">Produit</p>
+      <div class="grid-2">
+        <div>
+          <h2 style="margin-bottom:1rem">Application &amp; web opérationnels</h2>
+          <div class="grid-2" style="gap:0.75rem;margin-top:0">
+            <div class="feature-chip"><strong>Archives</strong><span>Filtres ville, matière, classe, examen</span></div>
+            <div class="feature-chip"><strong>Soumettre</strong><span>Photos → PDF, validation admin</span></div>
+            <div class="feature-chip"><strong>Pro &amp; paiements</strong><span>Abonnement + achat à l’unité</span></div>
+            <div class="feature-chip"><strong>Compte</strong><span>Favoris, bibliothèque, hors ligne, portefeuille</span></div>
+          </div>
+        </div>
+        <div class="demo-visual">
+          <img src="../../mobile/flutter_02.png" alt="Aperçu application mobile EZOA-TO" onerror="this.remove(); this.parentElement.querySelector('.fallback').style.display='block'" />
+          <p class="fallback" style="display:none">Capture mobile — placer <code>flutter_02.png</code> ou une capture récente dans le dépôt</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Marché -->
+    <section class="slide" data-title="Marché" aria-label="Diapositive 5 — Marché">
+      <p class="slide-kicker">Marché</p>
+      <h2>Du Togo vers l’Afrique de l’Ouest francophone.</h2>
+      <div class="grid-3">
+        <div class="card">
+          <p class="label">TAM</p>
+          <p class="big-num">~10<span class="suffix">M</span></p>
+          <p>Élèves du secondaire en AO francophone — éducation digitale / annales</p>
+        </div>
+        <div class="card">
+          <p class="label">SAM</p>
+          <p class="big-num">~370<span class="suffix">k</span></p>
+          <p>Élèves collège–lycée au Togo avec accès smartphone / internet</p>
+        </div>
+        <div class="card">
+          <p class="label">SOM</p>
+          <p class="big-num">3–8<span class="suffix">k</span></p>
+          <p>Abonnés Pro payants ciblés à 18–24 mois (pilote → national)</p>
+        </div>
+      </div>
+      <p class="footnote">Estimations / sources — méthodologie et URLs dans les notes orateur. Base Togo : ~912&nbsp;k élèves secondaire (MEN 2024-25).</p>
+    </section>
+
+    <!-- 6. Business model -->
+    <section class="slide" data-title="Business model" aria-label="Diapositive 6 — Business model">
+      <p class="slide-kicker">Business model</p>
+      <h2>Accès freemium + Mobile Money.</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Abonnement Pro</h3>
+          <p class="price">1&nbsp;000 FCFA</p>
+          <p class="unit">/ 6 mois — épreuves payantes illimitées</p>
+        </div>
+        <div class="card">
+          <h3>À l’unité</h3>
+          <p class="price">100–200</p>
+          <p class="unit">FCFA — examen / corrigé (selon config)</p>
+        </div>
+        <div class="card">
+          <h3>Contributeurs</h3>
+          <p class="price">~1&nbsp;000</p>
+          <p class="unit">FCFA récompense / soumission validée · retrait Mobile Money</p>
+        </div>
+      </div>
+      <p class="sub" style="margin-top:1.25rem">Paiements : Flooz &amp; T-Money. Devoirs &amp; compositions gratuits — examens nationaux monétisés.</p>
+      <p class="footnote">1&nbsp;000 FCFA / 6 mois ≈ prix d’une photocopie groupée — micropaiement aligné Mobile Money (voir notes).</p>
+    </section>
+
+    <!-- 7. Traction -->
+    <section class="slide" data-title="Traction" aria-label="Diapositive 7 — Traction">
+      <p class="slide-kicker">Traction</p>
+      <span class="stat-pill">Produit opérationnel · Prêt pilote</span>
+      <h2>Produit bout en bout. Preuve terrain en lancement.</h2>
+      <ul class="bullet-list">
+        <li>App Flutter + web React + admin + API PHP/MySQL — archives, soumission, validation, Pro</li>
+        <li>Paiements Mobile Money (Flooz / T-Money) intégrés — freemium prêt à monétiser</li>
+        <li>Pas de vanity metrics inventées : priorités = pilotes lycées, volume d’épreuves validées, 1<sup>ers</sup> Pro</li>
+        <li>Partenariats établissements : discussions à ouvrir — recrutement ambassadeurs prévu</li>
+      </ul>
+      <p class="footnote">Stade pré-traction mesurée — honnêteté investisseur : le risque est d’exécution terrain, pas de produit fantôme.</p>
+    </section>
+
+    <!-- 8. Concurrence -->
+    <section class="slide" data-title="Positionnement" aria-label="Diapositive 8 — Concurrence">
+      <p class="slide-kicker">Positionnement</p>
+      <h2>Pas un drive WhatsApp. Une archive de confiance.</h2>
+      <div class="vs-row">
+        <div class="card">
+          <h3>Statu quo</h3>
+          <p style="margin-top:0.75rem;line-height:1.6">
+            Groupes WhatsApp · photocopies · PDF Facebook · annales éparpillées · apps révision génériques (peu locales)
+          </p>
+        </div>
+        <div class="vs-divider">VS</div>
+        <div class="card" style="border-color:rgba(52,211,153,0.35)">
+          <h3>EZOA-TO</h3>
+          <p style="margin-top:0.75rem;line-height:1.6">
+            Focus Togo · validation humaine · Flooz / T-Money · contributeurs rémunérés · hors ligne · favoris
+          </p>
+        </div>
+      </div>
+      <p class="footnote">Concurrent réel = le chaos informel. Apps francophones (révision / cours) existent — peu d’archive nationale togolais + MM local.</p>
+    </section>
+
+    <!-- 9. Go-to-market -->
+    <section class="slide" data-title="Go-to-market" aria-label="Diapositive 9 — Go-to-market">
+      <p class="slide-kicker">Go-to-market</p>
+      <h2>Écoles, réseaux d’élèves, Mobile Money.</h2>
+      <div class="grid-4">
+        <div class="feature-chip"><strong>1. Pilotes</strong><span>3–5 lycées Lomé / régions — accès Pro découverte</span></div>
+        <div class="feature-chip"><strong>2. Ambassadeurs</strong><span>Élèves &amp; profs contributeurs récompensés</span></div>
+        <div class="feature-chip"><strong>3. Campagnes</strong><span>WhatsApp, Facebook — pics CEPD / BEPC / BAC</span></div>
+        <div class="feature-chip"><strong>4. B2B écoles</strong><span>Licence établissement : accès classes + dépôt sujets</span></div>
+      </div>
+      <p class="sub" style="margin-top:1.75rem">Notifications ciblées par classe. Offre B2B indicative : forfait annuel par établissement (à co-construire).</p>
+    </section>
+
+    <!-- 10. Équipe -->
+    <section class="slide" data-title="Équipe" aria-label="Diapositive 10 — Équipe">
+      <p class="slide-kicker">Équipe</p>
+      <h2>Produit, tech &amp; exécution terrain.</h2>
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="avatar">CA</div>
+          <h3>Chaminade Dondah Adjolou</h3>
+          <p class="role">CEO &amp; CTO</p>
+          <p style="color:var(--muted);font-size:0.9rem;margin-top:0.35rem;line-height:1.45">
+            Vision produit, architecture et développement (mobile, web, backend, paiements).
+          </p>
+        </div>
+        <div class="team-card">
+          <div class="avatar">DH</div>
+          <h3>Divine HIBA</h3>
+          <p class="role">Project Manager &amp; Business Analyst</p>
+          <p style="color:var(--muted);font-size:0.9rem;margin-top:0.35rem;line-height:1.45">
+            Pilotage projet, besoins métier, coordination écoles et priorisation produit.
+          </p>
+        </div>
+        <div class="team-card open-role">
+          <div class="avatar" style="background:rgba(255,255,255,0.08);color:var(--muted)">+</div>
+          <h3>Rôles ouverts</h3>
+          <p class="role">Recrutement prévu</p>
+          <p style="color:var(--muted);font-size:0.9rem;margin-top:0.35rem;line-height:1.45">
+            Ops contenu / validation · partenariats établissements · growth acquisition.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. Roadmap -->
+    <section class="slide" data-title="Roadmap" aria-label="Diapositive 11 — Roadmap">
+      <p class="slide-kicker">Roadmap</p>
+      <h2>6 · 12 · 18 mois</h2>
+      <div class="timeline">
+        <div class="tl-item">
+          <span class="dot" aria-hidden="true"></span>
+          <p class="when">6 mois</p>
+          <ul>
+            <li>3–5 lycées pilotes · catalogue exams clés</li>
+            <li>Paiements MM stables · Play Store</li>
+            <li>1<sup>ers</sup> abonnés Pro &amp; KPIs terrain</li>
+          </ul>
+        </div>
+        <div class="tl-item">
+          <span class="dot" aria-hidden="true"></span>
+          <p class="when">12 mois</p>
+          <ul>
+            <li>Couverture nationale CEPD / BEPC / BAC</li>
+            <li>Offre licence établissements</li>
+            <li>Rétention Pro · réseau contributeurs</li>
+          </ul>
+        </div>
+        <div class="tl-item">
+          <span class="dot" aria-hidden="true"></span>
+          <p class="when">18 mois</p>
+          <ul>
+            <li>1<sup>er</sup> pays voisin (AO francophone)</li>
+            <li>Corrigés &amp; parcours de révision</li>
+            <li>Dialogue MEN / partenaires éducation</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. Besoin -->
+    <section class="slide" data-title="Besoin" aria-label="Diapositive 12 — Besoin">
+      <p class="slide-kicker">Besoin · Pre-seed / seed</p>
+      <h2>Accélérer le pilote national.</h2>
+      <p class="ask-amount">25–50 M FCFA</p>
+      <p class="ask-note">Proposition indicative · ~38–76 kUSD · ticket central proposé : 35 M FCFA</p>
+      <div class="funds">
+        <div class="fund-item"><span>Produit &amp; infra</span><span>35&nbsp;%</span></div>
+        <div class="fund-item"><span>Contenu &amp; validation</span><span>25&nbsp;%</span></div>
+        <div class="fund-item"><span>Acquisition &amp; écoles</span><span>25&nbsp;%</span></div>
+        <div class="fund-item"><span>Ops &amp; conformité paiements</span><span>15&nbsp;%</span></div>
+      </div>
+      <p class="closing">
+        Ouvert aussi aux <em>partenariats écoles</em>, incubateurs et mécènes éducation —
+        sans equity si préféré.
+      </p>
+    </section>
+  </div>
+
+  <footer class="chrome" aria-label="Navigation">
+    <div class="slide-num" id="slideNum">1 / 12</div>
+    <div class="dots" id="dots" role="tablist" aria-label="Diapositives"></div>
+    <div class="nav-btns">
+      <button type="button" id="btnPrev" aria-label="Précédent">←</button>
+      <button type="button" id="btnNext" aria-label="Suivant">→</button>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const dotsEl = document.getElementById("dots");
+      const slideNum = document.getElementById("slideNum");
+      const total = slides.length;
+      let index = 0;
+
+      slides.forEach((slide, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "dot-btn" + (i === 0 ? " active" : "");
+        btn.setAttribute("role", "tab");
+        btn.setAttribute("aria-label", "Aller à la diapositive " + (i + 1) + " — " + (slide.dataset.title || ""));
+        btn.addEventListener("click", () => go(i));
+        dotsEl.appendChild(btn);
+      });
+
+      const dots = Array.from(dotsEl.querySelectorAll(".dot-btn"));
+
+      function go(i) {
+        index = Math.max(0, Math.min(total - 1, i));
+        slides.forEach((s, n) => s.classList.toggle("active", n === index));
+        dots.forEach((d, n) => d.classList.toggle("active", n === index));
+        slideNum.textContent = (index + 1) + " / " + total;
+        history.replaceState(null, "", "#" + (index + 1));
+      }
+
+      function next() { go(index + 1); }
+      function prev() { go(index - 1); }
+
+      document.getElementById("btnNext").addEventListener("click", next);
+      document.getElementById("btnPrev").addEventListener("click", prev);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+          e.preventDefault();
+          next();
+        } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+          e.preventDefault();
+          prev();
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          go(0);
+        } else if (e.key === "End") {
+          e.preventDefault();
+          go(total - 1);
+        } else if (e.key === "f" || e.key === "F") {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen?.();
+          } else {
+            document.exitFullscreen?.();
+          }
+        }
+      });
+
+      let touchX = null;
+      document.addEventListener("touchstart", (e) => {
+        touchX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      document.addEventListener("touchend", (e) => {
+        if (touchX == null) return;
+        const dx = e.changedTouches[0].screenX - touchX;
+        if (Math.abs(dx) > 50) (dx < 0 ? next : prev)();
+        touchX = null;
+      }, { passive: true });
+
+      const hash = parseInt(location.hash.replace("#", ""), 10);
+      if (hash >= 1 && hash <= total) go(hash - 1);
+    })();
+  </script>
+</body>
+</html>
