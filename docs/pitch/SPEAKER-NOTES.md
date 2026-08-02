@@ -49,8 +49,9 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 ## 3. Solution
 
 - EZOA-TO = bibliothèque nationale d’épreuves (web + mobile).
-- Socle immédiat : **CEPD, BEPC, BAC** + devoirs / compositions.
-- Expansion crédible (même logique archive) : **CAP, BT, BTS**, puis **concours nationaux** (écoles / accès sélectif ; upside concours de la fonction publique — rester prudent, pas promettre le catalogue complet dès le seed).
+- Socle examens : **CEPD, BEPC, BAC** + devoirs / compositions.
+- **Fonctionnalité livrée (PR #8)** : **4 niveaux** — collège, lycée, université, concours — avec formulaires de soumission adaptatifs et filtres archives. Pas seulement une roadmap 12–18 mois.
+- Contenu catalogue CAP / BT / BTS / concours = **prochaine expansion** (remplir les rayons), pas la capacité produit.
 - Chercher, consulter, télécharger ; favoris et hors ligne pour le terrain (3G, lycée).
 - Qualité : soumissions communautaires + **validation humaine** avant publication.
 
@@ -58,8 +59,8 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 ## 4. Produit / démo
 
-- Montrer 30–60 s : Archives → fiche PDF → compte (favoris / bibliothèque / Pro).
-- Filtrage par examen : positionner le produit comme **plateforme multi-examens** (secondaire général → pro / post-secondaire), pas uniquement BAC.
+- Montrer 30–60 s : Archives (filtre **niveau**) → fiche PDF → compte (favoris / bibliothèque / Pro).
+- **4 niveaux livrés** + formulaires adaptatifs (collège / lycée / univ. / concours) — plateforme multi-niveaux, pas uniquement BAC.
 - Flux contributeur : photo → PDF → admin → récompense portefeuille → retrait Mobile Money.
 - Stack crédible : Flutter, React, PHP/MySQL — **produit opérationnel**, pas une maquette.
 
@@ -163,6 +164,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 - **Honnêteté** : produit opérationnel / prêt pilote — **pas** de MAU ni de revenus inventés.
 - Vrai aujourd’hui : parcours bout en bout (archives, soumission, admin, Pro, paiements MM), stack mobile + web + API, itération GitHub.
+- **Fonctionnalité livrée** : 4 niveaux + **détection de doublons admin** (similarité / split UI) — livré sur branche, en cours d’intégration (PR #8 → `dev`), pas encore forcément en prod `master`.
 - Prochaines preuves à collecter (et à mettre à jour dans le deck) : n° d’épreuves validées, lycées pilotes signés, premiers paiements Pro, taux de rétention 6 mois.
 - Formulation investisseur : *le risque est l’exécution go-to-market, pas l’existence du produit.*
 
@@ -201,9 +203,9 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 ## 11. Roadmap 6 / 12 / 18 mois
 
+- **Livré (PR #8)** : modèle **4 niveaux** + formulaires adaptatifs + anti-doublons admin — en déploiement / intégration `dev`.
 - **6 mois** : 3–5 lycées pilotes, catalogue examens clés, Mobile Money stable, Play Store, premiers Pro + KPIs.
-- **12 mois** : couverture nationale **CEPD / BEPC / BAC**, offre licence établissements, rétention Pro, réseau contributeurs.
-- **12–18 mois** : ouverture **CAP, BT, BTS** et premiers **concours nationaux** (catalogue ciblé, contributeurs filières techniques / centres de formation) — upside marché hors secondaire général.
+- **12 mois** : **expansion contenu** — couverture nationale CEPD / BEPC / BAC, puis volumes CAP / BT / BTS et concours (catalogue ciblé, contributeurs filières) ; licence établissements ; rétention Pro.
 - **18 mois** : 1er pays voisin Afrique de l’Ouest francophone, corrigés / parcours, dialogue Ministère de l’Éducation / partenaires éducation.
 
 ---

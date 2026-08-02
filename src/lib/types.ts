@@ -5,7 +5,18 @@
 /** Ville du Togo — saisie libre, suggestions via /meta */
 export type Ville = string;
 
-export type Niveau = "college" | "lycee";
+export type Niveau = "college" | "lycee" | "universite" | "concours";
+
+/** Métadonnées spécifiques au niveau (université / concours). */
+export interface MetaNiveau {
+  filiere?: string;
+  anneeEtude?: string;
+  universite?: string;
+  session?: string;
+  concours?: string;
+  nomEpreuve?: string;
+  organisme?: string;
+}
 
 export type Classe =
   // collège
@@ -44,8 +55,9 @@ export interface Epreuve {
   classe: Classe;
   annee: number;
   type: TypeEpreuve;
-  periode?: Periode;
+  periode?: Periode | string;
   examen?: ExamenNational;
+  metaNiveau?: MetaNiveau | null;
   etablissement?: string;
   ville: Ville;
   pdfUrl: string;
@@ -313,11 +325,12 @@ export interface Soumission {
   titre: string;
   matiere: string;
   niveau: Niveau;
-  classe: Classe;
+  classe: string;
   annee: number;
   type: TypeEpreuve;
-  periode?: Periode;
+  periode?: Periode | string;
   examen?: ExamenNational;
+  metaNiveau?: MetaNiveau | null;
   etablissement?: string;
   ville: Ville;
   images: string[];
@@ -329,6 +342,19 @@ export interface Soumission {
   statut: "en_attente" | "validee" | "rejetee";
   motifRejet?: string;
   doublonsPotentiels?: string[];
+  similairesCount?: number;
+}
+
+export interface SimilarEpreuveMatch {
+  id: string;
+  score: number;
+  epreuve: Epreuve;
+}
+
+export interface SoumissionSimilairesResponse {
+  soumission: Soumission;
+  similaires: SimilarEpreuveMatch[];
+  similairesCount: number;
 }
 
 export interface ArchiveBrowseResult {
@@ -433,6 +459,8 @@ export interface DemandeEtablissement {
 export interface MetaClasses {
   college: string[];
   lycee: string[];
+  universite?: string[];
+  concours?: string[];
 }
 
 export interface ReferentielItem {
@@ -443,6 +471,8 @@ export interface ReferentielItem {
 export interface AdminReferentielClasses {
   college: ReferentielItem[];
   lycee: ReferentielItem[];
+  universite?: ReferentielItem[];
+  concours?: ReferentielItem[];
 }
 
 export interface AdminReferentiels {
@@ -464,6 +494,13 @@ export interface PublicMeta {
   villes: Ville[];
   matieres: string[];
   classes: MetaClasses;
+  niveaux?: Niveau[];
+  concours?: string[];
+  filieres?: string[];
+  anneesEtude?: string[];
+  types?: string[];
+  periodes?: string[];
+  examens?: ExamenNational[];
   etablissements: { nom: string; ville: string; niveau: Niveau | "mixte" }[];
   stats: {
     epreuvesValidees: number;

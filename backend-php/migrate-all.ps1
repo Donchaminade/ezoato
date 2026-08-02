@@ -37,7 +37,8 @@ $migrations = @(
   "migration-etablissements-encoding-fix.sql",
   "migration-classes.sql",
   "migration-classes-techniques.sql",
-  "migration-favoris.sql"
+  "migration-favoris.sql",
+  "migration-niveaux-concours.sql"
 )
 
 Write-Host "Base cible : $DbName" -ForegroundColor Cyan

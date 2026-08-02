@@ -27,8 +27,40 @@ const typeTone: Record<Epreuve["type"], string> = {
 
 function documentKindLabel(epreuve: Epreuve): string {
   if (epreuve.type === "corrige") return "Corrigé type";
+  if (epreuve.niveau === "concours") return "Concours";
+  if (epreuve.niveau === "universite") return "Université";
   if (epreuve.type === "examen" && epreuve.examen) return "Examen national";
   return "Sujet d'examen";
+}
+
+function niveauShort(niveau: Epreuve["niveau"]): string {
+  const map = { college: "Collège", lycee: "Lycée", universite: "Université", concours: "Concours" } as const;
+  return map[niveau] ?? niveau;
+}
+
+function secondaryLine(epreuve: Epreuve): string {
+  if (epreuve.niveau === "concours") {
+    const c = epreuve.metaNiveau?.concours ?? epreuve.classe;
+    const ep = epreuve.metaNiveau?.nomEpreuve ?? epreuve.matiere;
+    return `${c} · ${ep}`;
+  }
+  if (epreuve.niveau === "universite") {
+    const f = epreuve.metaNiveau?.filiere;
+    return [epreuve.matiere, epreuve.classe, f].filter(Boolean).join(" · ");
+  }
+  return `${epreuve.matiere} · ${epreuve.classe}`;
+}
+
+function lieuLine(epreuve: Epreuve): string {
+  if (epreuve.niveau === "concours") {
+    return epreuve.metaNiveau?.session
+      ? `Session ${epreuve.metaNiveau.session}`
+      : (epreuve.metaNiveau?.organisme ?? "Concours");
+  }
+  if (epreuve.niveau === "universite") {
+    return epreuve.metaNiveau?.universite ?? epreuve.etablissement ?? "—";
+  }
+  return epreuve.etablissement ?? epreuve.examen ?? "—";
 }
 
 function formatTaille(ko: number): string {
@@ -44,7 +76,7 @@ export function EpreuveCard({
 }) {
   const { isFavorited, toggleFavori, isPending } = useFavoris();
   const favorited = isFavorited(epreuve.id);
-  const lieu = epreuve.etablissement ?? epreuve.examen ?? "—";
+  const lieu = lieuLine(epreuve);
   const taille = formatTaille(epreuve.tailleKo);
 
   async function handleShare() {
@@ -87,10 +119,10 @@ export function EpreuveCard({
           </Link>
         </h3>
         <p className="text-sm text-muted-foreground">
-          {epreuve.matiere} · {epreuve.classe}
+          {secondaryLine(epreuve)}
         </p>
         <p className="text-sm text-muted-foreground">
-          Type :{" "}
+          {niveauShort(epreuve.niveau)} ·{" "}
           <span className="font-medium text-foreground">{documentKindLabel(epreuve)}</span>
         </p>
         <p className="flex items-start gap-1.5 text-sm text-muted-foreground">

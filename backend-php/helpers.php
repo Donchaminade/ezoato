@@ -231,7 +231,7 @@ function resolve_referentiel_nom(string $table, string $inputNom, ?string $nivea
   $inputCanon = canonical_referentiel_nom($inputNom, $table === 'villes');
 
   if ($table === 'classes') {
-    if ($niveau === null || !in_array($niveau, ['college', 'lycee'], true)) return null;
+    if ($niveau === null || !in_array($niveau, ['college', 'lycee', 'universite', 'concours'], true)) return null;
     $stmt = db()->prepare('SELECT nom FROM classes WHERE niveau = ?');
     $stmt->execute([$niveau]);
     $rows = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -293,16 +293,18 @@ function default_meta_classes(): array {
       '2nde G2', '1ère G2', 'Tle G2',
       '2nde G3', '1ère G3', 'Tle G3',
     ],
+    'universite' => ['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'],
+    'concours' => [],
   ];
 }
 
-/** Liste des classes depuis la base (collège / lycée). */
+/** Liste des classes depuis la base (collège / lycée / univ). */
 function load_meta_classes(): array {
   if (!table_exists('classes')) {
     return default_meta_classes();
   }
   $rows = db()->query('SELECT nom, niveau FROM classes ORDER BY ordre ASC, nom ASC')->fetchAll();
-  $out = ['college' => [], 'lycee' => []];
+  $out = ['college' => [], 'lycee' => [], 'universite' => [], 'concours' => []];
   foreach ($rows as $row) {
     $niveau = $row['niveau'] ?? '';
     if (!isset($out[$niveau])) continue;
@@ -311,15 +313,19 @@ function load_meta_classes(): array {
   if (!$out['college'] && !$out['lycee']) {
     return default_meta_classes();
   }
+  if (!$out['universite']) {
+    $out['universite'] = default_meta_classes()['universite'];
+  }
   return $out;
 }
 
-/** Toutes les classes valides (collège + lycée). */
+/** Toutes les classes valides (collège + lycée + univ). */
 function all_meta_class_names(): array {
   $classes = load_meta_classes();
   return array_values(array_unique(array_merge(
     $classes['college'] ?? [],
     $classes['lycee'] ?? [],
+    $classes['universite'] ?? [],
   )));
 }
 
@@ -372,10 +378,12 @@ function load_admin_class_items(): array {
     return [
       'college' => $map($defaults['college'], 'college'),
       'lycee' => $map($defaults['lycee'], 'lycee'),
+      'universite' => $map($defaults['universite'], 'universite'),
+      'concours' => [],
     ];
   }
   $rows = db()->query('SELECT nom, niveau FROM classes ORDER BY ordre ASC, nom ASC')->fetchAll();
-  $rawByNiveau = ['college' => [], 'lycee' => []];
+  $rawByNiveau = ['college' => [], 'lycee' => [], 'universite' => [], 'concours' => []];
   foreach ($rows as $row) {
     $niveau = $row['niveau'] ?? '';
     if (!isset($rawByNiveau[$niveau])) continue;
@@ -384,6 +392,8 @@ function load_admin_class_items(): array {
   return [
     'college' => map_referentiel_items($rawByNiveau['college']),
     'lycee' => map_referentiel_items($rawByNiveau['lycee']),
+    'universite' => map_referentiel_items($rawByNiveau['universite']),
+    'concours' => map_referentiel_items($rawByNiveau['concours']),
   ];
 }
 
@@ -584,6 +594,7 @@ function map_epreuve(array $row): array {
   $cfg = cfg();
   $base = rtrim($cfg['api_base_url'] ?? '', '/');
   require_once __DIR__ . '/lib/storage-paths.php';
+  $metaNiveau = decode_meta_niveau($row['meta_niveau'] ?? null);
   $mapped = [
     'id' => $row['id'],
     'titre' => repair_display_text($row['titre'] ?? '') ?? '',
@@ -594,6 +605,7 @@ function map_epreuve(array $row): array {
     'type' => $row['type'],
     'periode' => $row['periode'] ?? null,
     'examen' => $row['examen'] ?? null,
+    'metaNiveau' => $metaNiveau ?: null,
     'etablissement' => repair_display_text($row['etablissement'] ?? null),
     'ville' => repair_ville_display($row['ville'] ?? ''),
     'pdfUrl' => $base . '/epreuves/' . $row['id'] . '/download',
@@ -836,6 +848,7 @@ function map_soumission(array $row): array {
   $base = rtrim($cfg['api_base_url'] ?? '', '/');
   $doublons = $row['doublons_json'] ?? null;
   if (is_string($doublons)) $doublons = json_decode($doublons, true);
+  if (!is_array($doublons)) $doublons = [];
   $imagesRaw = $row['images_json'] ?? '[]';
   if (is_string($imagesRaw)) $imagesRaw = json_decode($imagesRaw, true) ?: [];
   $imageUrls = [];
@@ -850,6 +863,7 @@ function map_soumission(array $row): array {
   }
   $annee = (int)$row['annee'];
   $type = $row['type'] ?? '';
+  $metaNiveau = decode_meta_niveau($row['meta_niveau'] ?? null);
   require_once __DIR__ . '/lib/storage-paths.php';
   return [
     'id' => $row['id'],
@@ -861,6 +875,7 @@ function map_soumission(array $row): array {
     'type' => $type,
     'periode' => $row['periode'] ?? null,
     'examen' => $row['examen'] ?? null,
+    'metaNiveau' => $metaNiveau ?: null,
     'etablissement' => repair_display_text($row['etablissement'] ?? null),
     'ville' => repair_ville_display($row['ville'] ?? ''),
     'images' => $imageUrls,
@@ -872,6 +887,7 @@ function map_soumission(array $row): array {
     'statut' => $row['statut'],
     'motifRejet' => $row['motif_rejet'] ?? null,
     'doublonsPotentiels' => $doublons ?: null,
+    'similairesCount' => count($doublons),
   ];
 }
 
@@ -1117,5 +1133,6 @@ function map_soumission_detail(array $row, bool $forOwner = false): array {
   return $m;
 }
 
+require_once __DIR__ . '/lib/niveau-soumission.php';
 require_once __DIR__ . '/lib/notifications.php';
 require_once __DIR__ . '/lib/abonnement-rappels.php';
