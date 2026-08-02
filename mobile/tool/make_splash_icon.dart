@@ -2,8 +2,8 @@
 // assets/images/icon-ezoa.png (livre vert EZOA).
 //
 // Produit assets/images/icon-ezoa-splash.png : canvas carré 1024×1024
-// transparent, icône recolorée en blanc (alpha conservé) centrée à ~62 %,
-// pour affichage sur le fond noir du splash natif.
+// transparent, icône brand (couleurs d'origine) centrée à ~62 %,
+// pour affichage sur le fond blanc/off-white du splash natif.
 //
 // Usage : dart run tool/make_splash_icon.dart
 // Puis : dart run flutter_native_splash:create
@@ -24,18 +24,9 @@ void main() {
     exit(1);
   }
 
-  // Recolore en blanc : RGB → 255 partout, alpha de chaque pixel conservé.
-  final white = source.convert(numChannels: 4);
-  for (final pixel in white) {
-    pixel
-      ..r = 255
-      ..g = 255
-      ..b = 255;
-  }
-
   final target = (_outSize * _iconFraction).round();
   final scaled = img.copyResize(
-    white,
+    source,
     width: target,
     height: target,
     interpolation: img.Interpolation.cubic,
