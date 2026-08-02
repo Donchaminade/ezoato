@@ -36,7 +36,7 @@ class Env {
   /// `--dart-define=DEV_LAN_HOST=192.168.x.x`
   static const String _devLanHost = String.fromEnvironment(
     'DEV_LAN_HOST',
-    defaultValue: '192.168.1.67',
+    defaultValue: '10.14.202.205',
   );
 
   /// Émulateur Android : `10.0.2.2` pointe vers localhost du PC hôte.
