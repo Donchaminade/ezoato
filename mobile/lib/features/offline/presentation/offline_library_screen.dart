@@ -89,6 +89,8 @@ class OfflineLibraryScreen extends ConsumerWidget {
                   ville: meta?.ville,
                   telechargements: meta?.telechargements,
                   type: meta?.type ?? 'epreuve',
+                  periode: meta?.periode,
+                  examen: meta?.examen,
                   isOffline: true,
                   revealIndex: i,
                   previewImage: previewPath != null

@@ -36,6 +36,7 @@ class Epreuve {
     required this.soumisPar,
     required this.soumisLe,
     required this.statut,
+    this.periode,
     this.examen,
     this.etablissement,
     this.pdfPreviewUrl,
@@ -61,6 +62,7 @@ class Epreuve {
       soumisPar: json['soumisPar'] as String,
       soumisLe: json['soumisLe'] as String,
       statut: json['statut'] as String,
+      periode: json['periode'] as String?,
       examen: json['examen'] as String?,
       etablissement: json['etablissement'] as String?,
       pdfPreviewUrl: json['pdfPreviewUrl'] as String?,
@@ -77,6 +79,7 @@ class Epreuve {
   final String classe;
   final int annee;
   final String type;
+  final String? periode;
   final String? examen;
   final String? etablissement;
   final String ville;
@@ -616,6 +619,7 @@ class ListEpreuvesParams {
     this.niveau,
     this.classe,
     this.type,
+    this.periode,
     this.annee,
     this.examen,
     this.page,
@@ -628,6 +632,7 @@ class ListEpreuvesParams {
   final String? niveau;
   final String? classe;
   final String? type;
+  final String? periode;
   final int? annee;
   final String? examen;
   final int? page;
@@ -641,6 +646,7 @@ class ListEpreuvesParams {
     if (niveau != null && niveau!.isNotEmpty) map['niveau'] = niveau!;
     if (classe != null && classe!.isNotEmpty) map['classe'] = classe!;
     if (type != null && type!.isNotEmpty) map['type'] = type!;
+    if (periode != null && periode!.isNotEmpty) map['periode'] = periode!;
     if (annee != null) map['annee'] = annee.toString();
     if (examen != null && examen!.isNotEmpty) map['examen'] = examen!;
     if (page != null) map['page'] = page.toString();
