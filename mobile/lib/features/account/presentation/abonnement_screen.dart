@@ -17,11 +17,11 @@ class AbonnementScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final statusAsync = ref.watch(subscriptionStatusProvider);
 
-    return EzoaScreen(
+    return EzoaDetailScreen(
       title: 'Abonnement',
-      subtitle: 'Accès illimité aux épreuves payantes',
-      child: statusAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+      loading: statusAsync.isLoading,
+      body: statusAsync.when(
+        loading: () => const SizedBox.shrink(),
         error: (e, _) => EmptyState(
           title: 'Erreur',
           message: '$e',
@@ -32,7 +32,7 @@ class AbonnementScreen extends ConsumerWidget {
           return RefreshIndicator(
           onRefresh: () async => ref.invalidate(subscriptionStatusProvider),
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+            padding: const EdgeInsets.all(16),
             children: [
               EzoaGlassCard(
                 margin: EdgeInsets.zero,
