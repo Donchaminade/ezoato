@@ -225,17 +225,10 @@ if ($action === 'paiements') {
 }
 
 function map_profile_user(array $u): array {
-  return [
-    'id' => $u['id'],
-    'nom' => $u['nom'],
-    'email' => $u['email'],
-    'telephone' => $u['telephone'] ?? null,
-    'role' => $u['role'],
-    'ville' => $u['ville'],
-    'classe' => isset($u['classe']) ? (repair_display_text($u['classe'] ?? '') ?: null) : null,
-    'etablissement' => isset($u['etablissement']) ? (repair_display_text($u['etablissement'] ?? '') ?: null) : null,
-    'createdAt' => isset($u['created_at']) ? date('c', strtotime($u['created_at'])) : null,
-  ];
+  $out = map_auth_user($u);
+  $out['ville'] = $u['ville'] ?? null;
+  $out['createdAt'] = isset($u['created_at']) ? date('c', strtotime($u['created_at'])) : null;
+  return $out;
 }
 
 function default_notification_prefs(string $userId): array {
@@ -297,7 +290,9 @@ function save_notification_prefs(string $userId, array $in): array {
 
 if ($action === 'profile') {
   if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
-    $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement, created_at FROM users WHERE id = ?');
+    $cols = 'id, nom, email, telephone, role, ville, classe, etablissement, created_at';
+    if (users_has_profil_type()) $cols = 'id, nom, email, telephone, role, ville, classe, etablissement, profil_type, created_at';
+    $stmt = db()->prepare("SELECT $cols FROM users WHERE id = ?");
     $stmt->execute([$user['id']]);
     $row = $stmt->fetch();
     if (!$row) fail('Utilisateur introuvable', 404);
@@ -355,7 +350,9 @@ if ($action === 'profile') {
     fail('Modification impossible', 409);
   }
 
-  $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement, created_at FROM users WHERE id = ?');
+  $cols = 'id, nom, email, telephone, role, ville, classe, etablissement, created_at';
+  if (users_has_profil_type()) $cols = 'id, nom, email, telephone, role, ville, classe, etablissement, profil_type, created_at';
+  $stmt = db()->prepare("SELECT $cols FROM users WHERE id = ?");
   $stmt->execute([$user['id']]);
   json_out(['ok' => true, 'user' => map_profile_user($stmt->fetch())]);
 }

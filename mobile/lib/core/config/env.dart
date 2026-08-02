@@ -36,7 +36,7 @@ class Env {
   /// `--dart-define=DEV_LAN_HOST=192.168.x.x`
   static const String _devLanHost = String.fromEnvironment(
     'DEV_LAN_HOST',
-    defaultValue: '192.168.1.67',
+    defaultValue: '10.14.202.205',
   );
 
   /// Émulateur Android : `10.0.2.2` pointe vers localhost du PC hôte.
@@ -47,6 +47,9 @@ class Env {
 
   /// Page contact publique (`/contact` sur le site web).
   static String get contactUrl => '$webUrl/contact';
+
+  /// Conditions générales d'utilisation (`/conditions` sur le site web).
+  static String get conditionsUrl => '$webUrl/conditions';
 
   static String get webUrl {
     if (_dartDefineWebUrl.isNotEmpty) {

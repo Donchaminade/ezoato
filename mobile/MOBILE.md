@@ -75,7 +75,7 @@ Configurez l'URL via `--dart-define` (recommandé) :
 Sans surcharge, l’app déduit l’hôte depuis `API_URL` et utilise le port Vite `5173`.
 
 Sans `--dart-define`, l'app utilise par défaut sur Android l'**IP LAN du PC**
-(`DEV_LAN_HOST`, défaut `192.168.1.67` dans `lib/core/config/env.dart`) et
+(`DEV_LAN_HOST`, défaut `10.14.202.205` dans `lib/core/config/env.dart`) et
 `localhost` sur les autres plateformes. L'**émulateur Android** ne joint pas
 l'IP LAN du PC : utilisez `USE_EMULATOR_HOST=true` ou `API_URL` avec
 `10.0.2.2`. L'appareil physique doit être sur le **même réseau Wi-Fi** que le
@@ -84,7 +84,7 @@ PC, et XAMPP/Apache doit être démarré.
 ### Dépannage « Impossible de joindre l'API »
 
 1. **XAMPP** : panneau de contrôle → Apache **Running**.
-2. **IP du PC** : `ipconfig` → adresse **IPv4** du Wi-Fi (ex. `192.168.1.67`).
+2. **IP du PC** : `ipconfig` → adresse **IPv4** du Wi-Fi (ex. `10.14.202.205`).
 3. **Test navigateur** (sur le téléphone) :
    `http://<IP-LAN>/zovu-project/backend-php/meta` → doit renvoyer du JSON.
 4. **Pare-feu Windows** : autoriser Apache (`httpd.exe`) sur le réseau privé.
