@@ -8,6 +8,7 @@ Présentation professionnelle pour investisseurs, partenaires et établissements
 |---------|------|
 | [`ezoa-to-pitch-deck.html`](./ezoa-to-pitch-deck.html) | Deck principal (**14 slides**), HTML/CSS/JS — texte FR + PNG intégrés |
 | [`SPEAKER-NOTES.md`](./SPEAKER-NOTES.md) | Notes orateur, glossaire, projections, sources marché |
+| [`storypitch.md`](./storypitch.md) | Histoire d’ouverture émotionnelle (60–90 s) avant le deck |
 | [`assets/`](./assets/) (`slide-01-cover.png` … `slide-12-ask.png`) | Visuels PNG (slides 13–14 réutilisent des assets existants) |
 | `public/pitch/` (copie servie) | Même deck en production : `/pitch/ezoa-to-pitch-deck.html` (CTA **Sponsoriser**) |
 
@@ -35,14 +36,15 @@ Avant d’envoyer le pack :
 
 ## Présenter (écran / projecteur)
 
-1. Ouvrir `ezoa-to-pitch-deck.html` dans Chrome ou Edge (depuis le dépôt).
-2. **F** pour le plein écran (ou F11).
-3. Naviguer :
+1. Optionnel : ouvrir à l’oral avec [`storypitch.md`](./storypitch.md) (60–90 s), puis le deck.
+2. Ouvrir `ezoa-to-pitch-deck.html` dans Chrome ou Edge (depuis le dépôt).
+3. **F** pour le plein écran (ou F11).
+4. Naviguer :
    - **→** / **Espace** / **Page Down** — suivante  
    - **←** / **Page Up** — précédente  
    - **Home** / **End** — première / dernière  
    - Points en bas · swipe tactile  
-4. Garder `SPEAKER-NOTES.md` sur un second écran.
+5. Garder `SPEAKER-NOTES.md` sur un second écran.
 
 ## Exporter en PDF
 
