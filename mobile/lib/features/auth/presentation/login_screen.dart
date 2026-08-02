@@ -106,12 +106,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             tooltip: _obscurePassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe',
           ),
         ),
-        Align(
-          alignment: Alignment.centerRight,
+        Center(
           child: GestureDetector(
             onTap: () => context.push('/forgot-password'),
             child: Text(
               'Mot de passe oublié ?',
+              textAlign: TextAlign.center,
               style: EzoaTypography.bodySmall(context).copyWith(
                 color: EzoaColors.of(context).accent,
                 fontWeight: FontWeight.w600,

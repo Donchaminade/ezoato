@@ -508,6 +508,7 @@ class EmptyState extends StatelessWidget {
           enableShine: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
                 icon,
@@ -973,9 +974,17 @@ class EzoaAuthLayout extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(title, style: EzoaTypography.titleLarge(context)),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: EzoaTypography.titleLarge(context),
+          ),
           const SizedBox(height: 8),
-          Text(subtitle, style: EzoaTypography.body(context)),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: EzoaTypography.body(context),
+          ),
           const SizedBox(height: 24),
           ...children,
         ],
