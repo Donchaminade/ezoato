@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EZOA-TO — Pitch Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tg-green: #006A4E;
+      --tg-green-deep: #004D38;
+      --tg-green-bright: #34D399;
+      --tg-gold: #FFCE00;
+      --tg-red: #D21034;
+      --ink: #0B1220;
+      --ink-soft: #141C2E;
+      --surface: #1A2338;
+      --text: #F4F7F5;
+      --muted: #9AA3B5;
+      --line: rgba(255, 255, 255, 0.08);
+      --placeholder: #FFCE00;
+      --font-display: "Space Grotesk", system-ui, sans-serif;
+      --font-body: "DM Sans", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--ink);
+      color: var(--text);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body { overflow: hidden; }
+
+    .deck {
+      height: 100vh;
+      height: 100dvh;
+      position: relative;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, rgba(0, 106, 78, 0.35), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 90% 100%, rgba(255, 206, 0, 0.08), transparent 50%),
+        var(--ink);
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      padding: clamp(0.85rem, 2vw, 1.65rem) clamp(1.1rem, 3vw, 2.5rem);
+      padding-bottom: 3.75rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* H1 = section titles (Problème, Solution, …) — dominant */
+    .slide h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(2.85rem, 6.8vw, 5.25rem);
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      max-width: 18ch;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+
+    .slide.slide-cover h1 {
+      font-size: clamp(3.4rem, 8.5vw, 6.25rem);
+      font-weight: 800;
+      max-width: 14ch;
+      margin-bottom: 0;
+    }
+
+    /* H2 = supporting line — clearly secondary to H1 */
+    .slide h2 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(1.35rem, 2.6vw, 2.05rem);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      max-width: 26ch;
+      margin-bottom: 0.75rem;
+      color: var(--tg-green-bright);
+    }
+
+    .slide .lead {
+      font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+      line-height: 1.45;
+      color: var(--muted);
+      max-width: 34ch;
+    }
+
+    .slide .sub {
+      font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+      color: var(--muted);
+      max-width: 48ch;
+      line-height: 1.5;
+    }
+
+    /* —— Split layout (text + image) —— */
+    .slide-split {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 0.85rem;
+      align-items: center;
+      min-height: 0;
+      column-gap: 0.85rem;
+    }
+
+    .slide-split.reverse {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+
+    .slide-split.reverse .slide-copy { order: 2; }
+    .slide-split.reverse .slide-visual { order: 1; }
+
+    .slide-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+      gap: 0.2rem;
+    }
+
+    /* Brand mark above content titles (Produit, etc.) */
+    .slide-brand-logo {
+      height: clamp(42px, 5.5vw, 58px);
+      width: auto;
+      max-width: 160px;
+      object-fit: contain;
+      object-position: left center;
+      align-self: flex-start;
+      margin-bottom: 0.15rem;
+      filter: drop-shadow(0 2px 12px rgba(0, 106, 78, 0.35));
+    }
+
+    .slide-visual {
+      margin: 0;
+      min-height: 0;
+      height: min(72vh, 100%);
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.35);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(0.75rem, 1.8vw, 1.35rem);
+    }
+
+    .slide-visual img {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+    }
+
+    @media (max-width: 960px) {
+      .slide-split,
+      .slide-split.reverse {
+        grid-template-columns: 1fr;
+        align-content: start;
+        gap: 0.85rem;
+        column-gap: 0.85rem;
+      }
+      .slide-split.reverse .slide-copy,
+      .slide-split.reverse .slide-visual { order: unset; }
+      .slide-visual {
+        height: min(38vh, 280px);
+        order: -1;
+      }
+      .slide h1, .slide h2 { max-width: none; }
+      .slide h1 { font-size: clamp(2.4rem, 9vw, 3.75rem); }
+      .slide h2 { font-size: clamp(1.15rem, 4vw, 1.55rem); }
+      .bullet-list li,
+      .nowrap {
+        white-space: normal;
+      }
+      .bullet-list li {
+        font-size: clamp(1.05rem, 3.6vw, 1.3rem);
+      }
+    }
+
+    /* —— Cover full-bleed —— */
+    .slide.slide-cover {
+      padding: 0;
+      padding-bottom: 0;
+    }
+
+    .slide-cover .cover-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 0;
+    }
+
+    .slide-cover .cover-shade {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(105deg, rgba(11, 18, 32, 0.92) 0%, rgba(11, 18, 32, 0.78) 42%, rgba(11, 18, 32, 0.35) 72%, rgba(11, 18, 32, 0.55) 100%),
+        linear-gradient(to top, rgba(11, 18, 32, 0.88) 0%, transparent 45%);
+    }
+
+    .slide-cover .cover-inner {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(1.5rem, 4vw, 3.25rem) clamp(1.5rem, 5vw, 4rem);
+      padding-bottom: 4.5rem;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .brand-row img {
+      height: clamp(52px, 8vw, 80px);
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 24px rgba(0, 106, 78, 0.4));
+    }
+
+    .cover-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slogan {
+      margin-top: 1.1rem;
+      font-family: var(--font-display);
+      font-size: clamp(1.45rem, 3vw, 2rem);
+      font-weight: 500;
+      color: var(--tg-gold);
+      letter-spacing: 0.02em;
+    }
+
+    .tagline {
+      margin-top: 0.65rem;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+      max-width: 34ch;
+    }
+
+    .cover-meta {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem 2.25rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .cover-meta strong {
+      display: block;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    /* —— Content blocks —— */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(0.75rem, 2vw, 1.25rem);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+      margin-top: 0.65rem;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.7rem;
+      margin-top: 0.35rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+    }
+
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-top: 0.15rem;
+      max-width: none;
+      width: 100%;
+    }
+
+    .bullet-list li {
+      display: flex;
+      gap: 0.55rem;
+      align-items: baseline;
+      font-size: clamp(1.2rem, 2.1vw, 1.48rem);
+      line-height: 1.4;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .bullet-list li::before {
+      content: "—";
+      flex-shrink: 0;
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--tg-gold);
+      line-height: 1.4;
+    }
+
+    .bullet-list li strong {
+      color: var(--tg-green-bright);
+      font-weight: 700;
+    }
+
+    /* Keep short pitch lines / money phrases on one line */
+    .nowrap {
+      white-space: nowrap;
+    }
+
+    .card {
+      background: linear-gradient(160deg, rgba(26, 35, 56, 0.9), rgba(20, 28, 46, 0.7));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.1rem 1.15rem;
+    }
+
+    .card h3 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: var(--text);
+    }
+
+    .card p {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .card .price {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 2.5vw, 1.9rem);
+      font-weight: 700;
+      color: var(--tg-gold);
+      margin: 0.25rem 0 0.35rem;
+    }
+
+    .card .unit {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      background: rgba(0, 106, 78, 0.35);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--tg-green-bright);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 0.65rem;
+      width: fit-content;
+    }
+
+    .feature-chip {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--line);
+    }
+
+    .feature-chip strong {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .feature-chip span {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .vs-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: 0.35rem;
+    }
+
+    .vs-divider {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--tg-gold);
+      opacity: 0.75;
+      text-align: center;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    .tl-item {
+      position: relative;
+      padding: 0.85rem 1rem 0.85rem 1.15rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--tg-green);
+    }
+
+    .tl-item .when {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--tg-green-bright);
+      margin-bottom: 0.4rem;
+    }
+
+    .tl-item ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .tl-item li {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    /* —— Team slide (product-style profile cards) —— */
+    .slide-split.team-layout {
+      grid-template-columns: 1fr;
+      align-items: stretch;
+      gap: 0.35rem;
+    }
+
+    .slide-split.team-layout .slide-copy {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .slide-split.team-layout h1 {
+      font-size: clamp(2.2rem, 4.8vw, 3.6rem);
+      max-width: none;
+    }
+
+    .slide-split.team-layout h2 {
+      font-size: clamp(1.05rem, 1.8vw, 1.45rem);
+      margin-bottom: 0.55rem;
+      max-width: none;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.2rem;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      align-content: center;
+    }
+
+    .team-card {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      border-radius: 18px;
+      border: 1px solid rgba(52, 211, 153, 0.28);
+      background:
+        linear-gradient(180deg, rgba(26, 35, 56, 0.88), rgba(11, 18, 32, 0.72));
+      box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .team-card-media {
+      position: relative;
+      aspect-ratio: 1 / 0.92;
+      width: 100%;
+      flex-shrink: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(52, 211, 153, 0.28), transparent 55%),
+        linear-gradient(145deg, var(--tg-green), var(--tg-green-deep));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .team-avatar-initials {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 0;
+      letter-spacing: 0.06em;
+      user-select: none;
+    }
+
+    .team-card-media img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      display: block;
+    }
+
+    .team-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 0.85rem 0.95rem 0.55rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .team-card-name {
+      font-family: var(--font-display);
+      font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .team-role-badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 0.22rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      background: linear-gradient(135deg, var(--tg-gold), #e6b800);
+      border: 1px solid rgba(255, 206, 0, 0.55);
+      box-shadow: 0 2px 10px rgba(255, 206, 0, 0.18);
+    }
+
+    .team-location {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--tg-green-bright);
+      font-size: 0.78rem;
+      font-weight: 550;
+      margin-top: 0.1rem;
+    }
+
+    .team-location svg {
+      width: 0.9rem;
+      height: 0.9rem;
+      flex-shrink: 0;
+      opacity: 0.9;
+    }
+
+    .team-bio {
+      color: var(--muted);
+      font-size: clamp(0.78rem, 1.15vw, 0.88rem);
+      line-height: 1.4;
+      margin-top: 0.15rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .team-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      list-style: none;
+      margin-top: 0.35rem;
+    }
+
+    .team-tags li {
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--tg-green-bright);
+      background: rgba(0, 106, 78, 0.28);
+      border: 1px solid rgba(52, 211, 153, 0.28);
+      letter-spacing: 0.01em;
+    }
+
+    .team-card-footer {
+      margin-top: auto;
+      padding: 0.55rem 0.95rem 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: rgba(154, 163, 181, 0.85);
+      letter-spacing: 0.02em;
+    }
+
+    .team-card.open-role {
+      border-style: dashed;
+      border-color: rgba(52, 211, 153, 0.28);
+      background: rgba(255, 255, 255, 0.025);
+      box-shadow: none;
+      opacity: 0.92;
+    }
+
+    .team-card.open-role .team-card-media {
+      background:
+        radial-gradient(circle at 50% 40%, rgba(0, 106, 78, 0.35), transparent 60%),
+        linear-gradient(160deg, rgba(20, 28, 46, 0.95), rgba(11, 18, 32, 0.98));
+      color: var(--muted);
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      font-weight: 600;
+    }
+
+    .team-card.open-role .team-role-badge {
+      color: var(--tg-green-bright);
+      background: rgba(0, 106, 78, 0.35);
+      border-color: rgba(52, 211, 153, 0.3);
+      box-shadow: none;
+    }
+
+    .team-card.open-role .team-location {
+      color: var(--muted);
+    }
+
+    .team-card.open-role .team-tags li {
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 960px) {
+      .team-grid {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+        overflow-y: auto;
+      }
+      .team-card-media {
+        aspect-ratio: 16 / 7;
+      }
+    }
+
+    @media (min-width: 961px) and (max-width: 1180px) {
+      .team-card-name {
+        font-size: 1rem;
+      }
+      .team-bio {
+        font-size: 0.76rem;
+      }
+      .team-tags li {
+        font-size: 0.64rem;
+      }
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--tg-green), var(--tg-green-deep));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: white;
+      margin-bottom: 0.4rem;
+    }
+
+    .ask-amount {
+      font-family: var(--font-display);
+      font-size: clamp(2.85rem, 5.8vw, 4.25rem);
+      font-weight: 700;
+      color: var(--tg-gold);
+      margin: 0.1rem 0 0.45rem;
+      line-height: 1;
+    }
+
+    .funds {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.55rem;
+      max-width: 100%;
+    }
+
+    .fund-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--line);
+      font-size: 0.95rem;
+    }
+
+    .fund-item span:last-child {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--tg-green-bright);
+    }
+
+    .closing {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.45;
+      max-width: 42ch;
+    }
+
+    .closing em {
+      font-style: normal;
+      color: var(--tg-gold);
+      font-family: var(--font-display);
+      font-weight: 600;
+    }
+
+    .footnote {
+      margin-top: 0.85rem;
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      max-width: 52ch;
+      line-height: 1.4;
+    }
+
+    .disclaimer {
+      margin-top: 0.55rem;
+      font-size: 0.72rem;
+      color: var(--tg-gold);
+      letter-spacing: 0.03em;
+      font-weight: 600;
+      max-width: 48ch;
+      line-height: 1.35;
+    }
+
+    .table-scroll {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 0.2rem;
+    }
+
+    .data-table,
+    .pitch-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 0.35rem;
+      font-size: clamp(1rem, 1.4vw, 1.25rem);
+      line-height: 1.35;
+    }
+
+    .data-table th,
+    .data-table td,
+    .pitch-table th,
+    .pitch-table td {
+      padding: 0.55rem 0.6rem;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .data-table th,
+    .pitch-table th {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(0.88rem, 1.2vw, 1.05rem);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--tg-green-bright);
+      background: rgba(0, 106, 78, 0.28);
+    }
+
+    .data-table td,
+    .pitch-table td {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .data-table tr.highlight td {
+      background: rgba(0, 106, 78, 0.28);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .data-table .yes { color: var(--tg-green-bright); font-weight: 700; }
+    .data-table .no { color: var(--muted); }
+    .data-table .mid { color: var(--tg-gold); }
+
+    /* Competition: muted informal alternatives */
+    .pitch-table tr.competitor td {
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.015);
+      font-weight: 400;
+    }
+
+    .pitch-table tr.competitor .yes,
+    .pitch-table tr.competitor .mid,
+    .pitch-table tr.competitor .no {
+      color: var(--muted);
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    /* EZOA-TO premium row — emerald + gold, level with investor decks */
+    .pitch-table tr.row-ezoa td,
+    .pitch-table td.strength {
+      background: linear-gradient(145deg, rgba(0, 106, 78, 0.55), rgba(0, 77, 56, 0.38));
+      color: var(--text);
+      font-weight: 700;
+      box-shadow:
+        inset 0 0 0 1px rgba(52, 211, 153, 0.4),
+        0 6px 20px rgba(0, 106, 78, 0.4);
+    }
+
+    .pitch-table tr.row-ezoa td.col-ezoa {
+      font-family: var(--font-display);
+      color: var(--tg-gold);
+      letter-spacing: 0.03em;
+      background: linear-gradient(145deg, rgba(0, 106, 78, 0.72), rgba(0, 77, 56, 0.5));
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 206, 0, 0.35),
+        0 6px 22px rgba(0, 106, 78, 0.45);
+    }
+
+    .pitch-table tr.row-ezoa td.strength {
+      color: var(--tg-green-bright);
+    }
+
+    .pitch-table .strength-mark {
+      color: var(--tg-gold);
+      font-weight: 800;
+      margin-right: 0.2em;
+      text-shadow: 0 0 12px rgba(255, 206, 0, 0.35);
+    }
+
+    .data-table.compact th,
+    .data-table.compact td,
+    .pitch-table.compact th,
+    .pitch-table.compact td {
+      padding: 0.5rem 0.55rem;
+      font-size: inherit;
+    }
+
+    .data-table .num,
+    .pitch-table .num {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--tg-gold);
+      white-space: nowrap;
+      font-size: 1.05em;
+    }
+
+    .slide-copy .ask-amount + .sub {
+      margin-bottom: 0.55rem;
+    }
+
+    /* Merci / closing — larger type to fill the column */
+    .closing-slide .slide-copy {
+      gap: 0.45rem;
+    }
+
+    .closing-slide h1 {
+      font-size: clamp(3.75rem, 9vw, 6.75rem);
+      margin-bottom: 0.1rem;
+      max-width: 12ch;
+    }
+
+    .closing-slide h2 {
+      font-size: clamp(1.75rem, 3.4vw, 2.65rem);
+      margin-bottom: 0.55rem;
+      max-width: 22ch;
+    }
+
+    .closing-slide .bullet-list {
+      gap: 0.7rem;
+      margin-top: 0.35rem;
+    }
+
+    .closing-slide .bullet-list li {
+      font-size: clamp(1.45rem, 2.7vw, 1.95rem);
+      line-height: 1.35;
+    }
+
+    .closing-slide .contact-block {
+      margin-top: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .closing-slide .contact-block a {
+      color: var(--tg-green-bright);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+      letter-spacing: -0.01em;
+    }
+
+    .closing-slide .contact-block a:hover {
+      color: var(--tg-gold);
+    }
+
+    .closing-slide .contact-block a.site-home {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      margin-top: 0.35rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(52, 211, 153, 0.45);
+      background: rgba(0, 106, 78, 0.4);
+      color: var(--tg-green-bright);
+      font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+    }
+
+    .closing-slide .contact-block a.site-home:hover {
+      border-color: rgba(255, 206, 0, 0.55);
+      color: var(--tg-gold);
+      background: rgba(0, 106, 78, 0.65);
+    }
+
+    @media (max-width: 960px) {
+      .closing-slide h1 {
+        font-size: clamp(3rem, 11vw, 4.5rem);
+      }
+      .closing-slide h2 {
+        font-size: clamp(1.4rem, 5vw, 1.9rem);
+      }
+      .closing-slide .bullet-list li {
+        font-size: clamp(1.25rem, 4.2vw, 1.55rem);
+      }
+      .closing-slide .contact-block a {
+        font-size: clamp(1.2rem, 4vw, 1.45rem);
+      }
+      .closing-slide .contact-block a.site-home {
+        font-size: clamp(1.05rem, 3.6vw, 1.25rem);
+      }
+    }
+
+    .big-num {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 5.5vw, 3.75rem);
+      font-weight: 700;
+      color: var(--tg-gold);
+      line-height: 1;
+      margin: 0.3rem 0 0.4rem;
+    }
+
+    .big-num .suffix {
+      font-size: 0.42em;
+      color: var(--muted);
+      font-weight: 600;
+      margin-left: 0.15em;
+    }
+
+    .card .label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tg-green-bright);
+      margin-bottom: 0.15rem;
+    }
+
+    /* Chrome UI */
+    .chrome {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
+      background: linear-gradient(transparent, rgba(11, 18, 32, 0.92) 40%);
+      pointer-events: none;
+    }
+
+    .chrome > * { pointer-events: auto; }
+
+    .dots {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .dot-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.22);
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .dot-btn:hover { background: rgba(255, 255, 255, 0.45); }
+    .dot-btn.active {
+      background: var(--tg-gold);
+      transform: scale(1.25);
+    }
+
+    .nav-btns {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-btns button {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(26, 35, 56, 0.85);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .nav-btns button:hover {
+      border-color: rgba(52, 211, 153, 0.4);
+      color: var(--tg-green-bright);
+    }
+
+    .nav-btns .site-home {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      background: rgba(0, 106, 78, 0.5);
+      color: var(--tg-green-bright);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .nav-btns .site-home:hover {
+      border-color: rgba(255, 206, 0, 0.55);
+      color: var(--tg-gold);
+      background: rgba(0, 106, 78, 0.75);
+    }
+
+    .slide-num {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.8rem;
+      color: var(--muted);
+      min-width: 4.5rem;
+    }
+
+    .site-home-fixed {
+      position: fixed;
+      top: 1rem;
+      right: 1.25rem;
+      z-index: 45;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.5rem 0.95rem;
+      border-radius: 8px;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      background: rgba(0, 106, 78, 0.55);
+      color: var(--tg-green-bright);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      backdrop-filter: blur(8px);
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .site-home-fixed:hover {
+      border-color: rgba(255, 206, 0, 0.55);
+      color: var(--tg-gold);
+      background: rgba(0, 106, 78, 0.8);
+    }
+
+    .hint {
+      position: fixed;
+      top: 1rem;
+      left: 1.25rem;
+      z-index: 40;
+      font-size: 0.7rem;
+      color: var(--muted);
+      opacity: 0.55;
+      letter-spacing: 0.04em;
+    }
+
+    /* Print / PDF */
+    @media print {
+      @page {
+        size: landscape;
+        margin: 0;
+      }
+
+      body {
+        overflow: visible;
+        background: var(--ink);
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .deck {
+        height: auto;
+        background: var(--ink);
+      }
+
+      .chrome, .hint, .site-home-fixed { display: none !important; }
+
+      .slide {
+        position: relative;
+        display: flex !important;
+        opacity: 1 !important;
+        transform: none !important;
+        page-break-after: always;
+        break-after: page;
+        min-height: 100vh;
+        height: 100vh;
+        padding-bottom: 1.5rem;
+      }
+
+      .slide:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+
+      .slide-visual,
+      .slide-cover .cover-bg {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .slide-visual img,
+      .slide-cover .cover-bg {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="site-home-fixed" href="/">Voir la page web</a>
+  <p class="hint">← → / Espace · F plein écran</p>
+
+  <div class="deck" id="deck" role="region" aria-label="Pitch deck EZOA-TO">
+
+    <!-- 1. Cover -->
+    <section class="slide slide-cover active" data-title="Couverture" aria-label="Diapositive 1 — Couverture">
+      <img class="cover-bg" src="assets/slide-01-cover.png" alt="" />
+      <div class="cover-shade" aria-hidden="true"></div>
+      <div class="cover-inner">
+        <div class="cover-center">
+          <div class="brand-row">
+            <img src="assets/logo-ezoa.png" alt="EZOA-TO" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
+            <div class="avatar" style="display:none;width:72px;height:72px;font-size:1.5rem">E</div>
+          </div>
+          <h1>EZOA-TO</h1>
+          <p class="lead" style="margin-top:0.75rem;max-width:28ch">Archives scolaires du Togo</p>
+          <p class="slogan">Archive. Révise. Excelle.</p>
+          <p class="tagline">Le passé scolaire du Togo, au service de ton avenir.</p>
+        </div>
+        <div class="cover-meta">
+          <div><strong>Équipe</strong> Chaminade D. Adjolou (Fondateur · CEO &amp; CTO) · Divine HIBA</div>
+          <div><strong>Contact</strong> infoezoato@gmail.com · github.com/Donchaminade</div>
+          <div><strong>Stack</strong> Flutter · React · PHP/MySQL</div>
+          <div><strong>Marché</strong> Togo · Afrique de l’Ouest francophone</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Problème -->
+    <section class="slide" data-title="Problème" aria-label="Diapositive 2 — Problème">
+      <div class="slide-split">
+        <div class="slide-copy">
+          <h1>Problème</h1>
+          <h2>Les épreuves se perdent.</h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap">Accès fragmenté (WhatsApp, photocopies)</span></li>
+            <li><span class="nowrap">Temps perdu avant les examens</span></li>
+            <li><span class="nowrap">Pas de source fiable locale au Togo</span></li>
+            <li><span class="nowrap">Révisions inégales — le réseau décide</span></li>
+            <li><span class="nowrap">Aucun filtre classe / matière / examen</span></li>
+          </ul>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-02-problem.png" alt="Illustration — surcharge et dispersion des épreuves" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 3. Solution -->
+    <section class="slide" data-title="Solution" aria-label="Diapositive 3 — Solution">
+      <div class="slide-split reverse">
+        <div class="slide-copy">
+          <h1>Solution</h1>
+          <h2>Une archive nationale, dans la poche.</h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap">4 niveaux : collège · lycée · université · concours</span></li>
+            <li><span class="nowrap">CEPD · BEPC · BAC + devoirs / compositions</span></li>
+            <li><span class="nowrap">Web + mobile — chercher, télécharger, réviser</span></li>
+            <li><span class="nowrap">Favoris, PDF, mode hors ligne</span></li>
+            <li><span class="nowrap">Soumission + validation anti-doublons</span></li>
+          </ul>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-03-solution.png" alt="Illustration — bibliothèque d’épreuves mobile" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 4. Produit -->
+    <section class="slide" data-title="Produit" aria-label="Diapositive 4 — Produit">
+      <div class="slide-split">
+        <div class="slide-copy">
+          <img class="slide-brand-logo" src="assets/logo-ezoa.png" alt="EZOA-TO" />
+          <h1>Produit</h1>
+          <h2>App &amp; web opérationnels.</h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap">4 niveaux livrés + formulaires adaptatifs</span></li>
+            <li><span class="nowrap">Archives filtrables (niveau, ville, matière)</span></li>
+            <li><span class="nowrap">Soumettre : photos → PDF → anti-doublons</span></li>
+            <li><span class="nowrap">Pro 1&nbsp;000&nbsp;FCFA / 6&nbsp;mois + achat à l’unité</span></li>
+            <li><span class="nowrap">Stack : Flutter · React · PHP/MySQL</span></li>
+          </ul>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-04-product.png" alt="Visuel produit EZOA-TO" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 5. Marché -->
+    <section class="slide" data-title="Marché" aria-label="Diapositive 5 — Marché">
+      <div class="slide-split reverse">
+        <div class="slide-copy">
+          <h1>Marché</h1>
+          <h2>Togo → Afrique de l’Ouest francophone.</h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap"><strong>~912&nbsp;k</strong> élèves secondaire (Ministère de l’Éducation)</span></li>
+            <li><span class="nowrap">Upside : CAP · BT · BTS · concours (post-secondaire)</span></li>
+            <li><span class="nowrap"><strong>TAM ~10&nbsp;M</strong> (marché total) — secondaire régional</span></li>
+            <li><span class="nowrap"><strong>SAM ~370&nbsp;k</strong> + filière pro / concours</span></li>
+            <li><span class="nowrap"><strong>SOM 3–8&nbsp;k</strong> Pro — estimations, notes orateur</span></li>
+          </ul>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-05-market.png" alt="Carte Togo et opportunité marché" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 6. Business model -->
+    <section class="slide" data-title="Modèle économique" aria-label="Diapositive 6 — Modèle économique">
+      <div class="slide-split">
+        <div class="slide-copy">
+          <h1>Modèle économique</h1>
+          <h2>Freemium + <span class="nowrap">Mobile&nbsp;Money</span>.</h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap">Devoirs &amp; compositions gratuits</span></li>
+            <li><span class="nowrap">Pro&nbsp;: <strong>1&nbsp;000&nbsp;FCFA&nbsp;/&nbsp;6&nbsp;mois</strong> (examens illimités)</span></li>
+            <li><span class="nowrap">À l’unité&nbsp;: 100–200&nbsp;FCFA / examen</span></li>
+            <li><span class="nowrap">Contributeurs&nbsp;: ~1&nbsp;000&nbsp;FCFA / soumission validée</span></li>
+            <li><span class="nowrap">Paiements&nbsp;: Flooz &amp; T-Money</span></li>
+          </ul>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-06-business.png" alt="Illustration modèle freemium et Mobile Money" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 7. Traction -->
+    <section class="slide" data-title="Traction" aria-label="Diapositive 7 — Traction">
+      <div class="slide-split reverse">
+        <div class="slide-copy">
+          <h1>Traction</h1>
+          <h2>Produit prêt. Preuve terrain à lancer.</h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap">Produit bout en bout (web + mobile)</span></li>
+            <li><span class="nowrap">4 niveaux + détection de doublons admin</span></li>
+            <li><span class="nowrap">Mobile&nbsp;Money — Pro &amp; achat à l’unité</span></li>
+            <li><span class="nowrap">Aucun utilisateur actif / revenu inventé</span></li>
+            <li><span class="nowrap">Preuves à venir : pilotes, premiers Pro</span></li>
+          </ul>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-07-traction.png" alt="Illustration traction et produit prêt" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 8. Concurrence -->
+    <section class="slide" data-title="Concurrence" aria-label="Diapositive 8 — Concurrence">
+      <div class="slide-split">
+        <div class="slide-copy">
+          <h1>Concurrence</h1>
+          <h2>Le chaos informel, pas une app.</h2>
+          <div class="table-scroll">
+            <table class="data-table pitch-table compact" aria-label="Comparaison EZOA-TO vs alternatives">
+              <thead>
+                <tr>
+                  <th>Alternative</th>
+                  <th>Fiabilité</th>
+                  <th>Recherche</th>
+                  <th>Hors ligne</th>
+                  <th>Paiement</th>
+                  <th>Validation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="competitor">
+                  <td>WhatsApp</td>
+                  <td class="no">Faible</td>
+                  <td class="no">Non</td>
+                  <td class="mid">Partiel</td>
+                  <td class="no">Non</td>
+                  <td class="no">Non</td>
+                </tr>
+                <tr class="competitor">
+                  <td>Photocopies</td>
+                  <td class="mid">Variable</td>
+                  <td class="no">Non</td>
+                  <td class="yes">Oui</td>
+                  <td class="mid">Cash</td>
+                  <td class="no">Non</td>
+                </tr>
+                <tr class="competitor">
+                  <td>PDF dispersés</td>
+                  <td class="no">Faible</td>
+                  <td class="no">Non</td>
+                  <td class="yes">Oui</td>
+                  <td class="no">Non</td>
+                  <td class="no">Non</td>
+                </tr>
+                <tr class="row-ezoa">
+                  <td class="col-ezoa">EZOA-TO</td>
+                  <td class="strength"><span class="strength-mark">✓</span>Archive nationale</td>
+                  <td class="strength"><span class="strength-mark">✓</span>Filtrable</td>
+                  <td class="strength"><span class="strength-mark">✓</span>Oui</td>
+                  <td class="strength"><span class="strength-mark">✓</span>Pro / MM</td>
+                  <td class="strength"><span class="strength-mark">✓</span>Humaine</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="footnote">Paiement = Mobile Money local. Concurrent réel = dispersion, pas une EdTech togolaise.</p>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-08-competition.png" alt="Illustration positionnement concurrentiel" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 9. Go-to-market -->
+    <section class="slide" data-title="Go-to-market" aria-label="Diapositive 9 — Go-to-market">
+      <div class="slide-split reverse">
+        <div class="slide-copy">
+          <h1>Go-to-market</h1>
+          <h2>Écoles, élèves, <span class="nowrap">Mobile&nbsp;Money</span>.</h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap">Pilotes : 3–5 lycées (Lomé / régions)</span></li>
+            <li><span class="nowrap">Ambassadeurs élèves &amp; profs récompensés</span></li>
+            <li><span class="nowrap">Campagnes WhatsApp / Facebook — examens</span></li>
+            <li><span class="nowrap">Licence B2B établissements (forfait annuel)</span></li>
+            <li><span class="nowrap">Notifications ciblées par classe</span></li>
+          </ul>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-09-gtm.png" alt="Illustration go-to-market écoles et réseaux" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 10. Équipe -->
+    <section class="slide" data-title="Équipe" aria-label="Diapositive 10 — Équipe">
+      <div class="slide-split team-layout">
+        <div class="slide-copy">
+          <h1>Équipe</h1>
+          <h2>Produit, tech &amp; terrain.</h2>
+          <div class="team-grid">
+            <article class="team-card">
+              <div class="team-card-media" aria-hidden="true">
+                <span class="team-avatar-initials">CD</span>
+                <img
+                  src="assets/team-chaminade.jpg"
+                  alt=""
+                  onerror="this.remove()"
+                />
+              </div>
+              <div class="team-card-body">
+                <h3 class="team-card-name">Chaminade D. Adjolou</h3>
+                <span class="team-role-badge">Fondateur principal · CEO &amp; CTO · Développeur</span>
+                <p class="team-location">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.8"/>
+                  </svg>
+                  Lomé, Togo
+                </p>
+                <p class="team-bio">Fondateur principal — architecture et développement produit (mobile, web, backend).</p>
+                <ul class="team-tags">
+                  <li>Fondateur</li>
+                  <li>Développement</li>
+                  <li>Flutter</li>
+                  <li>React</li>
+                </ul>
+              </div>
+              <footer class="team-card-footer">Équipe fondatrice</footer>
+            </article>
+
+            <article class="team-card">
+              <div class="team-card-media" aria-hidden="true">
+                <span class="team-avatar-initials">DH</span>
+                <img
+                  src="assets/team-divine.jpg"
+                  alt=""
+                  onerror="this.remove()"
+                />
+              </div>
+              <div class="team-card-body">
+                <h3 class="team-card-name">Divine HIBA</h3>
+                <span class="team-role-badge">Project Manager &amp; BA</span>
+                <p class="team-location">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.8"/>
+                  </svg>
+                  Lomé, Togo
+                </p>
+                <p class="team-bio">Pilotage projet, besoins métier et coordination avec les écoles.</p>
+                <ul class="team-tags">
+                  <li>Product</li>
+                  <li>BA</li>
+                  <li>Écoles</li>
+                  <li>Ops</li>
+                </ul>
+              </div>
+              <footer class="team-card-footer">Équipe fondatrice</footer>
+            </article>
+
+            <aside class="team-card open-role" aria-label="Poste ouvert">
+              <div class="team-card-media" aria-hidden="true">
+                <span class="team-avatar-initials">+</span>
+              </div>
+              <div class="team-card-body">
+                <h3 class="team-card-name">À recruter</h3>
+                <span class="team-role-badge">Ops · Growth</span>
+                <p class="team-location">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.8"/>
+                  </svg>
+                  Lomé, Togo
+                </p>
+                <p class="team-bio">Renfort contenu, partenariats écoles et acquisition.</p>
+                <ul class="team-tags">
+                  <li>Contenu</li>
+                  <li>Partenariats</li>
+                  <li>Growth</li>
+                </ul>
+              </div>
+              <footer class="team-card-footer">Poste ouvert</footer>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. Roadmap -->
+    <section class="slide" data-title="Roadmap" aria-label="Diapositive 11 — Roadmap">
+      <div class="slide-split reverse">
+        <div class="slide-copy">
+          <h1>Roadmap</h1>
+          <h2><span class="nowrap">6 · 12 · 18&nbsp;mois.</span></h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap"><strong>Livré</strong> — 4 niveaux, Pro, anti-doublons, web + mobile</span></li>
+            <li><span class="nowrap"><strong>6&nbsp;mois</strong> — pilotes lycées, Play Store, premiers Pro</span></li>
+            <li><span class="nowrap"><strong>12&nbsp;mois</strong> — couverture CEPD / BEPC / BAC + volumes concours</span></li>
+            <li><span class="nowrap"><strong>12–18&nbsp;mois</strong> — expansion CAP · BT · BTS (catalogue)</span></li>
+            <li><span class="nowrap"><strong>18&nbsp;mois</strong> — 1<sup>er</sup> pays voisin (Afrique de l’Ouest)</span></li>
+          </ul>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-11-roadmap.png" alt="Illustration feuille de route" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 12. Besoin -->
+    <section class="slide" data-title="Financement demandé" aria-label="Diapositive 12 — Financement demandé">
+      <div class="slide-split">
+        <div class="slide-copy">
+          <h1>Financement</h1>
+          <h2>Ticket seed / pré-amorçage.</h2>
+          <p class="ask-amount"><span class="nowrap">25&nbsp;M&nbsp;FCFA</span></p>
+          <p class="sub">Pour débloquer pilotes, catalogue national et premiers abonnements Pro.</p>
+          <div class="table-scroll">
+            <table class="data-table pitch-table compact" aria-label="Allocation des fonds">
+              <thead>
+                <tr>
+                  <th>Poste</th>
+                  <th>%</th>
+                  <th>Montant</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Produit &amp; infra</td>
+                  <td>35&nbsp;%</td>
+                  <td class="num">8,75&nbsp;M</td>
+                </tr>
+                <tr>
+                  <td>Contenu &amp; validation</td>
+                  <td>25&nbsp;%</td>
+                  <td class="num">6,25&nbsp;M</td>
+                </tr>
+                <tr>
+                  <td>Acquisition &amp; écoles</td>
+                  <td>25&nbsp;%</td>
+                  <td class="num">6,25&nbsp;M</td>
+                </tr>
+                <tr>
+                  <td>Ops &amp; conformité</td>
+                  <td>15&nbsp;%</td>
+                  <td class="num">3,75&nbsp;M</td>
+                </tr>
+                <tr class="highlight">
+                  <td>Total</td>
+                  <td>100&nbsp;%</td>
+                  <td class="num">25&nbsp;M&nbsp;FCFA</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-12-ask.png" alt="Illustration besoin de financement" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 13. Projections / rentabilité -->
+    <section class="slide" data-title="Projections" aria-label="Diapositive 13 — Projections et unit economics">
+      <div class="slide-split reverse">
+        <div class="slide-copy">
+          <h1>Projections</h1>
+          <h2>Unit economics &amp; seuil de rentabilité.</h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap">Pro&nbsp;: <strong>1&nbsp;000&nbsp;FCFA / 6&nbsp;mois</strong> → ~2&nbsp;000&nbsp;FCFA / an</span></li>
+            <li><span class="nowrap">Seuil ops lean (~5–7&nbsp;M FCFA/an) ≈ <strong>2,5–3,5&nbsp;k Pro</strong></span></li>
+            <li><span class="nowrap">Upside CAP / BTS / concours&nbsp;: +élèves, propension à payer plus haute</span></li>
+            <li><span class="nowrap">25&nbsp;M&nbsp;FCFA&nbsp;: stores, Mobile&nbsp;Money, pilotes, catalogue</span></li>
+          </ul>
+          <p class="disclaimer">Projections indicatives — pas des résultats réalisés. Upside concours non inclus dans le tableau de base.</p>
+          <div class="table-scroll">
+            <table class="data-table pitch-table compact" aria-label="Projections de revenus Pro">
+              <thead>
+                <tr>
+                  <th>Horizon</th>
+                  <th>Conservateur</th>
+                  <th>Médian</th>
+                  <th>Ambitieux</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>12&nbsp;mois</td>
+                  <td>800 Pro<br /><span class="num">~1,6&nbsp;M/an</span></td>
+                  <td>2&nbsp;000 Pro<br /><span class="num">~4&nbsp;M/an</span></td>
+                  <td>4&nbsp;000 Pro<br /><span class="num">~8&nbsp;M/an</span></td>
+                </tr>
+                <tr>
+                  <td>24&nbsp;mois</td>
+                  <td>2&nbsp;500 Pro<br /><span class="num">~5&nbsp;M/an</span></td>
+                  <td>5&nbsp;000 Pro<br /><span class="num">~10&nbsp;M/an</span></td>
+                  <td>8&nbsp;000 Pro<br /><span class="num">~16&nbsp;M/an</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-06-business.png" alt="Illustration monétisation et projections" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 14. Merci / clôture -->
+    <section class="slide closing-slide" data-title="Merci" aria-label="Diapositive 14 — Merci">
+      <div class="slide-split">
+        <div class="slide-copy">
+          <h1>Merci</h1>
+          <h2>Prochaines étapes.</h2>
+          <ul class="bullet-list">
+            <li><span class="nowrap">Démo produit (web + mobile)</span></li>
+            <li><span class="nowrap">Cadre de pilote lycée (3–5 établissements)</span></li>
+            <li><span class="nowrap">Échange diligence / term sheet seed</span></li>
+            <li><span class="nowrap"><em>Archive. Révise. Excelle.</em></span></li>
+          </ul>
+          <div class="contact-block">
+            <a href="mailto:infoezoato@gmail.com">infoezoato@gmail.com</a>
+            <a href="https://github.com/Donchaminade" target="_blank" rel="noopener noreferrer">github.com/Donchaminade</a>
+            <a class="site-home" href="/">Voir la page web</a>
+          </div>
+        </div>
+        <figure class="slide-visual">
+          <img src="assets/slide-01-cover.png" alt="EZOA-TO — archives scolaires du Togo" />
+        </figure>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="chrome" aria-label="Navigation">
+    <div class="slide-num" id="slideNum">1 / 14</div>
+    <div class="dots" id="dots" aria-label="Diapositives"></div>
+    <div class="nav-btns">
+      <a class="site-home" href="/">Voir la page web</a>
+      <button type="button" id="btnPrev" aria-label="Précédent">←</button>
+      <button type="button" id="btnNext" aria-label="Suivant">→</button>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const dotsEl = document.getElementById("dots");
+      const slideNum = document.getElementById("slideNum");
+      const total = slides.length;
+      let index = 0;
+
+      slides.forEach((slide, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "dot-btn" + (i === 0 ? " active" : "");
+        btn.setAttribute("role", "tab");
+        btn.setAttribute(
+          "aria-label",
+          "Aller à la diapositive " + (i + 1) + " — " + (slide.dataset.title || "")
+        );
+        btn.addEventListener("click", () => go(i));
+        dotsEl.appendChild(btn);
+      });
+
+      const dots = Array.from(dotsEl.querySelectorAll(".dot-btn"));
+
+      function go(i) {
+        index = Math.max(0, Math.min(total - 1, i));
+        slides.forEach((s, n) => s.classList.toggle("active", n === index));
+        dots.forEach((d, n) => d.classList.toggle("active", n === index));
+        slideNum.textContent = (index + 1) + " / " + total;
+        history.replaceState(null, "", "#" + (index + 1));
+      }
+
+      function next() { go(index + 1); }
+      function prev() { go(index - 1); }
+
+      document.getElementById("btnNext").addEventListener("click", next);
+      document.getElementById("btnPrev").addEventListener("click", prev);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+          e.preventDefault();
+          next();
+        } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+          e.preventDefault();
+          prev();
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          go(0);
+        } else if (e.key === "End") {
+          e.preventDefault();
+          go(total - 1);
+        } else if (e.key === "f" || e.key === "F") {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen?.();
+          } else {
+            document.exitFullscreen?.();
+          }
+        }
+      });
+
+      let touchX = null;
+      document.addEventListener("touchstart", (e) => {
+        touchX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      document.addEventListener("touchend", (e) => {
+        if (touchX == null) return;
+        const dx = e.changedTouches[0].screenX - touchX;
+        if (Math.abs(dx) > 50) (dx < 0 ? next : prev)();
+        touchX = null;
+      }, { passive: true });
+
+      const hash = parseInt(location.hash.replace("#", ""), 10);
+      if (hash >= 1 && hash <= total) go(hash - 1);
+      else go(0);
+    })();
+  </script>
+</body>
+</html>

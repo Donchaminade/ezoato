@@ -5,6 +5,7 @@ import {
   Building2,
   CheckCircle2,
   CreditCard,
+  Crown,
   Download,
   FileCheck2,
   GraduationCap,
@@ -18,6 +19,7 @@ import {
   ShieldCheck,
   Smartphone,
   Sparkles,
+  Trophy,
   Upload,
   UserCheck,
   Users,
@@ -29,18 +31,48 @@ import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EZOA_BRAND } from "@/lib/branding";
+import { PITCH_DECK_HREF } from "@/lib/pitch";
 import { formatFcfa } from "@/lib/pricing";
+import {
+  SUBSCRIPTION_DURATION_MONTHS,
+  SUBSCRIPTION_PRICE,
+} from "@/lib/subscription-constants";
 import type { PublicMeta } from "@/lib/types";
 
 const EXAM_TYPES = [
+  "Collège",
+  "Lycée",
+  "Université",
+  "Concours",
   "CEPD",
   "BEPC",
   "BAC I",
   "BAC II",
   "Devoirs",
   "Compositions",
-  "Contrôles",
-  "Interrogations",
+] as const;
+
+const NIVEAUX = [
+  {
+    icon: BookOpen,
+    title: "Collège",
+    text: "De la 6ᵉ à la 3ᵉ : devoirs, compositions et BEPC. Le formulaire de soumission suit le parcours collège.",
+  },
+  {
+    icon: GraduationCap,
+    title: "Lycée",
+    text: "Seconde à Terminale : compositions, BAC I & II, séries A, C, D… Filtre par matière et année.",
+  },
+  {
+    icon: Landmark,
+    title: "Université",
+    text: "Épreuves du supérieur classées par filière et session — pour réviser avec de vrais sujets.",
+  },
+  {
+    icon: Trophy,
+    title: "Concours",
+    text: "ENAM, Police, Douanes et autres concours : sujets ciblés pour les candidats motivés.",
+  },
 ] as const;
 
 const ARCHIVE_TYPES = [
@@ -58,14 +90,14 @@ const ARCHIVE_TYPES = [
   },
   {
     icon: Landmark,
-    title: "CEPD",
-    text: "Certificat d'Études Primaires du premier Degré — sujets officiels archivés par année.",
+    title: "Examens nationaux",
+    text: "CEPD, BEPC, BAC — sujets officiels archivés par année, accessibles à l'unité ou via Pro.",
     free: false,
   },
   {
-    icon: GraduationCap,
-    title: "BEPC & BAC",
-    text: "Brevet et baccalauréat togolais (séries A, C, D…) : les sujets nationaux les plus demandés.",
+    icon: Trophy,
+    title: "Concours & supérieur",
+    text: "Annales de concours et épreuves universitaires pour élargir la révision au-delà du secondaire.",
     free: false,
   },
 ] as const;
@@ -73,8 +105,8 @@ const ARCHIVE_TYPES = [
 const AUDIENCES = [
   {
     icon: GraduationCap,
-    title: "Élèves",
-    text: "Révise avec de vrais sujets, filtre par classe ou examen, télécharge un PDF lisible sur ton téléphone.",
+    title: "Élèves & candidats",
+    text: "Révise avec de vrais sujets — collège, lycée, université ou concours — et télécharge un PDF lisible sur ton téléphone.",
   },
   {
     icon: Users,
@@ -112,15 +144,15 @@ const VALUES = [
   {
     icon: Zap,
     title: "Moderne",
-    text: "Interface mobile, paiement Flooz/T-Money, installation comme application sur Android.",
+    text: "App mobile et site web, paiement Flooz/T-Money, expérience fluide même en 3G/4G.",
   },
 ] as const;
 
 const VALIDATION_STEPS = [
   "Tu soumets des photos nettes de l'épreuve (pages complètes, sans reflet).",
   "Un PDF d'aperçu est créé automatiquement.",
-  "Un gestionnaire vérifie la lisibilité, les métadonnées (matière, année, établissement…).",
-  "S'il existe déjà un doublon, le gestionnaire compare et conserve la meilleure version.",
+  "Un gestionnaire vérifie la lisibilité et les métadonnées (matière, année, niveau…).",
+  "La détection de doublons signale les similarités : le gestionnaire compare et garde la meilleure version.",
   "Une fois validée, l'épreuve est publiée et visible dans les archives.",
 ] as const;
 
@@ -139,7 +171,7 @@ const GOVERNANCE = [
   },
   {
     role: "Gestionnaire",
-    desc: "Valide les soumissions, modère le contenu et assure la qualité des archives.",
+    desc: "Valide les soumissions, traite les doublons détectés et assure la qualité des archives.",
   },
   {
     role: "Admin",
@@ -183,14 +215,15 @@ export function AboutMission() {
           <p className="mt-4 text-muted-foreground leading-relaxed">
             <strong className="text-foreground">{EZOA_BRAND.fullName}</strong> ({EZOA_BRAND.name}) est une
             plateforme d&apos;archives numériques dédiée au système éducatif togolais. Nous centralisons les{" "}
-            <strong className="text-foreground">devoirs, compositions et examens nationaux</strong> du collège
-            et du lycée — de la 6<sup>e</sup> à la Terminale — pour que chaque élève puisse réviser avec des
-            sujets réels, où qu&apos;il soit au Togo.
+            <strong className="text-foreground">devoirs, compositions, examens et concours</strong> sur quatre
+            niveaux — collège, lycée, université et concours — pour que chacun puisse réviser avec des sujets
+            réels, où qu&apos;il soit au Togo.
           </p>
           <p className="mt-4 text-muted-foreground leading-relaxed">
-            Avant EZOA-TO, retrouver un ancien sujet du BEPC ou une composition de Terminale passait par le bouche-à-oreille,
-            des photocopies perdues ou des groupes dispersés. Aujourd&apos;hui, une recherche par ville, matière ou
-            établissement suffit.
+            Avant EZOA-TO, retrouver un ancien sujet du BEPC, une composition de Terminale ou une annales de
+            concours passait par le bouche-à-oreille, des photocopies perdues ou des groupes dispersés.
+            Aujourd&apos;hui, une recherche par niveau, ville, matière ou établissement suffit — sur mobile
+            comme sur le web.
           </p>
           <p className="mt-6 font-display text-lg font-semibold text-primary">{EZOA_BRAND.slogan}</p>
           <p className="mt-1 text-sm text-muted-foreground">{EZOA_BRAND.tagline}</p>
@@ -260,13 +293,27 @@ export function AboutArchiveTypes() {
         <div className="mx-auto max-w-7xl">
           <ScrollReveal className="mx-auto mb-10 max-w-2xl text-center">
             <Badge variant="outline" className="mb-4">
-              Contenu archivé
+              Quatre niveaux
             </Badge>
             <h2 className="font-display text-2xl font-bold sm:text-3xl">Que trouve-t-on sur EZOA-TO ?</h2>
             <p className="mt-2 text-muted-foreground">
-              Tous les types d&apos;épreuves du parcours scolaire togolais, du primaire (CEPD) au baccalauréat.
+              Du collège aux concours, avec des formulaires adaptés à chaque parcours — pas seulement le secondaire.
             </p>
           </ScrollReveal>
+
+          <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {NIVEAUX.map((n, i) => (
+              <ScrollReveal key={n.title} delay={i * 0.05} offsetY={30}>
+                <div className="card-elevated h-full p-5 text-center sm:text-left">
+                  <div className="mx-auto grid size-11 place-items-center rounded-xl bg-primary/10 sm:mx-0">
+                    <n.icon className="size-5 text-primary" />
+                  </div>
+                  <h3 className="mt-3 font-display font-semibold">{n.title}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{n.text}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             {ARCHIVE_TYPES.map((t, i) => (
@@ -297,9 +344,9 @@ export function AboutArchiveTypes() {
               <p className="text-sm text-muted-foreground">
                 <MapPin className="mr-1.5 inline size-4 text-primary" />
                 Les épreuves sont indexées par{" "}
+                <strong className="text-foreground">niveau</strong>,{" "}
                 <strong className="text-foreground">ville</strong>,{" "}
                 <strong className="text-foreground">établissement</strong>,{" "}
-                <strong className="text-foreground">classe</strong>,{" "}
                 <strong className="text-foreground">matière</strong>,{" "}
                 <strong className="text-foreground">année</strong> et{" "}
                 <strong className="text-foreground">type d&apos;examen</strong>. Tu peux combiner
@@ -399,8 +446,8 @@ export function AboutHowItWorks() {
               <ol className="mt-6 space-y-4">
                 {[
                   "Photographie chaque page de l'épreuve (bien éclairée, sans coupure).",
-                  "Renseigne matière, classe, année, type et établissement.",
-                  "Le système génère un PDF ; un gestionnaire valide sous 48 h en moyenne.",
+                  "Choisis le niveau (collège, lycée, université ou concours) — le formulaire s'adapte.",
+                  "Le système génère un PDF ; un gestionnaire valide et vérifie les doublons.",
                   "Chaque épreuve validée compte pour ton palier de récompense.",
                   "Retire tes gains sur ton portefeuille via Flooz ou T-Money.",
                 ].map((text, i) => (
@@ -437,14 +484,15 @@ export function AboutValidation() {
             </h2>
             <p className="mt-4 text-muted-foreground leading-relaxed">
               EZOA-TO n&apos;accepte pas le contenu brut sans contrôle. Notre équipe de gestionnaires s&apos;assure
-              que les documents sont lisibles, correctement classés et utiles à la communauté. Les doublons sont
-              fusionnés pour éviter le bruit dans les résultats.
+              que les documents sont lisibles, correctement classés et utiles à la communauté. Une{" "}
+              <strong className="text-foreground">détection de doublons</strong> aide à comparer les
+              soumissions similaires et à conserver la meilleure version — moins de bruit dans les archives.
             </p>
             <ul className="mt-6 space-y-3">
               {[
                 "Refus des photos floues, coupées ou illisibles",
                 "Vérification des métadonnées (matière, année, niveau)",
-                "Détection des doublons et choix de la meilleure version",
+                "Alertes de similarité et comparaison avant validation",
                 "Signalement possible via la page contact",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm">
@@ -492,11 +540,12 @@ export function AboutPricing({ meta }: { meta?: PublicMeta }) {
         <ScrollReveal className="mx-auto mb-10 max-w-2xl text-center">
           <h2 className="font-display text-2xl font-bold sm:text-3xl">Tarifs & récompenses</h2>
           <p className="mt-2 text-muted-foreground">
-            Transparence totale : tu sais exactement ce qui est gratuit et ce qui finance la plateforme.
+            Transparence totale : tu sais exactement ce qui est gratuit, ce qui se paie à l&apos;unité,
+            et ce que couvre l&apos;abonnement Pro.
           </p>
         </ScrollReveal>
 
-        <div className="grid gap-5 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <ScrollReveal offsetY={35}>
             <div className="card-elevated h-full border-primary/20 p-6">
               <Badge className="bg-secondary text-secondary-foreground">0 FCFA</Badge>
@@ -507,30 +556,49 @@ export function AboutPricing({ meta }: { meta?: PublicMeta }) {
             </div>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.06} offsetY={35}>
+          <ScrollReveal delay={0.05} offsetY={35}>
             <div className="card-elevated h-full p-6">
               <Badge variant="outline">
                 <CreditCard className="mr-1 size-3" />
                 {formatFcfa(prix)}
               </Badge>
-              <h3 className="mt-4 font-display text-lg font-bold">Examens nationaux</h3>
+              <h3 className="mt-4 font-display text-lg font-bold">À l&apos;unité</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                CEPD, BEPC, BAC — paiement unique par épreuve via Flooz ou T-Money. Accès immédiat au PDF.
+                Examens nationaux et contenus payants — paiement unique via Flooz ou T-Money, accès immédiat.
               </p>
             </div>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.12} offsetY={35}>
+          <ScrollReveal delay={0.1} offsetY={35}>
+            <div className="card-elevated h-full border-primary/25 p-6">
+              <Badge variant="outline">
+                <Crown className="mr-1 size-3" />
+                Pro
+              </Badge>
+              <h3 className="mt-4 font-display text-lg font-bold">Abonnement Pro</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                <strong className="text-foreground">
+                  {formatFcfa(SUBSCRIPTION_PRICE)} / {SUBSCRIPTION_DURATION_MONTHS} mois
+                </strong>{" "}
+                — accès illimité aux épreuves payantes. Un micropaiement pensé pour les familles.
+              </p>
+              <Button asChild variant="link" className="mt-3 h-auto p-0">
+                <Link to="/account/abonnement">Découvrir Pro</Link>
+              </Button>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.15} offsetY={35}>
             <div className="card-elevated h-full p-6">
               <Badge variant="outline">
                 <Wallet className="mr-1 size-3" />
                 Contributeur
               </Badge>
-              <h3 className="mt-4 font-display text-lg font-bold">Programme de récompenses</h3>
+              <h3 className="mt-4 font-display text-lg font-bold">Récompenses</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 <strong className="text-foreground">{epreuves} épreuves validées</strong> ={" "}
                 <strong className="text-foreground">{formatFcfa(recompense)}</strong> sur ton portefeuille.
-                Retrait possible dès <strong className="text-foreground">{formatFcfa(minRetrait)}</strong>.
+                Retrait dès <strong className="text-foreground">{formatFcfa(minRetrait)}</strong>.
               </p>
               <Button asChild variant="link" className="mt-3 h-auto p-0">
                 <Link to="/contributor">Espace contributeur</Link>
@@ -578,17 +646,17 @@ export function AboutTechnology() {
               Technologie
             </Badge>
             <h2 className="font-display text-2xl font-bold sm:text-3xl">
-              Conçu pour le téléphone, partout au Togo
+              Mobile et web, partout au Togo
             </h2>
             <p className="mt-4 text-muted-foreground leading-relaxed">
-              EZOA-TO est une application web progressive (PWA) : pas besoin de passer par le Play Store.
-              Sur Android, tu peux l&apos;installer sur ton écran d&apos;accueil comme une vraie application.
-              L&apos;interface est légère et optimisée pour les connexions 3G/4G.
+              EZOA-TO existe en <strong className="text-foreground">application mobile</strong> et sur le{" "}
+              <strong className="text-foreground">web</strong>. Tu cherches, télécharges et contribues depuis
+              ton téléphone ou un navigateur — interface légère, pensée pour les connexions 3G/4G.
             </p>
             <ul className="mt-6 space-y-3">
               {[
-                { icon: Smartphone, text: "Navigation mobile avec barre flottante en bas" },
-                { icon: Search, text: "Recherche et filtres avancés dans les archives" },
+                { icon: Smartphone, text: "App mobile + site web synchronisés" },
+                { icon: Search, text: "Filtres par niveau, matière, ville et concours" },
                 { icon: CreditCard, text: "Paiements Flooz et T-Money intégrés" },
                 { icon: Download, text: "PDF générés automatiquement, prêts à imprimer" },
               ].map((item) => (
@@ -638,8 +706,8 @@ export function AboutCTA() {
               Prêt à rejoindre la communauté EZOA-TO ?
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-              Que tu cherches un sujet du BEPC ou que tu veuilles archiver les épreuves de ton lycée,
-              EZOA-TO est fait pour toi.
+              Que tu cherches un sujet du BEPC, une annales de concours ou que tu veuilles archiver les
+              épreuves de ton établissement — EZOA-TO est fait pour toi.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button asChild size="lg">
@@ -663,6 +731,27 @@ export function AboutCTA() {
                 <HelpCircle className="size-4" />
                 FAQ
               </Link>
+              <span className="text-border" aria-hidden>
+                ·
+              </span>
+              <Link
+                to="/partenariat"
+                className="inline-flex items-center gap-1.5 text-muted-foreground transition hover:text-primary"
+              >
+                <Heart className="size-4" />
+                Sponsoriser
+              </Link>
+              <span className="text-border" aria-hidden>
+                ·
+              </span>
+              <a
+                href={PITCH_DECK_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-muted-foreground transition hover:text-primary"
+              >
+                Pitch
+              </a>
               <span className="text-border" aria-hidden>
                 ·
               </span>

@@ -34,6 +34,7 @@ import type {
   Soumission,
   SoumissionDetail,
   SoumissionHistory,
+  SoumissionSimilairesResponse,
   SubscriptionStatus,
   UpdateProfilePayload,
   User,
@@ -219,6 +220,10 @@ export const api = {
 
   async listSoumissions(): Promise<Soumission[]> {
     return http("/admin/soumissions");
+  },
+
+  async getSoumissionSimilaires(id: string): Promise<SoumissionSimilairesResponse> {
+    return http(`/admin/soumissions/${id}/similaires`);
   },
 
   async validerSoumission(

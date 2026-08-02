@@ -26,6 +26,7 @@ import { AdminNotificationsTab } from "@/components/admin/AdminNotificationsTab"
 import { AdminAbonnementsTab } from "@/components/admin/AdminAbonnementsTab";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
 import { AuthenticatedImageGrid, AuthenticatedPdf } from "@/components/admin/AuthenticatedMedia";
+import { SoumissionCompareSplit } from "@/components/admin/SoumissionCompareSplit";
 import { AdminStatsCharts } from "@/components/admin/AdminStatsCharts";
 import {
   DemandesEtablissementAdminTab,
@@ -54,7 +55,7 @@ import { FormField } from "@/components/ui/form-field";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatFcfa } from "@/lib/pricing";
-import type { AdminRetrait, Epreuve, Soumission } from "@/lib/types";
+import type { AdminRetrait, Epreuve, SimilarEpreuveMatch, Soumission } from "@/lib/types";
 
 const ADMIN_SECTIONS = [
   "overview",
@@ -205,6 +206,16 @@ function AdminDashboard({ isAdmin }: { isAdmin: boolean }) {
   );
 }
 
+function niveauBadgeLabel(n: string): string {
+  const map: Record<string, string> = {
+    college: "Collège",
+    lycee: "Lycée",
+    universite: "Université",
+    concours: "Concours",
+  };
+  return map[n] ?? n;
+}
+
 function SoumissionsTab() {
   const qc = useQueryClient();
   const { data, refetch } = useQuery({ queryKey: ["soumissions"], queryFn: () => api.listSoumissions() });
@@ -214,18 +225,42 @@ function SoumissionsTab() {
   const [motif, setMotif] = useState("Qualité insuffisante — image floue ou illisible");
   const [editVille, setEditVille] = useState("");
   const [editTitre, setEditTitre] = useState("");
+  const [similaires, setSimilaires] = useState<SimilarEpreuveMatch[]>([]);
+  const [compare, setCompare] = useState<{ existing: Epreuve; score?: number } | null>(null);
+  const [loadingSim, setLoadingSim] = useState(false);
 
   useEffect(() => {
     if (!active) return;
     setEditVille(active.ville);
     setEditTitre(active.titre);
+    setSimilaires([]);
+    setCompare(null);
+    let cancelled = false;
+    setLoadingSim(true);
+    api.getSoumissionSimilaires(active.id)
+      .then((res) => {
+        if (!cancelled) setSimilaires(res.similaires);
+      })
+      .catch(() => {
+        if (!cancelled) setSimilaires([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingSim(false);
+      });
+    return () => { cancelled = true; };
   }, [active?.id]);
 
   const corrections = () => ({ ville: editVille.trim(), titre: editTitre.trim() });
+  const similairesCount = Math.max(
+    active?.similairesCount ?? 0,
+    active?.doublonsPotentiels?.length ?? 0,
+    similaires.length,
+  );
 
   async function valider(s: Soumission) {
     await api.validerSoumission(s.id, corrections());
     toast.success("Épreuve validée et publiée");
+    setCompare(null);
     setActive(null);
     refetch();
     qc.invalidateQueries({ queryKey: ["admin-stats"] });
@@ -236,6 +271,7 @@ function SoumissionsTab() {
     await api.rejeterSoumission(active.id, motif);
     toast("Soumission rejetée");
     setRejectOpen(false);
+    setCompare(null);
     setActive(null);
     refetch();
   }
@@ -243,6 +279,7 @@ function SoumissionsTab() {
   async function remplacer(s: Soumission, doublonId: string) {
     await api.remplacerSoumission(s.id, doublonId, corrections());
     toast.success("Ancienne épreuve archivée, nouvelle publiée");
+    setCompare(null);
     setActive(null);
     refetch();
   }
@@ -252,6 +289,24 @@ function SoumissionsTab() {
     toast("Soumission archivée");
     setActive(null);
     refetch();
+  }
+
+  async function openCompareFromList(s: Soumission) {
+    setActive(s);
+    setLoadingSim(true);
+    try {
+      const res = await api.getSoumissionSimilaires(s.id);
+      setSimilaires(res.similaires);
+      if (res.similaires[0]) {
+        setCompare({ existing: res.similaires[0].epreuve, score: res.similaires[0].score });
+      } else {
+        toast("Aucune épreuve similaire trouvée");
+      }
+    } catch {
+      toast.error("Impossible de charger les similaires");
+    } finally {
+      setLoadingSim(false);
+    }
   }
 
   const pagination = usePagination(data);
@@ -275,7 +330,7 @@ function SoumissionsTab() {
             <TableRow>
               <TableHead>Titre</TableHead>
               <TableHead>Matière</TableHead>
-              <TableHead>Classe</TableHead>
+              <TableHead>Niveau</TableHead>
               <TableHead>Ville</TableHead>
               <TableHead>Date</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -285,21 +340,32 @@ function SoumissionsTab() {
             {!data?.length && (
               <DataTableEmptyRow colSpan={6} message="Aucune soumission en attente" />
             )}
-            {pagination.items.map((s) => (
+            {pagination.items.map((s) => {
+              const count = s.similairesCount ?? s.doublonsPotentiels?.length ?? 0;
+              return (
               <TableRow
                 key={s.id}
                 className={active?.id === s.id ? "bg-primary/8" : undefined}
               >
                 <TableCell>
                   <p className="font-medium">{s.titre}</p>
-                  {s.doublonsPotentiels?.length ? (
-                    <Badge variant="outline" className="mt-1 border-warning bg-warning/20 text-warning-foreground">
-                        <AlertTriangle className="size-3" /> Doublon
+                  {count > 0 ? (
+                    <button
+                      type="button"
+                      className="mt-1"
+                      onClick={() => openCompareFromList(s)}
+                    >
+                      <Badge variant="outline" className="border-warning bg-warning/20 text-warning-foreground">
+                        <AlertTriangle className="size-3" /> {count} similaire{count > 1 ? "s" : ""}
                       </Badge>
+                    </button>
                   ) : null}
                 </TableCell>
                 <TableCell>{s.matiere}</TableCell>
-                <TableCell>{s.classe} · {s.annee}</TableCell>
+                <TableCell>
+                  <span className="capitalize">{niveauBadgeLabel(s.niveau)}</span>
+                  <span className="text-muted-foreground"> · {s.classe} · {s.annee}</span>
+                </TableCell>
                 <TableCell>{s.ville}</TableCell>
                 <TableCell className="text-muted-foreground">
                   {new Date(s.soumisLe).toLocaleDateString("fr-FR")}
@@ -310,7 +376,8 @@ function SoumissionsTab() {
                   </TableActions>
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </DataTableShell>
 
@@ -320,9 +387,22 @@ function SoumissionsTab() {
                 <div>
                   <h2 className="font-display text-xl font-bold">{active.titre}</h2>
                   <p className="text-sm text-muted-foreground capitalize">
-                    {active.type} · {active.matiere} · {active.classe} · {active.annee}
+                    {niveauBadgeLabel(active.niveau)} · {active.type} · {active.matiere} · {active.classe} · {active.annee}
                   {active.examen ? ` · ${active.examen}` : ""}
                 </p>
+                {active.metaNiveau?.concours && (
+                  <p className="text-xs text-muted-foreground">
+                    Concours {active.metaNiveau.concours}
+                    {active.metaNiveau.session ? ` · session ${active.metaNiveau.session}` : ""}
+                    {active.metaNiveau.nomEpreuve ? ` · ${active.metaNiveau.nomEpreuve}` : ""}
+                  </p>
+                )}
+                {active.metaNiveau?.filiere && (
+                  <p className="text-xs text-muted-foreground">
+                    Filière {active.metaNiveau.filiere}
+                    {active.metaNiveau.universite ? ` · ${active.metaNiveau.universite}` : ""}
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Par {active.soumisPar} · {new Date(active.soumisLe).toLocaleDateString("fr-FR")}
                   {active.pages ? ` · ${active.pages} page${active.pages > 1 ? "s" : ""}` : ""}
@@ -331,6 +411,22 @@ function SoumissionsTab() {
                   <p className="mt-1 font-mono text-xs text-muted-foreground">{active.storagePath}</p>
                 )}
               </div>
+
+              {similairesCount > 0 && (
+                <Button
+                  variant="outline"
+                  className="w-full border-warning/50 bg-warning/10"
+                  disabled={loadingSim || !similaires[0]}
+                  onClick={() => {
+                    if (similaires[0]) {
+                      setCompare({ existing: similaires[0].epreuve, score: similaires[0].score });
+                    }
+                  }}
+                >
+                  <AlertTriangle className="size-4" />
+                  {loadingSim ? "Chargement…" : `Comparer — ${similairesCount} similaire${similairesCount > 1 ? "s" : ""}`}
+                </Button>
+              )}
 
               {active.images.length > 0 && (
                 <div>
@@ -352,21 +448,28 @@ function SoumissionsTab() {
                 )}
                 </div>
 
-              {active.doublonsPotentiels?.length ? (
+              {similaires.length > 0 ? (
                   <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
-                  <p className="font-semibold">Épreuve similaire détectée</p>
+                  <p className="font-semibold">Épreuves similaires</p>
                     <p className="mt-1 text-muted-foreground">
-                      Compare avant de valider. Tu peux remplacer l'existante ou archiver pour usage ultérieur.
+                      Compare en vue partagée avant de valider, remplacer ou archiver.
                     </p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {active.doublonsPotentiels.map((dupId) => (
-                      <div key={dupId} className="flex gap-1">
+                    {similaires.map((match) => (
+                      <div key={match.id} className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setCompare({ existing: match.epreuve, score: match.score })}
+                        >
+                          Comparer ({match.score}%)
+                        </Button>
                         <Button size="sm" variant="outline" asChild>
-                          <Link to="/epreuves/$id" params={{ id: dupId }} target="_blank">
-                            <ExternalLink className="size-3" /> Voir {dupId.slice(-6)}
+                          <Link to="/epreuves/$id" params={{ id: match.id }} target="_blank">
+                            <ExternalLink className="size-3" /> Voir
                           </Link>
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => remplacer(active, dupId)}>
+                        <Button size="sm" variant="outline" onClick={() => remplacer(active, match.id)}>
                           Remplacer
                         </Button>
                     </div>
@@ -416,6 +519,18 @@ function SoumissionsTab() {
             )}
         </div>
       </div>
+
+      {compare && active && (
+        <SoumissionCompareSplit
+          soumission={{ ...active, titre: editTitre || active.titre, ville: editVille || active.ville }}
+          existing={compare.existing}
+          score={compare.score}
+          onClose={() => setCompare(null)}
+          onValider={() => valider(active)}
+          onRejeter={() => setRejectOpen(true)}
+          onRemplacer={() => remplacer(active, compare.existing.id)}
+        />
+      )}
 
       <AlertDialog open={rejectOpen} onOpenChange={setRejectOpen}>
         <AlertDialogContent>

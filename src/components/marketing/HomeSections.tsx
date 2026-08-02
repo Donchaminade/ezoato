@@ -24,10 +24,18 @@ import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { FaqExplorer } from "@/components/faq/FaqExplorer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  SUBSCRIPTION_DURATION_MONTHS,
+  SUBSCRIPTION_PRICE,
+} from "@/lib/subscription-constants";
 import { cn } from "@/lib/utils";
 import type { PublicMeta } from "@/lib/types";
 
 const EXAM_TICKER = [
+  "Collège",
+  "Lycée",
+  "Université",
+  "Concours",
   "CEPD",
   "BEPC",
   "BAC I",
@@ -36,40 +44,36 @@ const EXAM_TICKER = [
   "Compositions",
   "Mathématiques",
   "Français",
-  "Physique-Chimie",
-  "SVT",
-  "Histoire-Géo",
-  "Anglais",
 ] as const;
 
 const STEPS = [
   {
     icon: Search,
     title: "Cherche",
-    text: "Filtre par ville, matière, établissement, classe ou examen national.",
+    text: "Filtre par niveau (collège, lycée, université, concours), ville, matière ou examen.",
   },
   {
     icon: BookOpen,
     title: "Consulte",
-    text: "Aperçu du PDF avant téléchargement. Lisible sur mobile, prêt à imprimer.",
+    text: "Aperçu du PDF avant téléchargement. Lisible sur mobile et sur le web.",
   },
   {
     icon: Download,
     title: "Télécharge",
-    text: "Devoirs et compositions gratuits. Examens nationaux à petit prix via Mobile Money.",
+    text: "Devoirs gratuits, examens à l'unité ou abonnement Pro — via Flooz ou T-Money.",
   },
 ] as const;
 
 const FEATURES = [
   {
     icon: Smartphone,
-    title: "Pensé pour le mobile",
-    text: "Interface légère, rapide sur connexion 3G/4G. Idéal entre deux cours.",
+    title: "Mobile & web",
+    text: "App et site pensés pour le téléphone — rapide sur 3G/4G, idéal entre deux cours.",
   },
   {
     icon: ShieldCheck,
     title: "Épreuves vérifiées",
-    text: "Chaque document passe par une validation humaine avant publication.",
+    text: "Validation humaine et détection de doublons avant publication — archives fiables.",
   },
   {
     icon: MapPin,
@@ -78,8 +82,8 @@ const FEATURES = [
   },
   {
     icon: GraduationCap,
-    title: "Collège & lycée",
-    text: "De la 6ème à la Terminale, devoirs, compositions et examens nationaux.",
+    title: "Quatre niveaux",
+    text: "Collège, lycée, université et concours — formulaires adaptés à chaque parcours.",
   },
   {
     icon: Wallet,
@@ -359,14 +363,15 @@ export function HomePricing({ meta }: { meta?: PublicMeta }) {
                   <Badge className="bg-primary/15 text-primary">{pricing.promo.label}</Badge>
                 )}
               </div>
-              <h3 className="mt-4 font-display text-xl font-bold">Examens nationaux</h3>
+              <h3 className="mt-4 font-display text-xl font-bold">Examens & Pro</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                CEPD, BEPC et BAC — sujets officiels archivés par année et par matière.
+                CEPD, BEPC, BAC et concours — à l&apos;unité ou en abonnement Pro (
+                {SUBSCRIPTION_PRICE.toLocaleString("fr-FR")}&nbsp;FCFA / {SUBSCRIPTION_DURATION_MONTHS}&nbsp;mois).
               </p>
               <ul className="mt-5 space-y-2 text-sm">
                 {[
-                  `Paiement ${prix} FCFA via Flooz ou T-Money`,
-                  "Accès immédiat après paiement",
+                  `À l'unité dès ${prix} FCFA via Flooz ou T-Money`,
+                  "Pro : accès illimité aux épreuves payantes",
                   `Contribue : ${epreuves} validées = ${recompense.toLocaleString("fr-FR")} FCFA`,
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2">

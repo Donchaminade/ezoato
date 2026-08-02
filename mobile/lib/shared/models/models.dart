@@ -1,7 +1,7 @@
 // Types métier EZOA-TO — parité avec mobile-expo-legacy/src/shared/types
 
 typedef Ville = String;
-typedef Niveau = String; // college | lycee
+typedef Niveau = String; // college | lycee | universite | concours
 typedef TypeEpreuve = String; // devoir | composition | examen | corrige
 typedef ExamenNational = String; // CEPD | BEPC | BAC1 | BAC2
 typedef StatutEpreuve = String;
@@ -448,12 +448,18 @@ class PublicMeta {
     this.types = kDefaultTypes,
     this.periodes = kDefaultPeriodes,
     this.examens = kDefaultExamens,
+    this.niveaux = kDefaultNiveaux,
+    this.concours = const [],
+    this.filieres = const [],
+    this.anneesEtude = kDefaultAnneesEtude,
   });
 
   /// Replis si l'API ne renvoie pas (encore) ces référentiels.
   static const kDefaultTypes = ['devoir', 'composition', 'examen'];
   static const kDefaultPeriodes = ['T1', 'T2', 'T3', 'S1', 'S2'];
   static const kDefaultExamens = ['CEPD', 'BEPC', 'BAC1', 'BAC2'];
+  static const kDefaultNiveaux = ['college', 'lycee', 'universite', 'concours'];
+  static const kDefaultAnneesEtude = ['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'];
 
   factory PublicMeta.fromJson(Map<String, dynamic> json) {
     List<String> strings(String key, List<String> fallback) {
@@ -472,6 +478,10 @@ class PublicMeta {
       types: strings('types', kDefaultTypes),
       periodes: strings('periodes', kDefaultPeriodes),
       examens: strings('examens', kDefaultExamens),
+      niveaux: strings('niveaux', kDefaultNiveaux),
+      concours: strings('concours', const []),
+      filieres: strings('filieres', const []),
+      anneesEtude: strings('anneesEtude', kDefaultAnneesEtude),
     );
   }
 
@@ -484,23 +494,47 @@ class PublicMeta {
   final List<String> types;
   final List<String> periodes;
   final List<String> examens;
+  final List<String> niveaux;
+  final List<String> concours;
+  final List<String> filieres;
+  final List<String> anneesEtude;
 }
 
-/// Classes par niveau renvoyées par `GET /meta` (`classes.college` / `classes.lycee`).
+/// Classes par niveau renvoyées par `GET /meta`.
 class MetaClasses {
-  const MetaClasses({this.college = const [], this.lycee = const []});
+  const MetaClasses({
+    this.college = const [],
+    this.lycee = const [],
+    this.universite = const [],
+    this.concours = const [],
+  });
 
   factory MetaClasses.fromJson(Map<String, dynamic> json) {
     return MetaClasses(
       college: (json['college'] as List<dynamic>? ?? []).map((e) => e as String).toList(),
       lycee: (json['lycee'] as List<dynamic>? ?? []).map((e) => e as String).toList(),
+      universite: (json['universite'] as List<dynamic>? ?? []).map((e) => e as String).toList(),
+      concours: (json['concours'] as List<dynamic>? ?? []).map((e) => e as String).toList(),
     );
   }
 
   final List<String> college;
   final List<String> lycee;
+  final List<String> universite;
+  final List<String> concours;
 
-  List<String> forNiveau(String niveau) => niveau == 'lycee' ? lycee : college;
+  List<String> forNiveau(String niveau) {
+    switch (niveau) {
+      case 'lycee':
+        return lycee;
+      case 'universite':
+        return universite;
+      case 'concours':
+        return concours;
+      default:
+        return college;
+    }
+  }
 }
 
 class PublicStats {
