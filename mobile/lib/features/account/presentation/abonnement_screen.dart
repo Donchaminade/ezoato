@@ -109,7 +109,7 @@ class AbonnementScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              if (!s.actif)
+              if (!s.actif) ...[
                 EzoaButton(
                   label: s.expire
                       ? 'Renouveler — ${s.montant} FCFA / ${s.dureeMois} mois'
@@ -117,6 +117,13 @@ class AbonnementScreen extends ConsumerWidget {
                   icon: LucideIcons.smartphone,
                   onPressed: () => _openSubscribeSheet(context, ref, s.montant),
                 ),
+                const SizedBox(height: 28),
+              ] else
+                const SizedBox(height: 8),
+              _CommentCaMarche(
+                montant: s.montant,
+                dureeMois: s.dureeMois,
+              ),
             ],
           ),
         );
@@ -164,6 +171,119 @@ class _InfoRow extends StatelessWidget {
       children: [
         Text(label, style: EzoaTypography.bodySmall(context)),
         Text(value, style: EzoaTypography.titleSmall(context)),
+      ],
+    );
+  }
+}
+
+/// Étapes simples — pas de renouvellement auto, rappels uniquement.
+class _CommentCaMarche extends StatelessWidget {
+  const _CommentCaMarche({
+    required this.montant,
+    required this.dureeMois,
+  });
+
+  final int montant;
+  final int dureeMois;
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = EzoaColors.of(context);
+    final steps = [
+      (
+        'Accès Pro',
+        'Toutes les épreuves payantes (examens nationaux et corrigés types) '
+            'pendant $dureeMois mois.',
+      ),
+      (
+        'Tarif',
+        '$montant FCFA pour $dureeMois mois — paiement unique, '
+            'sans renouvellement automatique.',
+      ),
+      (
+        'Activation',
+        'Payez par Flooz ou T-Money, puis confirmez : '
+            'l’accès Pro s’active immédiatement.',
+      ),
+      (
+        'À la fin',
+        'Des rappels vous préviennent avant l’expiration. '
+            'Pour continuer, renouvelez manuellement.',
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Comment ça marche',
+          style: EzoaTypography.titleSmall(context),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Simple, clair, sans engagement.',
+          style: EzoaTypography.bodySmall(context).copyWith(
+            color: pal.textMuted,
+          ),
+        ),
+        const SizedBox(height: 16),
+        for (var i = 0; i < steps.length; i++) ...[
+          if (i > 0) const SizedBox(height: 14),
+          _HowItWorksStep(
+            index: i + 1,
+            title: steps[i].$1,
+            body: steps[i].$2,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _HowItWorksStep extends StatelessWidget {
+  const _HowItWorksStep({
+    required this.index,
+    required this.title,
+    required this.body,
+  });
+
+  final int index;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = EzoaColors.of(context);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 28,
+          child: Text(
+            '$index.',
+            style: EzoaTypography.titleSmall(context).copyWith(
+              color: EzoaColors.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: EzoaTypography.titleSmall(context)),
+              const SizedBox(height: 2),
+              Text(
+                body,
+                style: EzoaTypography.bodySmall(context).copyWith(
+                  color: pal.textMuted,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
