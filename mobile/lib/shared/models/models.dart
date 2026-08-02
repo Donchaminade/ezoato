@@ -103,6 +103,7 @@ class User {
     this.ville,
     this.classe,
     this.etablissement,
+    this.profilType,
     this.createdAt,
   });
 
@@ -116,6 +117,7 @@ class User {
       ville: json['ville'] as String?,
       classe: json['classe'] as String?,
       etablissement: json['etablissement'] as String?,
+      profilType: (json['profilType'] ?? json['profil_type']) as String?,
       createdAt: json['createdAt'] as String?,
     );
   }
@@ -128,6 +130,7 @@ class User {
   final String? ville;
   final String? classe;
   final String? etablissement;
+  final String? profilType;
   final String? createdAt;
 }
 
@@ -142,6 +145,7 @@ class UserProfile extends User {
     super.ville,
     super.classe,
     super.etablissement,
+    super.profilType,
     super.createdAt,
   });
 
@@ -156,6 +160,7 @@ class UserProfile extends User {
       ville: json['ville'] as String?,
       classe: json['classe'] as String?,
       etablissement: json['etablissement'] as String?,
+      profilType: (json['profilType'] ?? json['profil_type']) as String?,
       createdAt: created,
       createdAtProfile: created,
     );

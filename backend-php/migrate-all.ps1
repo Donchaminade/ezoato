@@ -25,6 +25,7 @@ $migrations = @(
   "migration-password-reset.sql",
   "migration-user-telephone.sql",
   "migration-user-profile-classe.sql",
+  "migration-user-profil-type.sql",
   "migration-platform-settings.sql",
   "migration-platform-settings-contact.sql",
   "migration-push-notifications.sql",

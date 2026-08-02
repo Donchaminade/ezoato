@@ -22,16 +22,35 @@ if ($route === 'register') {
   $email = strtolower(trim($in['email'] ?? ''));
   $telephone = normalize_phone($in['telephone'] ?? '');
   $pwd = $in['password'] ?? '';
-  $classe = validate_user_classe($in['classe'] ?? null, true);
-  $etablissement = validate_user_etablissement($in['etablissement'] ?? null, true);
+  $profilRaw = $in['profil_type'] ?? $in['profilType'] ?? null;
+  // Rétrocompat : sans profil_type → comportement élève (classe/établissement requis)
+  $profilType = $profilRaw !== null && trim((string)$profilRaw) !== ''
+    ? validate_profil_type((string)$profilRaw, true)
+    : 'eleve';
+  $needsParcours = profil_needs_parcours($profilType);
+  $classe = validate_user_classe($in['classe'] ?? null, $needsParcours, $profilType);
+  // Élève / étudiant : établissement requis ; concours : optionnel ; autres : ignoré
+  $etablissement = validate_user_etablissement(
+    $in['etablissement'] ?? null,
+    $needsParcours && $profilType !== 'concours'
+  );
+  if (!$needsParcours) {
+    $classe = null;
+    $etablissement = null;
+  }
   if (strlen($nom) < 2 || strlen($nom) > 120) fail('Nom invalide');
   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) fail('Email invalide');
   if (strlen($telephone) < 8 || strlen($telephone) > 12) fail('Numéro de téléphone invalide');
   if (strlen($pwd) < 8) fail('Mot de passe trop court (8+ caractères)');
   $id = uuid();
   try {
-    db()->prepare('INSERT INTO users (id,nom,email,telephone,password_hash,role,classe,etablissement) VALUES (?,?,?,?,?,?,?,?)')
-        ->execute([$id, $nom, $email, $telephone, password_hash($pwd, PASSWORD_BCRYPT), 'utilisateur', $classe, $etablissement]);
+    if (users_has_profil_type()) {
+      db()->prepare('INSERT INTO users (id,nom,email,telephone,password_hash,role,classe,etablissement,profil_type) VALUES (?,?,?,?,?,?,?,?,?)')
+          ->execute([$id, $nom, $email, $telephone, password_hash($pwd, PASSWORD_BCRYPT), 'utilisateur', $classe, $etablissement, $profilType]);
+    } else {
+      db()->prepare('INSERT INTO users (id,nom,email,telephone,password_hash,role,classe,etablissement) VALUES (?,?,?,?,?,?,?,?)')
+          ->execute([$id, $nom, $email, $telephone, password_hash($pwd, PASSWORD_BCRYPT), 'utilisateur', $classe, $etablissement]);
+    }
   } catch (PDOException $e) {
     $msg = (string)$e->getMessage();
     if (str_contains($msg, 'email')) fail('Email déjà utilisé', 409);
@@ -48,6 +67,7 @@ if ($route === 'register') {
     'ville' => null,
     'classe' => $classe,
     'etablissement' => $etablissement,
+    'profil_type' => $profilType,
   ])]);
 }
 
@@ -57,13 +77,15 @@ if ($route === 'login') {
   $pwd = $in['password'] ?? '';
   if ($identifier === '' || $pwd === '') fail('Identifiants invalides', 401);
 
+  $userCols = 'id, nom, email, telephone, role, ville, classe, etablissement, password_hash';
+  if (users_has_profil_type()) $userCols = 'id, nom, email, telephone, role, ville, classe, etablissement, profil_type, password_hash';
   if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
-    $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement, password_hash FROM users WHERE email = ?');
+    $stmt = db()->prepare("SELECT $userCols FROM users WHERE email = ?");
     $stmt->execute([strtolower($identifier)]);
   } else {
     $telephone = normalize_phone($identifier);
     if (strlen($telephone) < 8) fail('Identifiants invalides', 401);
-    $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement, password_hash FROM users WHERE telephone = ?');
+    $stmt = db()->prepare("SELECT $userCols FROM users WHERE telephone = ?");
     $stmt->execute([$telephone]);
   }
   $u = $stmt->fetch();

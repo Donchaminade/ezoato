@@ -431,19 +431,24 @@ class ApiClient {
     required String email,
     required String telephone,
     required String password,
-    required String classe,
-    required String etablissement,
+    required String profilType,
+    String? classe,
+    String? etablissement,
   }) async {
+    final body = <String, dynamic>{
+      'nom': nom,
+      'email': email,
+      'telephone': telephone,
+      'password': password,
+      'profil_type': profilType,
+    };
+    if (classe != null && classe.isNotEmpty) body['classe'] = classe;
+    if (etablissement != null && etablissement.isNotEmpty) {
+      body['etablissement'] = etablissement;
+    }
     final data = await _post<Map<String, dynamic>>(
       '/auth/register',
-      body: {
-        'nom': nom,
-        'email': email,
-        'telephone': telephone,
-        'password': password,
-        'classe': classe,
-        'etablissement': etablissement,
-      },
+      body: body,
     );
     return (
       token: data['token'] as String,

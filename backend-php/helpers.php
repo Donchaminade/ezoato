@@ -329,15 +329,71 @@ function all_meta_class_names(): array {
   )));
 }
 
+/** Types de profil inscription (snake_case API / DB). */
+function allowed_profil_types(): array {
+  return ['eleve', 'etudiant', 'concours', 'enseignant', 'parent', 'autre'];
+}
+
+/** Profils qui renseignent classe / établissement. */
+function profil_needs_parcours(string $profilType): bool {
+  return in_array($profilType, ['eleve', 'etudiant', 'concours'], true);
+}
+
+/** Valide profil_type (accepte profil_type ou profilType en entrée). */
+function validate_profil_type(?string $profilType, bool $required = true): ?string {
+  $profilType = strtolower(trim((string)($profilType ?? '')));
+  if ($profilType === '') {
+    if ($required) fail('Type de profil requis');
+    return null;
+  }
+  if (!in_array($profilType, allowed_profil_types(), true)) {
+    fail('Type de profil invalide');
+  }
+  return $profilType;
+}
+
+/** Classes autorisées pour un profil donné. */
+function class_names_for_profil(string $profilType): array {
+  $classes = load_meta_classes();
+  if ($profilType === 'eleve') {
+    return array_values(array_unique(array_merge(
+      $classes['college'] ?? [],
+      $classes['lycee'] ?? [],
+    )));
+  }
+  if ($profilType === 'etudiant') {
+    return array_values($classes['universite'] ?? []);
+  }
+  if ($profilType === 'concours') {
+    if (!function_exists('load_meta_concours')) {
+      require_once __DIR__ . '/lib/niveau-soumission.php';
+    }
+    $fromRef = load_meta_concours();
+    $fromClasses = $classes['concours'] ?? [];
+    return array_values(array_unique(array_merge($fromRef, $fromClasses)));
+  }
+  return [];
+}
+
 /** Valide et normalise la classe utilisateur contre les référentiels. */
-function validate_user_classe(?string $classe, bool $required = false): ?string {
+function validate_user_classe(?string $classe, bool $required = false, ?string $profilType = null): ?string {
   $classe = trim((string)($classe ?? ''));
   if ($classe === '') {
     if ($required) fail('Classe requise');
     return null;
   }
-  foreach (all_meta_class_names() as $allowed) {
-    if ($allowed === $classe) return $classe;
+  $allowed = $profilType !== null && profil_needs_parcours($profilType)
+    ? class_names_for_profil($profilType)
+    : all_meta_class_names();
+  // Concours hors référentiel classes scolaire : autoriser aussi les noms concours
+  if ($profilType === null) {
+    if (!function_exists('load_meta_concours')) {
+      require_once __DIR__ . '/lib/niveau-soumission.php';
+    }
+    $allowed = array_values(array_unique(array_merge($allowed, load_meta_concours())));
+  }
+  foreach ($allowed as $name) {
+    if ($name === $classe) return $classe;
   }
   fail('Classe invalide');
 }
@@ -353,9 +409,27 @@ function validate_user_etablissement(?string $etablissement, bool $required = fa
   return repair_display_text($etablissement) ?? $etablissement;
 }
 
+/** Colonne profil_type présente ? */
+function users_has_profil_type(): bool {
+  static $cached = null;
+  if ($cached !== null) return $cached;
+  try {
+    $schema = db()->query('SELECT DATABASE()')->fetchColumn();
+    $stmt = db()->prepare(
+      'SELECT COUNT(*) FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?'
+    );
+    $stmt->execute([$schema, 'users', 'profil_type']);
+    $cached = ((int)$stmt->fetchColumn()) > 0;
+  } catch (Throwable $e) {
+    $cached = false;
+  }
+  return $cached;
+}
+
 /** Représentation publique d'un utilisateur (auth / profil). */
 function map_auth_user(array $u): array {
-  return [
+  $out = [
     'id' => $u['id'],
     'nom' => $u['nom'],
     'email' => $u['email'],
@@ -365,6 +439,13 @@ function map_auth_user(array $u): array {
     'classe' => isset($u['classe']) ? (repair_display_text($u['classe'] ?? '') ?: null) : null,
     'etablissement' => isset($u['etablissement']) ? (repair_display_text($u['etablissement'] ?? '') ?: null) : null,
   ];
+  if (array_key_exists('profil_type', $u) || users_has_profil_type()) {
+    $raw = $u['profil_type'] ?? null;
+    $out['profilType'] = $raw !== null && $raw !== ''
+      ? (string)$raw
+      : (($out['classe'] ?? null) !== null ? 'eleve' : null);
+  }
+  return $out;
 }
 
 /** Classes admin avec clé brute + libellé affiché. */
@@ -572,7 +653,9 @@ function current_user(): ?array {
   if (!preg_match('/Bearer\s+(.+)/i', $h, $m)) return null;
   $payload = jwt_decode($m[1]);
   if (!$payload) return null;
-  $stmt = db()->prepare('SELECT id, nom, email, telephone, role, ville, classe, etablissement FROM users WHERE id = ?');
+  $cols = 'id, nom, email, telephone, role, ville, classe, etablissement';
+  if (users_has_profil_type()) $cols .= ', profil_type';
+  $stmt = db()->prepare("SELECT $cols FROM users WHERE id = ?");
   $stmt->execute([$payload['sub']]);
   $row = $stmt->fetch();
   return $row ? map_auth_user($row) : null;

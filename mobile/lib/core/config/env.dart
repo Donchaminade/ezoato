@@ -48,6 +48,9 @@ class Env {
   /// Page contact publique (`/contact` sur le site web).
   static String get contactUrl => '$webUrl/contact';
 
+  /// Conditions générales d'utilisation (`/conditions` sur le site web).
+  static String get conditionsUrl => '$webUrl/conditions';
+
   static String get webUrl {
     if (_dartDefineWebUrl.isNotEmpty) {
       return _normalize(_dartDefineWebUrl);
