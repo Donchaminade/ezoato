@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -147,28 +149,29 @@ class HomeScreen extends ConsumerWidget {
                       style: EzoaTypography.titleSmall(context),
                     ),
                   ),
-                  if (isOnline)
-                    GestureDetector(
-                      onTap: () => context.go('/archives'),
-                      behavior: HitTestBehavior.opaque,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Voir tout',
-                            style: EzoaTypography.bodySmall(context).copyWith(
-                              color: EzoaColors.of(context).accent,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Icon(
-                            LucideIcons.chevronRight,
-                            size: 16,
+                  GestureDetector(
+                    onTap: () => isOnline
+                        ? context.go('/archives')
+                        : context.push('/account/offline'),
+                    behavior: HitTestBehavior.opaque,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Voir tout',
+                          style: EzoaTypography.bodySmall(context).copyWith(
                             color: EzoaColors.of(context).accent,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ],
-                      ),
+                        ),
+                        Icon(
+                          LucideIcons.chevronRight,
+                          size: 16,
+                          color: EzoaColors.of(context).accent,
+                        ),
+                      ],
                     ),
+                  ),
                 ],
               ),
             ),
@@ -183,6 +186,9 @@ class HomeScreen extends ConsumerWidget {
                         : 'Téléchargez des épreuves depuis Archives',
                     icon: LucideIcons.bookOpen,
                   );
+                }
+                if (!isOnline) {
+                  return _OfflineLibraryHomeGrid(items: items);
                 }
                 return SizedBox(
                   height: _RecentEpreuveHorizontalCard.height,
@@ -200,7 +206,7 @@ class HomeScreen extends ConsumerWidget {
                         index: index,
                         child: _RecentEpreuveHorizontalCard(
                           epreuve: epreuve,
-                          isOffline: !isOnline,
+                          isOffline: false,
                           onTap: () =>
                               context.push('/epreuve/${epreuve.id}'),
                         ),
@@ -693,6 +699,58 @@ class _QuickActionsRow extends ConsumerWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Grille 2 colonnes « Ma bibliothèque hors ligne » sur l'accueil.
+class _OfflineLibraryHomeGrid extends ConsumerWidget {
+  const _OfflineLibraryHomeGrid({required this.items});
+
+  final List<Epreuve> items;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final entriesAsync = ref.watch(offlineLibraryEntriesProvider);
+    final previewById = {
+      for (final e in entriesAsync.valueOrNull ?? const <OfflineLibraryEntry>[])
+        if (e.previewPath != null) e.item.id: e.previewPath!,
+    };
+
+    final rows = (items.length / 2).ceil();
+    final height = rows * 204.0 + (rows > 1 ? (rows - 1) * 12.0 : 0);
+
+    return SizedBox(
+      height: height,
+      child: GridView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          mainAxisExtent: 204,
+        ),
+        itemCount: items.length,
+        itemBuilder: (context, i) {
+          final e = items[i];
+          final previewPath = previewById[e.id];
+          return EpreuveGridCard(
+            titre: e.titre,
+            matiere: e.matiere,
+            classe: e.classe,
+            annee: e.annee,
+            ville: e.ville,
+            telechargements: e.telechargements,
+            type: e.type,
+            isOffline: true,
+            revealIndex: i,
+            previewImage:
+                previewPath != null ? FileImage(File(previewPath)) : null,
+            onTap: () => context.push('/epreuve/${e.id}'),
+          );
+        },
       ),
     );
   }

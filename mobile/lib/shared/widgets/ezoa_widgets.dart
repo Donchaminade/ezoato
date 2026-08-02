@@ -719,6 +719,7 @@ class EpreuveGridCard extends StatelessWidget {
     this.type = 'epreuve',
     this.revealIndex,
     this.epreuve,
+    this.previewImage,
   });
 
   final String titre;
@@ -737,6 +738,9 @@ class EpreuveGridCard extends StatelessWidget {
   /// Si fourni, affiche la miniature d'aperçu (sinon dégradé + icône).
   final Epreuve? epreuve;
 
+  /// Aperçu produit (fichier local hors ligne, ou ImageProvider réseau).
+  final ImageProvider? previewImage;
+
   static const _gradients = [
     [Color(0xFF006A4E), Color(0xFF004D38)],
     [Color(0xFF4338CA), Color(0xFF312E81)],
@@ -749,6 +753,9 @@ class EpreuveGridCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final pal = EzoaColors.of(context);
     final gradient = _gradients[matiere.hashCode.abs() % _gradients.length];
+    final placeholderIcon = type == 'examen'
+        ? LucideIcons.graduationCap
+        : LucideIcons.fileText;
 
     final card = EzoaGlassCard(
       margin: EdgeInsets.zero,
@@ -772,7 +779,20 @@ class EpreuveGridCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                if (epreuve != null)
+                if (previewImage != null)
+                  Image(
+                    image: previewImage!,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                    errorBuilder: (_, __, ___) => Center(
+                      child: Icon(
+                        placeholderIcon,
+                        size: 30,
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  )
+                else if (epreuve != null)
                   EpreuveThumbnail(
                     epreuve: epreuve!,
                     placeholderIconSize: 30,
@@ -780,9 +800,7 @@ class EpreuveGridCard extends StatelessWidget {
                 else
                   Center(
                     child: Icon(
-                      type == 'examen'
-                          ? LucideIcons.graduationCap
-                          : LucideIcons.fileText,
+                      placeholderIcon,
                       size: 30,
                       color: Colors.white.withValues(alpha: 0.85),
                     ),
@@ -833,8 +851,9 @@ class EpreuveGridCard extends StatelessWidget {
                     runSpacing: 4,
                     children: [
                       _EpreuveMiniBadge(label: matiere),
-                      _EpreuveMiniBadge(label: classe),
-                      _EpreuveMiniBadge(label: '$annee'),
+                      if (classe.isNotEmpty && classe != '—')
+                        _EpreuveMiniBadge(label: classe),
+                      if (annee > 0) _EpreuveMiniBadge(label: '$annee'),
                       if (ville != null && ville!.isNotEmpty)
                         _EpreuveMiniBadge(label: ville!),
                       if (telechargements != null && telechargements! > 0)
