@@ -4,13 +4,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Download, FileText, Lock } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { AuthenticatedImage } from "@/components/admin/AuthenticatedMedia";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatFcfa, getPrixFcfa, requiresPayment } from "@/lib/pricing";
 import type { Epreuve } from "@/lib/types";
+import { resolveMediaUrl } from "@/lib/utils";
 
 function previewPageUrl(thumbnailUrl: string, page: number): string {
-  const url = new URL(thumbnailUrl, window.location.origin);
+  const resolved = resolveMediaUrl(thumbnailUrl) ?? thumbnailUrl;
+  const url = new URL(resolved, window.location.origin);
   url.searchParams.set("page", String(page));
   return url.toString();
 }
@@ -53,11 +56,11 @@ function EpreuveDocumentPreview({ epreuve }: { epreuve: Epreuve }) {
             data-page={page}
             className="snap-start border-b border-border/60 last:border-b-0"
           >
-            <img
-              src={previewPageUrl(epreuve.thumbnailUrl!, page)}
+            <AuthenticatedImage
+              url={previewPageUrl(epreuve.thumbnailUrl!, page)}
               alt={`Page ${page} — ${epreuve.titre}`}
-              className="block w-full object-contain"
-              loading={page === 1 ? "eager" : "lazy"}
+              className="block w-full"
+              imgClassName="block w-full object-contain"
             />
           </div>
         ))}

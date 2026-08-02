@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { cn, resolveMediaUrl } from "@/lib/utils";
 
 /** Cadre portrait A4 pour épreuves (210×297 mm). */
 export const PORTRAIT_PREVIEW_FRAME =
@@ -11,17 +11,82 @@ export const PORTRAIT_PREVIEW_FRAME =
 export const ARCHIVES_PORTRAIT_PREVIEW_FRAME =
   "relative w-full max-w-none aspect-[210/297] overflow-hidden bg-muted/20";
 
-export function AuthenticatedPdf({ url, className }: { url: string; className?: string }) {
+/** Image d'aperçu avec URL média corrigée + fetch authentifié (épreuves payantes). */
+export function AuthenticatedImage({
+  url,
+  alt,
+  className,
+  imgClassName,
+}: {
+  url: string;
+  alt: string;
+  className?: string;
+  imgClassName?: string;
+}) {
   const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState(false);
+  const resolved = resolveMediaUrl(url) ?? url;
 
   useEffect(() => {
     let objectUrl: string | null = null;
-    api.fetchAuthenticatedUrl(url)
+    let cancelled = false;
+    setSrc(null);
+    setError(false);
+    api
+      .fetchAuthenticatedUrl(resolved)
+      .then((u) => {
+        if (cancelled) {
+          URL.revokeObjectURL(u);
+          return;
+        }
+        objectUrl = u;
+        setSrc(u);
+      })
+      .catch(() => {
+        if (!cancelled) setError(true);
+      });
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [resolved]);
+
+  if (error) {
+    return (
+      <div className={cn("grid place-items-center bg-muted/30 text-muted-foreground", className)}>
+        <div className="p-6 text-center">
+          <FileText className="mx-auto size-10 opacity-40" />
+          <p className="mt-2 text-sm">Aperçu indisponible</p>
+        </div>
+      </div>
+    );
+  }
+  if (!src) {
+    return (
+      <div className={cn("grid place-items-center bg-muted/20", className)}>
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+  return (
+    <div className={cn("overflow-hidden", className)}>
+      <img src={src} alt={alt} className={cn("h-full w-full object-contain", imgClassName)} />
+    </div>
+  );
+}
+
+export function AuthenticatedPdf({ url, className }: { url: string; className?: string }) {
+  const [src, setSrc] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  const resolved = resolveMediaUrl(url) ?? url;
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    api.fetchAuthenticatedUrl(resolved)
       .then((u) => { objectUrl = u; setSrc(u); })
       .catch(() => setError(true));
     return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
-  }, [url]);
+  }, [resolved]);
 
   if (error) {
     return (

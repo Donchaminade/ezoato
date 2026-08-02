@@ -30,6 +30,9 @@ dependencies:
   crypto: ^3.0.7
   tutorial_coach_mark: ^1.3.3
   url_launcher: ^6.3.1
+  image_cropper: ^12.2.1
+  pdf: ^3.12.0
+  image: ^4.8.0
 
 dev_dependencies:
   flutter_test:
@@ -39,7 +42,6 @@ dev_dependencies:
   http: ^1.6.0
   flutter_launcher_icons: ^0.14.3
   flutter_native_splash: ^2.4.5
-  image: ^4.8.0
 
 # Icônes composées par tool/make_launcher_icons.dart à partir de
 # icon-ezoa.png (icône verte sur fond blanc + fin anneau vert).

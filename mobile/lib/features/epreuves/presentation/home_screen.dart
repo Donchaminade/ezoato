@@ -12,6 +12,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/connectivity_service.dart';
 import '../../../core/theme/ezoa_theme.dart';
 import '../../../shared/models/models.dart';
+import '../../../shared/widgets/epreuve_thumbnail.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
 import '../../../shared/widgets/subscription_pro_widgets.dart';
 import '../../account/data/subscription_providers.dart';
@@ -823,24 +824,26 @@ class _RecentEpreuveHorizontalCard extends StatelessWidget {
                     top: Radius.circular(14),
                   ),
                 ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: -12,
-                      right: -12,
-                      child: Icon(
-                        LucideIcons.sparkles,
-                        size: 52,
-                        color: Colors.white.withValues(alpha: 0.08),
-                      ),
-                    ),
-                    Center(
-                      child: Icon(
-                        _typeIcon,
-                        size: 28,
-                        color: Colors.white.withValues(alpha: 0.88),
-                      ),
-                    ),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(14),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (!isOffline)
+                        EpreuveThumbnail(
+                          epreuve: epreuve,
+                          placeholderIconSize: 28,
+                        )
+                      else
+                        Center(
+                          child: Icon(
+                            _typeIcon,
+                            size: 28,
+                            color: Colors.white.withValues(alpha: 0.88),
+                          ),
+                        ),
                     Positioned(
                       top: 7,
                       left: 7,
@@ -889,7 +892,8 @@ class _RecentEpreuveHorizontalCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

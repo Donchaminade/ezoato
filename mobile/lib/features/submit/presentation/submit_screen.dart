@@ -1,7 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../core/network/api_client.dart';
@@ -11,6 +10,9 @@ import '../../../shared/models/models.dart';
 import '../../../shared/widgets/ezoa_searchable_picker.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
 import '../../epreuves/presentation/home_screen.dart' show metaProvider;
+import '../data/document_pdf_builder.dart';
+import '../domain/scanned_page.dart';
+import 'document_scanner_sheet.dart';
 
 class SubmitScreen extends ConsumerStatefulWidget {
   const SubmitScreen({super.key});
@@ -25,7 +27,7 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
   final _universiteController = TextEditingController();
   final _nomEpreuveController = TextEditingController();
   final _organismeController = TextEditingController();
-  final _picker = ImagePicker();
+  final _pdfBuilder = const DocumentPdfBuilder();
 
   int _step = 1;
   String? _niveau;
@@ -42,8 +44,11 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
   String? _concours;
   String _sessionConcours = '${DateTime.now().year}';
 
-  String? _pdfPath;
-  List<XFile> _images = [];
+  /// PDF importé tel quel (chemin « Importer PDF »).
+  String? _importedPdfPath;
+
+  /// Pages scannées (chemin « Scanner ») — assemblées en PDF à l'envoi.
+  List<ScannedPage> _scannedPages = [];
 
   bool _submitting = false;
   String? _error;
@@ -59,31 +64,20 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImages() async {
+  Future<void> _openScanner() async {
     try {
-      final picked = await _picker.pickMultiImage(imageQuality: 90);
-      if (picked.isEmpty) return;
+      final result = await showDocumentScannerSheet(
+        context,
+        initialPages: _scannedPages,
+      );
+      if (result == null) return;
       setState(() {
-        _pdfPath = null;
-        _images = [..._images, ...picked];
+        _importedPdfPath = null;
+        _scannedPages = result.pages;
         _error = null;
       });
     } catch (e) {
-      setState(() => _error = 'Sélection impossible : $e');
-    }
-  }
-
-  Future<void> _takePhoto() async {
-    try {
-      final photo = await _picker.pickImage(source: ImageSource.camera, imageQuality: 90);
-      if (photo == null) return;
-      setState(() {
-        _pdfPath = null;
-        _images = [..._images, photo];
-        _error = null;
-      });
-    } catch (e) {
-      setState(() => _error = 'Appareil photo indisponible : $e');
+      setState(() => _error = 'Scanner indisponible : $e');
     }
   }
 
@@ -96,8 +90,8 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
       final path = res?.files.single.path;
       if (path == null) return;
       setState(() {
-        _images = [];
-        _pdfPath = path;
+        _scannedPages = [];
+        _importedPdfPath = path;
         _error = null;
       });
     } catch (e) {
@@ -106,7 +100,10 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
   }
 
   bool get _formValid {
-    if (_niveau == null || (_pdfPath == null && _images.isEmpty)) return false;
+    if (_niveau == null ||
+        (_importedPdfPath == null && _scannedPages.isEmpty)) {
+      return false;
+    }
     if (_niveau == 'college' || _niveau == 'lycee') {
       final needsPeriode = _type != 'examen';
       final needsEtablissement = _type == 'devoir';
@@ -163,7 +160,8 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
           'filiere': _filiere!,
           'anneeEtude': _anneeEtude!,
           'universite': _universiteController.text.trim(),
-          if (_sessionUniv != null && _sessionUniv!.isNotEmpty) 'session': _sessionUniv!,
+          if (_sessionUniv != null && _sessionUniv!.isNotEmpty)
+            'session': _sessionUniv!,
           'meta_niveau':
               '{"filiere":"$_filiere","anneeEtude":"$_anneeEtude","universite":"${_universiteController.text.trim()}"${_sessionUniv != null && _sessionUniv!.isNotEmpty ? ',"session":"$_sessionUniv"' : ''}}',
         });
@@ -183,10 +181,17 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
               '{"concours":"$_concours","session":"${_sessionConcours.trim()}","nomEpreuve":"$nomEp"}',
         });
       }
+
+      String? pdfPath = _importedPdfPath;
+      if (pdfPath == null && _scannedPages.isNotEmpty) {
+        pdfPath = await _pdfBuilder.buildFromImagePaths(
+          _scannedPages.map((p) => p.path).toList(),
+        );
+      }
+
       final result = await ref.read(apiClientProvider).submitSoumission(
             fields: fields,
-            pdfPath: _pdfPath,
-            imagePaths: _images.map((x) => x.path).toList(),
+            pdfPath: pdfPath,
           );
       setState(() {
         _result = result;
@@ -195,8 +200,8 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
         _universiteController.clear();
         _nomEpreuveController.clear();
         _organismeController.clear();
-        _pdfPath = null;
-        _images = [];
+        _importedPdfPath = null;
+        _scannedPages = [];
         _step = 1;
         _niveau = null;
       });
@@ -236,7 +241,8 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
 
   Widget _buildForm(BuildContext context, PublicMeta meta) {
     final niveau = _niveau;
-    final classes = niveau == null ? const <String>[] : meta.classes.forNiveau(niveau);
+    final classes =
+        niveau == null ? const <String>[] : meta.classes.forNiveau(niveau);
     final result = _result;
     final concoursList = meta.concours.isEmpty
         ? const ['ENAM', 'Police nationale', 'Autre concours']
@@ -312,7 +318,8 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('1. Choisis le niveau', style: EzoaTypography.titleSmall(context)),
+                    Text('1. Choisis le niveau',
+                        style: EzoaTypography.titleSmall(context)),
                     const SizedBox(height: 14),
                     for (final entry in const [
                       ('college', 'Collège', '6e–3e · CEPD / BEPC'),
@@ -328,7 +335,8 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
                           onTap: () => setState(() {
                             _niveau = entry.$1;
                             _classe = null;
-                            _type = entry.$1 == 'concours' ? 'examen' : 'composition';
+                            _type =
+                                entry.$1 == 'concours' ? 'examen' : 'composition';
                             _step = 2;
                           }),
                         ),
@@ -339,308 +347,312 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
               ),
             ),
           ] else if (niveau != null) ...[
-          EzoaScrollReveal(
-            child: EzoaGlassCard(
-              margin: EdgeInsets.zero,
-              enableShine: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text('2. Métadonnées', style: EzoaTypography.titleSmall(context)),
-                      ),
-                      TextButton(
-                        onPressed: () => setState(() {
-                          _step = 1;
-                          _niveau = null;
-                        }),
-                        child: const Text('Changer'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    niveau == 'college'
-                        ? 'Collège'
-                        : niveau == 'lycee'
-                            ? 'Lycée'
-                            : niveau == 'universite'
-                                ? 'Université'
-                                : 'Concours',
-                    style: EzoaTypography.bodySmall(context),
-                  ),
-                  const SizedBox(height: 16),
-                  if (niveau == 'college' || niveau == 'lycee') ...[
-                    EzoaTextField(
-                      label: 'Titre de l\'épreuve',
-                      controller: _titreController,
-                      prefixIcon: LucideIcons.type,
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    EzoaSearchablePicker(
-                      label: 'Classe',
-                      value: _classe,
-                      items: classes,
-                      onChanged: (v) => setState(() => _classe = v),
-                    ),
-                    EzoaSearchablePicker(
-                      label: 'Matière',
-                      value: _matiere,
-                      items: meta.matieres,
-                      onChanged: (v) => setState(() => _matiere = v),
-                    ),
-                    EzoaSearchablePicker(
-                      label: 'Ville',
-                      value: _ville,
-                      items: meta.villes,
-                      onChanged: (v) => setState(() => _ville = v),
-                    ),
+            EzoaScrollReveal(
+              child: EzoaGlassCard(
+                margin: EdgeInsets.zero,
+                enableShine: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                     Row(
                       children: [
                         Expanded(
-                          child: EzoaSearchablePicker(
-                            label: 'Type',
-                            value: _type,
-                            items: meta.types,
-                            onChanged: (v) => setState(() {
-                              _type = v ?? 'devoir';
-                              if (_type != 'examen') _examen = null;
-                              if (_type != 'devoir') {
-                                _etablissementController.clear();
-                              }
-                            }),
-                          ),
+                          child: Text('2. Métadonnées',
+                              style: EzoaTypography.titleSmall(context)),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: EzoaSearchablePicker(
-                            label: 'Année',
-                            value: '$_annee',
-                            items: [
-                              for (var y = DateTime.now().year; y >= 2000; y--) '$y',
-                            ],
-                            onChanged: (v) =>
-                                setState(() => _annee = int.tryParse(v ?? '') ?? _annee),
-                          ),
+                        TextButton(
+                          onPressed: () => setState(() {
+                            _step = 1;
+                            _niveau = null;
+                          }),
+                          child: const Text('Changer'),
                         ),
                       ],
                     ),
-                    if (_type == 'examen')
-                      EzoaSearchablePicker(
-                        label: 'Examen national',
-                        value: _examen,
-                        items: meta.examens,
-                        onChanged: (v) => setState(() => _examen = v),
+                    const SizedBox(height: 8),
+                    Text(
+                      niveau == 'college'
+                          ? 'Collège'
+                          : niveau == 'lycee'
+                              ? 'Lycée'
+                              : niveau == 'universite'
+                                  ? 'Université'
+                                  : 'Concours',
+                      style: EzoaTypography.bodySmall(context),
+                    ),
+                    const SizedBox(height: 16),
+                    if (niveau == 'college' || niveau == 'lycee') ...[
+                      EzoaTextField(
+                        label: 'Titre de l\'épreuve',
+                        controller: _titreController,
+                        prefixIcon: LucideIcons.type,
+                        onChanged: (_) => setState(() {}),
                       ),
-                    if (_type != 'examen') ...[
                       EzoaSearchablePicker(
-                        label: 'Période',
-                        value: _periode,
-                        items: niveau == 'lycee' ? const ['S1', 'S2'] : const ['T1', 'T2', 'T3'],
-                        onChanged: (v) => setState(() => _periode = v),
+                        label: 'Classe',
+                        value: _classe,
+                        items: classes,
+                        onChanged: (v) => setState(() => _classe = v),
                       ),
-                      if (_type == 'devoir')
-                        EzoaTextField(
-                          label: 'Établissement',
-                          controller: _etablissementController,
-                          prefixIcon: LucideIcons.school,
-                          onChanged: (_) => setState(() {}),
+                      EzoaSearchablePicker(
+                        label: 'Matière',
+                        value: _matiere,
+                        items: meta.matieres,
+                        onChanged: (v) => setState(() => _matiere = v),
+                      ),
+                      EzoaSearchablePicker(
+                        label: 'Ville',
+                        value: _ville,
+                        items: meta.villes,
+                        onChanged: (v) => setState(() => _ville = v),
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: EzoaSearchablePicker(
+                              label: 'Type',
+                              value: _type,
+                              items: meta.types,
+                              onChanged: (v) => setState(() {
+                                _type = v ?? 'devoir';
+                                if (_type != 'examen') _examen = null;
+                                if (_type != 'devoir') {
+                                  _etablissementController.clear();
+                                }
+                              }),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: EzoaSearchablePicker(
+                              label: 'Année',
+                              value: '$_annee',
+                              items: [
+                                for (var y = DateTime.now().year; y >= 2000; y--)
+                                  '$y',
+                              ],
+                              onChanged: (v) => setState(
+                                () =>
+                                    _annee = int.tryParse(v ?? '') ?? _annee,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_type == 'examen')
+                        EzoaSearchablePicker(
+                          label: 'Examen national',
+                          value: _examen,
+                          items: meta.examens,
+                          onChanged: (v) => setState(() => _examen = v),
                         ),
+                      if (_type != 'examen') ...[
+                        EzoaSearchablePicker(
+                          label: 'Période',
+                          value: _periode,
+                          items: niveau == 'lycee'
+                              ? const ['S1', 'S2']
+                              : const ['T1', 'T2', 'T3'],
+                          onChanged: (v) => setState(() => _periode = v),
+                        ),
+                        if (_type == 'devoir')
+                          EzoaTextField(
+                            label: 'Établissement',
+                            controller: _etablissementController,
+                            prefixIcon: LucideIcons.school,
+                            onChanged: (_) => setState(() {}),
+                          ),
+                      ],
+                    ],
+                    if (niveau == 'universite') ...[
+                      EzoaTextField(
+                        label: 'Titre',
+                        controller: _titreController,
+                        prefixIcon: LucideIcons.type,
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      EzoaSearchablePicker(
+                        label: 'Filière',
+                        value: _filiere,
+                        items: filieres,
+                        onChanged: (v) => setState(() => _filiere = v),
+                      ),
+                      EzoaSearchablePicker(
+                        label: 'Année d\'études',
+                        value: _anneeEtude,
+                        items: anneesEtude,
+                        onChanged: (v) => setState(() => _anneeEtude = v),
+                      ),
+                      EzoaSearchablePicker(
+                        label: 'Matière / module',
+                        value: _matiere,
+                        items: meta.matieres,
+                        onChanged: (v) => setState(() => _matiere = v),
+                      ),
+                      EzoaTextField(
+                        label: 'Université',
+                        controller: _universiteController,
+                        prefixIcon: LucideIcons.school,
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      EzoaSearchablePicker(
+                        label: 'Ville',
+                        value: _ville,
+                        items: meta.villes,
+                        onChanged: (v) => setState(() => _ville = v),
+                      ),
+                      EzoaSearchablePicker(
+                        label: 'Année civile',
+                        value: '$_annee',
+                        items: [
+                          for (var y = DateTime.now().year; y >= 2000; y--) '$y',
+                        ],
+                        onChanged: (v) => setState(
+                          () => _annee = int.tryParse(v ?? '') ?? _annee,
+                        ),
+                      ),
+                      EzoaSearchablePicker(
+                        label: 'Session (optionnel)',
+                        value: _sessionUniv,
+                        items: const [
+                          'S1',
+                          'S2',
+                          'Session juin',
+                          'Session décembre',
+                        ],
+                        allowEmpty: true,
+                        emptyLabel: 'Aucune',
+                        onChanged: (v) => setState(() => _sessionUniv = v),
+                      ),
+                    ],
+                    if (niveau == 'concours') ...[
+                      EzoaSearchablePicker(
+                        label: 'Nom du concours',
+                        value: _concours,
+                        items: concoursList,
+                        onChanged: (v) => setState(() => _concours = v),
+                      ),
+                      EzoaSearchablePicker(
+                        label: 'Année / session',
+                        value: _sessionConcours,
+                        items: [
+                          for (var y = DateTime.now().year; y >= 2000; y--) '$y',
+                        ],
+                        onChanged: (v) => setState(() {
+                          _sessionConcours = v ?? _sessionConcours;
+                          _annee = int.tryParse(_sessionConcours) ?? _annee;
+                        }),
+                      ),
+                      EzoaTextField(
+                        label: 'Nom de l\'épreuve',
+                        controller: _nomEpreuveController,
+                        prefixIcon: LucideIcons.fileText,
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      EzoaTextField(
+                        label: 'Titre (optionnel)',
+                        controller: _titreController,
+                        prefixIcon: LucideIcons.type,
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      EzoaTextField(
+                        label: 'Organisme (optionnel)',
+                        controller: _organismeController,
+                        prefixIcon: LucideIcons.landmark,
+                      ),
+                      EzoaSearchablePicker(
+                        label: 'Ville (optionnel)',
+                        value: _ville,
+                        items: meta.villes,
+                        allowEmpty: true,
+                        emptyLabel: 'Togo',
+                        onChanged: (v) => setState(() => _ville = v),
+                      ),
                     ],
                   ],
-                  if (niveau == 'universite') ...[
-                    EzoaTextField(
-                      label: 'Titre',
-                      controller: _titreController,
-                      prefixIcon: LucideIcons.type,
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    EzoaSearchablePicker(
-                      label: 'Filière',
-                      value: _filiere,
-                      items: filieres,
-                      onChanged: (v) => setState(() => _filiere = v),
-                    ),
-                    EzoaSearchablePicker(
-                      label: 'Année d\'études',
-                      value: _anneeEtude,
-                      items: anneesEtude,
-                      onChanged: (v) => setState(() => _anneeEtude = v),
-                    ),
-                    EzoaSearchablePicker(
-                      label: 'Matière / module',
-                      value: _matiere,
-                      items: meta.matieres,
-                      onChanged: (v) => setState(() => _matiere = v),
-                    ),
-                    EzoaTextField(
-                      label: 'Université',
-                      controller: _universiteController,
-                      prefixIcon: LucideIcons.school,
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    EzoaSearchablePicker(
-                      label: 'Ville',
-                      value: _ville,
-                      items: meta.villes,
-                      onChanged: (v) => setState(() => _ville = v),
-                    ),
-                    EzoaSearchablePicker(
-                      label: 'Année civile',
-                      value: '$_annee',
-                      items: [
-                        for (var y = DateTime.now().year; y >= 2000; y--) '$y',
-                      ],
-                      onChanged: (v) =>
-                          setState(() => _annee = int.tryParse(v ?? '') ?? _annee),
-                    ),
-                    EzoaSearchablePicker(
-                      label: 'Session (optionnel)',
-                      value: _sessionUniv,
-                      items: const ['S1', 'S2', 'Session juin', 'Session décembre'],
-                      allowEmpty: true,
-                      emptyLabel: 'Aucune',
-                      onChanged: (v) => setState(() => _sessionUniv = v),
-                    ),
-                  ],
-                  if (niveau == 'concours') ...[
-                    EzoaSearchablePicker(
-                      label: 'Nom du concours',
-                      value: _concours,
-                      items: concoursList,
-                      onChanged: (v) => setState(() => _concours = v),
-                    ),
-                    EzoaSearchablePicker(
-                      label: 'Année / session',
-                      value: _sessionConcours,
-                      items: [
-                        for (var y = DateTime.now().year; y >= 2000; y--) '$y',
-                      ],
-                      onChanged: (v) => setState(() {
-                        _sessionConcours = v ?? _sessionConcours;
-                        _annee = int.tryParse(_sessionConcours) ?? _annee;
-                      }),
-                    ),
-                    EzoaTextField(
-                      label: 'Nom de l\'épreuve',
-                      controller: _nomEpreuveController,
-                      prefixIcon: LucideIcons.fileText,
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    EzoaTextField(
-                      label: 'Titre (optionnel)',
-                      controller: _titreController,
-                      prefixIcon: LucideIcons.type,
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    EzoaTextField(
-                      label: 'Organisme (optionnel)',
-                      controller: _organismeController,
-                      prefixIcon: LucideIcons.landmark,
-                    ),
-                    EzoaSearchablePicker(
-                      label: 'Ville (optionnel)',
-                      value: _ville,
-                      items: meta.villes,
-                      allowEmpty: true,
-                      emptyLabel: 'Togo',
-                      onChanged: (v) => setState(() => _ville = v),
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
           ] else
             const SizedBox.shrink(),
           if (_step == 2) ...[
-          EzoaScrollReveal(
-            child: EzoaGlassCard(
-              margin: EdgeInsets.zero,
-              enableShine: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('Fichiers', style: EzoaTypography.titleSmall(context)),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Envoyez des photos (converties en PDF) ou un PDF unique — pas les deux.',
-                    style: EzoaTypography.bodySmall(context),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _PickButton(
-                          label: 'Photos',
-                          icon: LucideIcons.image,
-                          onPressed: _pickImages,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _PickButton(
-                          label: 'Caméra',
-                          icon: LucideIcons.camera,
-                          onPressed: _takePhoto,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _PickButton(
-                          label: 'PDF',
-                          icon: LucideIcons.fileText,
-                          onPressed: _pickPdf,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (_images.isNotEmpty) ...[
-                    const SizedBox(height: 14),
-                    ..._images.asMap().entries.map(
-                          (entry) => _FileRow(
-                            icon: LucideIcons.image,
-                            name: entry.value.name,
-                            onRemove: () => setState(() {
-                              _images = [..._images]..removeAt(entry.key);
-                            }),
+            EzoaScrollReveal(
+              child: EzoaGlassCard(
+                margin: EdgeInsets.zero,
+                enableShine: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text('Document', style: EzoaTypography.titleSmall(context)),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Scannez vos pages (recadrage + filtre → PDF) ou importez un PDF déjà prêt.',
+                      style: EzoaTypography.bodySmall(context),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _PickButton(
+                            label: 'Scanner',
+                            icon: LucideIcons.camera,
+                            onPressed: _openScanner,
                           ),
                         ),
-                  ],
-                  if (_pdfPath != null) ...[
-                    const SizedBox(height: 14),
-                    _FileRow(
-                      icon: LucideIcons.fileText,
-                      name: _pdfPath!.split(RegExp(r'[\\/]')).last,
-                      onRemove: () => setState(() => _pdfPath = null),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _PickButton(
+                            label: 'Importer PDF',
+                            icon: LucideIcons.fileText,
+                            onPressed: _pickPdf,
+                          ),
+                        ),
+                      ],
                     ),
+                    if (_scannedPages.isNotEmpty) ...[
+                      const SizedBox(height: 14),
+                      _FileRow(
+                        icon: LucideIcons.camera,
+                        name: '${_scannedPages.length} page(s) scannée(s)',
+                        trailingLabel: 'Modifier',
+                        onTrailing: _openScanner,
+                        onRemove: () => setState(() => _scannedPages = []),
+                      ),
+                    ],
+                    if (_importedPdfPath != null) ...[
+                      const SizedBox(height: 14),
+                      _FileRow(
+                        icon: LucideIcons.fileText,
+                        name:
+                            _importedPdfPath!.split(RegExp(r'[\\/]')).last,
+                        onRemove: () =>
+                            setState(() => _importedPdfPath = null),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          if (_error != null) ...[
-            Text(
-              _error!,
-              textAlign: TextAlign.center,
-              style: EzoaTypography.bodySmall(context)
-                  .copyWith(color: EzoaColors.of(context).error),
+            const SizedBox(height: 20),
+            if (_error != null) ...[
+              Text(
+                _error!,
+                textAlign: TextAlign.center,
+                style: EzoaTypography.bodySmall(context)
+                    .copyWith(color: EzoaColors.of(context).error),
+              ),
+              const SizedBox(height: 12),
+            ],
+            EzoaScrollReveal(
+              child: EzoaButton(
+                label: 'Soumettre l\'épreuve',
+                icon: LucideIcons.upload,
+                loading: _submitting,
+                disabled: !_formValid,
+                onPressed: _submit,
+              ),
             ),
-            const SizedBox(height: 12),
-          ],
-          EzoaScrollReveal(
-            child: EzoaButton(
-              label: 'Soumettre l\'épreuve',
-              icon: LucideIcons.upload,
-              loading: _submitting,
-              disabled: !_formValid,
-              onPressed: _submit,
-            ),
-          ),
           ],
         ],
       ),
@@ -648,12 +660,7 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
   }
 }
 
-/// Bouton outline compact pour la rangée Photos / Caméra / PDF.
-///
-/// Contrairement à [EzoaButton], le padding horizontal est réduit et le
-/// contenu (icône + libellé) est enveloppé dans un [FittedBox] : sur les
-/// petites largeurs (~360 px logiques, 3 boutons côte à côte), le contenu
-/// se réduit légèrement au lieu de provoquer un overflow horizontal.
+/// Bouton outline compact pour la rangée Scanner / Importer PDF.
 class _PickButton extends StatelessWidget {
   const _PickButton({
     required this.label,
@@ -731,11 +738,15 @@ class _FileRow extends StatelessWidget {
     required this.icon,
     required this.name,
     required this.onRemove,
+    this.trailingLabel,
+    this.onTrailing,
   });
 
   final IconData icon;
   final String name;
   final VoidCallback onRemove;
+  final String? trailingLabel;
+  final VoidCallback? onTrailing;
 
   @override
   Widget build(BuildContext context) {
@@ -761,6 +772,15 @@ class _FileRow extends StatelessWidget {
               style: EzoaTypography.bodySmall(context),
             ),
           ),
+          if (trailingLabel != null && onTrailing != null)
+            TextButton(
+              onPressed: onTrailing,
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              child: Text(trailingLabel!),
+            ),
           IconButton(
             visualDensity: VisualDensity.compact,
             icon: Icon(LucideIcons.x, size: 14, color: pal.textFaint),

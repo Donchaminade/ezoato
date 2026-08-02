@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/theme/ezoa_theme.dart';
+import '../models/models.dart';
+import 'epreuve_thumbnail.dart';
 import 'ezoa_glass_card.dart';
 import 'ezoa_glass_header.dart';
 import 'ezoa_gradient_background.dart';
@@ -716,6 +718,7 @@ class EpreuveGridCard extends StatelessWidget {
     this.isOffline = false,
     this.type = 'epreuve',
     this.revealIndex,
+    this.epreuve,
     this.previewImage,
   });
 
@@ -731,6 +734,9 @@ class EpreuveGridCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final int? revealIndex;
+
+  /// Si fourni, affiche la miniature d'aperçu (sinon dégradé + icône).
+  final Epreuve? epreuve;
 
   /// Aperçu produit (fichier local hors ligne, ou ImageProvider réseau).
   final ImageProvider? previewImage;
@@ -785,6 +791,11 @@ class EpreuveGridCard extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.85),
                       ),
                     ),
+                  )
+                else if (epreuve != null)
+                  EpreuveThumbnail(
+                    epreuve: epreuve!,
+                    placeholderIconSize: 30,
                   )
                 else
                   Center(
