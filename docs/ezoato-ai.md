@@ -87,6 +87,8 @@ EZOATO_AI_PROVIDER=mock                # force le mock
 EZOATO_PDFTOTEXT=pdftotext
 ```
 
+**Production / `dev` déployé** : définir `GEMINI_API_KEY` (ou `GOOGLE_API_KEY`) et **`EZOATO_AI_ALLOW_MOCK=0`** (ou omettre la variable). Le mock ne doit pas servir de repli silencieux en prod. La clé Gemini n’est jamais commitée.
+
 Prod sans clé : `503` générique. Ordre des fournisseurs : `EZOATO_AI_PROVIDER` forcé → **Gemini** si clé → OpenAI si clé → mock si `EZOATO_AI_ALLOW_MOCK=1` → `none`.
 
 ## Tests

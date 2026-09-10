@@ -53,9 +53,11 @@ GEMINI_MODEL=gemini-2.0-flash  # optionnel
 OPENAI_API_KEY=sk-...          # repli optionnel
 OPENAI_MODEL=gpt-4o-mini
 OPENAI_BASE_URL=https://api.openai.com/v1
-EZOATO_AI_ALLOW_MOCK=1         # local/CI sans clé (générateur déterministe)
+EZOATO_AI_ALLOW_MOCK=1         # local/CI sans clé uniquement
 EZOATO_AI_PROVIDER=mock        # force le mock
 ```
+
+En **production / `dev` déployé** : `GEMINI_API_KEY` (ou `GOOGLE_API_KEY`) + `EZOATO_AI_ALLOW_MOCK=0`. Ne jamais committer la clé.
 
 Tests : `php tests/test-ai-security.php` (sans clé ni serveur).
 
