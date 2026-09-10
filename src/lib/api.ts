@@ -2,6 +2,16 @@
  * Client API EZOA-TO — toujours branché sur le backend PHP (VITE_API_URL).
  */
 import type {
+  AiCoach,
+  AiEntitlement,
+  AiEssayFeedback,
+  AiExplanation,
+  AiHints,
+  AiJudge,
+  AiOfflinePack,
+  AiQuiz,
+  AiQuizAnswerResult,
+  AiSessionStart,
   AdminReferentielUpdate,
   AdminReferentiels,
   AdminRetrait,
@@ -715,6 +725,111 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ token, password }),
     });
+  },
+
+  async getAiEntitlement(): Promise<AiEntitlement> {
+    return http("/ai/entitlement");
+  },
+
+  async startAiSession(data: {
+    mode?: "redaction" | "calcul" | "quiz";
+    epreuveId?: string;
+    sourceText?: string;
+    question?: string;
+    matiere?: string;
+    questionCount?: number;
+  }): Promise<AiSessionStart> {
+    return http("/ai/session", { method: "POST", body: JSON.stringify(data) });
+  },
+
+  async generateAiQuiz(data: {
+    epreuveId?: string;
+    sourceText?: string;
+    questionCount?: number;
+    includePack?: boolean;
+  }): Promise<AiQuiz> {
+    return http("/ai/quiz", { method: "POST", body: JSON.stringify(data) });
+  },
+
+  async answerAiQuiz(data: {
+    sessionId: string;
+    questionId: string;
+    choiceId: string;
+  }): Promise<AiQuizAnswerResult> {
+    return http("/ai/quiz/answer", { method: "POST", body: JSON.stringify(data) });
+  },
+
+  async submitAiEssay(data: {
+    sessionId?: string;
+    epreuveId?: string;
+    question?: string;
+    essay: string;
+    rewriteParagraph?: string;
+  }): Promise<AiEssayFeedback> {
+    return http("/ai/essay", { method: "POST", body: JSON.stringify(data) });
+  },
+
+  async getAiCoach(data: {
+    sessionId?: string;
+    question: string;
+    sourceText?: string;
+  }): Promise<AiCoach> {
+    return http("/ai/coach", { method: "POST", body: JSON.stringify(data) });
+  },
+
+  async judgeAiAnswer(data: {
+    sessionId?: string;
+    question: string;
+    studentAnswer?: string;
+    image?: File | null;
+  }): Promise<AiJudge> {
+    if (data.image) {
+      const token = typeof window !== "undefined" ? localStorage.getItem("ezoa_token") : null;
+      const form = new FormData();
+      if (data.sessionId) form.set("sessionId", data.sessionId);
+      form.set("question", data.question);
+      if (data.studentAnswer) form.set("studentAnswer", data.studentAnswer);
+      form.set("image", data.image);
+      const res = await fetch(`${API_URL}/ai/judge`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: form,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error((err as { error?: string }).error ?? `API ${res.status}`);
+      }
+      return res.json();
+    }
+    return http("/ai/judge", {
+      method: "POST",
+      body: JSON.stringify({
+        sessionId: data.sessionId,
+        question: data.question,
+        studentAnswer: data.studentAnswer,
+      }),
+    });
+  },
+
+  async explainAiQuestion(data: {
+    question: string;
+    choices?: string[];
+    studentAnswer?: string;
+    sourceText?: string;
+    epreuveId?: string;
+  }): Promise<AiExplanation> {
+    return http("/ai/explain", { method: "POST", body: JSON.stringify(data) });
+  },
+
+  async getAiRevisionHints(data: {
+    wrongAnswers: { question: string; chosen: string; correct?: string }[];
+  }): Promise<AiHints> {
+    return http("/ai/hints", { method: "POST", body: JSON.stringify(data) });
+  },
+
+  async getAiOfflinePack(epreuveId?: string): Promise<AiOfflinePack> {
+    const qs = epreuveId ? `?epreuveId=${encodeURIComponent(epreuveId)}` : "";
+    return http(`/ai/pack${qs}`);
   },
 
   async submitEpreuve(formData: FormData): Promise<{ id: string; pdfPreviewUrl: string }> {

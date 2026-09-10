@@ -19,6 +19,7 @@ import '../../features/auth/presentation/onboarding_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/reset_password_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
+import '../../features/ai/presentation/revision_screen.dart';
 import '../../features/epreuves/presentation/archives_screen.dart';
 import '../../features/epreuves/presentation/epreuve_detail_screen.dart';
 import '../../features/epreuves/presentation/home_screen.dart';
@@ -133,6 +134,24 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/epreuve/:id',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, state) => EpreuveDetailScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/reviser',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) => RevisionScreen(
+          epreuveId: state.uri.queryParameters['epreuveId'],
+          epreuveTitle: state.uri.queryParameters['titre'],
+          matiere: state.uri.queryParameters['matiere'],
+        ),
+      ),
+      GoRoute(
+        path: '/epreuve/:id/reviser',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) => RevisionScreen(
+          epreuveId: state.pathParameters['id'],
+          epreuveTitle: state.uri.queryParameters['titre'],
+          matiere: state.uri.queryParameters['matiere'],
+        ),
       ),
       GoRoute(
         path: '/account/profile',

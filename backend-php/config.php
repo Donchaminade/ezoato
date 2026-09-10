@@ -54,6 +54,21 @@ return [
     'adresse' => 'Lomé, Togo',
     'horaires' => 'Lun–Ven, 8h–18h (GMT)',
   ],
+  /**
+   * Ezoato AI — les clés LLM ne sont JAMAIS stockées ici.
+   * EZOATO_AI_PROVIDER=auto|groq|google|openai (défaut auto).
+   * Texte auto : GROQ_API_KEY → GEMINI_API_KEY/GOOGLE_API_KEY → OPENAI_API_KEY.
+   * Vision auto : Google multimodal → OpenAI ( Groq = texte seul ).
+   * Modèles : EZOATO_AI_GROQ_MODEL, EZOATO_AI_GOOGLE_MODEL, OPENAI_MODEL.
+   * En local/CI sans clé : EZOATO_AI_ALLOW_MOCK=1 (générateur déterministe).
+   * En production / dev déployé : EZOATO_AI_ALLOW_MOCK=0.
+   */
+  'ai' => [
+    'rate_limit_per_hour' => 20,
+    'max_source_chars' => 12000,
+    'max_body_bytes' => 32000,
+    'model' => 'gemini-2.0-flash',
+  ],
   /** Web Push (VAPID) — voir generate-vapid-keys.php en local */
   'push' => [
     'vapid_public_key' => null,

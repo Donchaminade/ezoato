@@ -20,6 +20,7 @@ export function PublicFooter() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/" className="hover:text-foreground">Accueil</Link></li>
             <li><Link to="/docs" className="hover:text-foreground">Archives</Link></li>
+            <li><Link to="/reviser" className="hover:text-foreground">Réviser avec l'IA</Link></li>
             <li><Link to="/submit" className="hover:text-foreground">Soumettre</Link></li>
             <li><Link to="/about" className="hover:text-foreground">À propos</Link></li>
             <li><Link to="/partenariat" className="hover:text-foreground">Partenariat</Link></li>

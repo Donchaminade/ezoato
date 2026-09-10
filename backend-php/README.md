@@ -28,6 +28,43 @@ Définis `VITE_API_URL` côté front pour pointer vers cette API (ex: `https://a
 - `POST /admin/soumissions/{id}/valider` — copie le PDF en publié
 - `POST /admin/soumissions/{id}/rejeter` — { motif }
 
+### Ezoato AI (premium — JWT + abonnement Pro)
+
+Voir `docs/ezoato-ai.md`. Tuteur **ancré sur l’épreuve** (métadonnées + extraits), pas un chat générique ni un fine-tuning. Modes : rédaction, calcul/sciences (pas un solveur), QCM persisté.
+
+- `GET  /ai/entitlement`
+- `POST /ai/session` — `{ mode, epreuveId?, question?, sourceText?, matiere? }`
+- `GET  /ai/session/{id}`
+- `POST /ai/essay` — feedback de copie (pas une note de jury)
+- `POST /ai/coach` — méthode + formules + exemple similaire
+- `POST /ai/judge` — verdict ; `multipart` + `image` (JPG/PNG/WebP, 2 Mo) + vision/OCR
+- `POST /ai/quiz` / `POST /ai/quiz/answer`
+- `POST /ai/explain` · `POST /ai/hints` · `GET /ai/pack`
+
+Sessions et rate-limit : tables MySQL `ai_sessions` / `ai_rate_limits` (`migration-ai-sessions.sql`).
+Limiteur : 20 requêtes / utilisateur / heure / action.
+Sans Pro : `402`. Épreuve payante : même règle que le téléchargement.
+
+#### Variables d'environnement (jamais dans git)
+
+```
+EZOATO_AI_PROVIDER=auto        # auto|groq|google|openai (mock = CI)
+GROQ_API_KEY=...               # texte auto prioritaire
+EZOATO_AI_GROQ_MODEL=openai/gpt-oss-20b
+GEMINI_API_KEY=...             # ou GOOGLE_API_KEY — Gemini / Gemma
+EZOATO_AI_GOOGLE_MODEL=gemini-2.0-flash   # ou gemma-3-27b-it
+EZOATO_AI_GOOGLE_VISION_MODEL=gemini-2.0-flash
+OPENAI_API_KEY=sk-...          # repli optionnel
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_BASE_URL=https://api.openai.com/v1
+EZOATO_AI_ALLOW_MOCK=1         # local/CI sans clé uniquement
+EZOATO_AI_PROVIDER=mock        # force le mock
+```
+
+En **production / `dev` déployé** : au moins une clé (Groq et/ou Google) + `EZOATO_AI_ALLOW_MOCK=0`. Ne jamais committer les clés. Vision photo : Google ou OpenAI ( Groq n’analyse pas les images ).
+
+Tests : `php tests/test-ai-security.php` (sans clé ni serveur).
+
 ## Cron — rappels abonnement
 
 Script CLI-only : `cron/abonnement_rappels.php` (refus HTTP 403).
@@ -45,6 +82,9 @@ Voir aussi le commentaire en tête de `cron/abonnement_rappels.php` (crontab Lin
 
 ## Sécurité
 - Toujours valider les inputs (type, longueur, MIME des images)
-- Rate-limit côté serveur web (mod_evasive / nginx)
+- Rate-limit côté serveur web (mod_evasive / nginx) + limiteur applicatif sur `/ai/*`
 - HTTPS obligatoire en prod
 - Les scripts `cron/*` doivent rester CLI-only (pas d’exposition HTTP)
+- Clés LLM uniquement via env (`GEMINI_API_KEY` / `GOOGLE_API_KEY`, repli `OPENAI_API_KEY`) — jamais dans `config.php` / git
+- Le texte élève ou d'épreuve n'est jamais exécuté comme instruction système
+- Les réponses IA portent un avertissement : ce n'est pas une note officielle
