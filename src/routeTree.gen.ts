@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ReviserRouteImport } from './routes/reviser'
 import { Route as PartenariatRouteImport } from './routes/partenariat'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DocsRouteImport } from './routes/docs'
@@ -44,6 +45,11 @@ const SubmitRoute = SubmitRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviserRoute = ReviserRouteImport.update({
+  id: '/reviser',
+  path: '/reviser',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartenariatRoute = PartenariatRouteImport.update({
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof DocsRoute
   '/faq': typeof FaqRoute
   '/partenariat': typeof PartenariatRoute
+  '/reviser': typeof ReviserRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
   '/account/abonnement': typeof AccountAbonnementRoute
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsRoute
   '/faq': typeof FaqRoute
   '/partenariat': typeof PartenariatRoute
+  '/reviser': typeof ReviserRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
   '/account/abonnement': typeof AccountAbonnementRoute
@@ -235,6 +243,7 @@ export interface FileRoutesById {
   '/docs': typeof DocsRoute
   '/faq': typeof FaqRoute
   '/partenariat': typeof PartenariatRoute
+  '/reviser': typeof ReviserRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
   '/account/abonnement': typeof AccountAbonnementRoute
@@ -265,6 +274,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/faq'
     | '/partenariat'
+    | '/reviser'
     | '/sitemap.xml'
     | '/submit'
     | '/account/abonnement'
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/faq'
     | '/partenariat'
+    | '/reviser'
     | '/sitemap.xml'
     | '/submit'
     | '/account/abonnement'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/faq'
     | '/partenariat'
+    | '/reviser'
     | '/sitemap.xml'
     | '/submit'
     | '/account/abonnement'
@@ -349,6 +361,7 @@ export interface RootRouteChildren {
   DocsRoute: typeof DocsRoute
   FaqRoute: typeof FaqRoute
   PartenariatRoute: typeof PartenariatRoute
+  ReviserRoute: typeof ReviserRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubmitRoute: typeof SubmitRoute
   EpreuvesIdRoute: typeof EpreuvesIdRoute
@@ -368,6 +381,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reviser': {
+      id: '/reviser'
+      path: '/reviser'
+      fullPath: '/reviser'
+      preLoaderRoute: typeof ReviserRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partenariat': {
@@ -594,6 +614,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocsRoute: DocsRoute,
   FaqRoute: FaqRoute,
   PartenariatRoute: PartenariatRoute,
+  ReviserRoute: ReviserRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubmitRoute: SubmitRoute,
   EpreuvesIdRoute: EpreuvesIdRoute,

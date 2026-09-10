@@ -16,6 +16,7 @@ import {
   AuthenticatedPdf,
   PORTRAIT_PREVIEW_FRAME,
 } from "@/components/admin/AuthenticatedMedia";
+import { RevisionWorkspace } from "@/components/ai/RevisionWorkspace";
 import { PaymentDialog } from "@/components/payments/PaymentDialog";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -284,6 +285,14 @@ function EpreuveDetail() {
                     )}
                   </div>
                 )}
+
+                <RevisionWorkspace
+                  epreuveId={data.id}
+                  epreuveTitle={data.titre}
+                  matiere={data.matiere}
+                  hasContentAccess={!!user && !!hasAccess}
+                  lockedReason={!user ? "login" : !hasAccess ? "pay" : undefined}
+                />
               </div>
 
               <aside className="space-y-4">
