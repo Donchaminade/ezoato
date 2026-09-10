@@ -9,7 +9,26 @@ function ai_pdo(array $deps = []): ?PDO
   if (isset($deps['db']) && $deps['db'] instanceof PDO) {
     return $deps['db'];
   }
+  if (
+    empty($deps['sessionDir'])
+    && empty($deps['forceFileSessions'])
+    && function_exists('db')
+  ) {
+    try {
+      $pdo = db();
+      return $pdo instanceof PDO ? $pdo : null;
+    } catch (Throwable $e) {
+      return null;
+    }
+  }
   return null;
+}
+
+function ai_session_allows_files(array $deps = []): bool
+{
+  return !empty($deps['sessionDir'])
+    || !empty($deps['forceFileSessions'])
+    || (!empty($GLOBALS['ezoato_ai_session_dir']) && is_string($GLOBALS['ezoato_ai_session_dir']));
 }
 
 function ai_session_use_sql(array $deps = []): bool

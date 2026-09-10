@@ -114,7 +114,7 @@ class _RevisionScreenState extends ConsumerState<RevisionScreen> {
             children: [
               _ModeChip(
                 label: 'Rédaction',
-                icon: LucideIcons.penLine,
+                icon: LucideIcons.pencil,
                 selected: _mode == kAiModeRedaction,
                 onTap: () => setState(() => _mode = kAiModeRedaction),
               ),
@@ -377,7 +377,7 @@ class _EssayPanelState extends ConsumerState<_EssayPanel> {
           label: 'Envoyer pour un feedback',
           onPressed: _busy ? null : _submit,
           loading: _busy,
-          icon: LucideIcons.penLine,
+          icon: LucideIcons.pencil,
         ),
         if (_feedback != null) ...[
           const SizedBox(height: 16),

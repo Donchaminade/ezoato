@@ -30,6 +30,10 @@ function ai_session_write(array $session, array $deps = []): void
       ai_session_write_sql($pdo, $session);
       return;
     }
+    throw new AiUnavailableException('Service IA temporairement indisponible');
+  }
+  if (!ai_session_allows_files($deps)) {
+    throw new AiUnavailableException('Service IA temporairement indisponible');
   }
   $dir = ai_session_dir($deps['sessionDir'] ?? null);
   if (!is_dir($dir)) {
@@ -51,6 +55,10 @@ function ai_session_read(string $id, string $userId, array $deps = []): array
     if ($pdo) {
       return ai_session_read_sql($pdo, $id, $userId);
     }
+    throw new AiUnavailableException('Service IA temporairement indisponible');
+  }
+  if (!ai_session_allows_files($deps)) {
+    throw new AiValidationException('Session introuvable', 404);
   }
   $path = ai_session_dir($deps['sessionDir'] ?? null) . DIRECTORY_SEPARATOR . $id . '.json';
   if (!is_file($path)) {

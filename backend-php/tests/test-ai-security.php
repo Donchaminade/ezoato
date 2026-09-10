@@ -555,6 +555,26 @@ assert_true($hitSql, 'rate-limit SQL déclenché');
 $rlRows = (int)$pdo->query('SELECT COUNT(*) FROM ai_rate_limits')->fetchColumn();
 assert_true($rlRows >= AI_RATE_MAX_PER_WINDOW, 'compteurs rate-limit en table');
 
+$noStore = $depsOk;
+unset($noStore['sessionDir'], $noStore['db']);
+$savedSessGlobal = $GLOBALS['ezoato_ai_session_dir'] ?? null;
+unset($GLOBALS['ezoato_ai_session_dir']);
+try {
+  ai_session_write([
+    'id' => 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+    'userId' => $user['id'],
+    'mode' => 'quiz',
+  ], $noStore);
+  assert_true(false, 'sans MySQL ni override fichier → pas de JSON production (aucune exception)');
+} catch (AiUnavailableException $e) {
+  assert_true(ai_client_error_code($e) === 503, 'sans MySQL ni override fichier → 503 (pas de JSON)');
+} catch (Throwable $e) {
+  assert_true(false, 'sans MySQL ni override fichier → ' . get_class($e));
+}
+if ($savedSessGlobal !== null) {
+  $GLOBALS['ezoato_ai_session_dir'] = $savedSessGlobal;
+}
+
 echo "\n=== Vision / OCR photo (mode B) ===\n";
 
 $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', true);
