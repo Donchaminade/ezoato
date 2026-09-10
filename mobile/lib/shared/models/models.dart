@@ -1010,3 +1010,395 @@ class SubscriptionStatus {
   final int montant;
   final int dureeMois;
 }
+
+/// Modes tuteur IA — parité web / `docs/ezoato-ai.md`.
+typedef AiMode = String;
+
+const AiMode kAiModeRedaction = 'redaction';
+const AiMode kAiModeCalcul = 'calcul';
+const AiMode kAiModeQuiz = 'quiz';
+
+class AiEntitlement {
+  const AiEntitlement({
+    required this.premium,
+    this.feature = 'ezoato-ai',
+    this.paywall = 'abonnement',
+    this.message = '',
+  });
+
+  factory AiEntitlement.fromJson(Map<String, dynamic> json) {
+    return AiEntitlement(
+      premium: json['premium'] as bool? ?? false,
+      feature: json['feature'] as String? ?? 'ezoato-ai',
+      paywall: json['paywall'] as String? ?? 'abonnement',
+      message: json['message'] as String? ?? '',
+    );
+  }
+
+  final bool premium;
+  final String feature;
+  final String paywall;
+  final String message;
+}
+
+class AiQuizChoice {
+  const AiQuizChoice({required this.id, required this.text});
+
+  factory AiQuizChoice.fromJson(Map<String, dynamic> json) {
+    return AiQuizChoice(
+      id: json['id'] as String? ?? '',
+      text: json['text'] as String? ?? '',
+    );
+  }
+
+  final String id;
+  final String text;
+}
+
+class AiQuizQuestion {
+  const AiQuizQuestion({
+    required this.id,
+    required this.prompt,
+    required this.choices,
+    this.topic,
+  });
+
+  factory AiQuizQuestion.fromJson(Map<String, dynamic> json) {
+    return AiQuizQuestion(
+      id: json['id'] as String? ?? '',
+      prompt: json['prompt'] as String? ?? '',
+      choices: (json['choices'] as List<dynamic>? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .map(AiQuizChoice.fromJson)
+          .toList(),
+      topic: json['topic'] as String?,
+    );
+  }
+
+  final String id;
+  final String prompt;
+  final List<AiQuizChoice> choices;
+  final String? topic;
+}
+
+class AiProgress {
+  const AiProgress({
+    required this.index,
+    required this.total,
+    required this.answered,
+    required this.correct,
+  });
+
+  factory AiProgress.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return const AiProgress(index: 0, total: 0, answered: 0, correct: 0);
+    }
+    return AiProgress(
+      index: (json['index'] as num?)?.toInt() ?? 0,
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      answered: (json['answered'] as num?)?.toInt() ?? 0,
+      correct: (json['correct'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  final int index;
+  final int total;
+  final int answered;
+  final int correct;
+}
+
+class AiExplanation {
+  const AiExplanation({
+    required this.steps,
+    required this.summary,
+    required this.disclaimer,
+    this.verifyWithTeacher = true,
+    this.officialGrade = false,
+  });
+
+  factory AiExplanation.fromJson(Map<String, dynamic> json) {
+    return AiExplanation(
+      steps: (json['steps'] as List<dynamic>? ?? []).whereType<String>().toList(),
+      summary: json['summary'] as String? ?? '',
+      disclaimer: json['disclaimer'] as String? ?? '',
+      verifyWithTeacher: json['verifyWithTeacher'] as bool? ?? true,
+      officialGrade: json['officialGrade'] as bool? ?? false,
+    );
+  }
+
+  final List<String> steps;
+  final String summary;
+  final String disclaimer;
+  final bool verifyWithTeacher;
+  final bool officialGrade;
+}
+
+class AiCoach {
+  const AiCoach({
+    required this.method,
+    required this.formulas,
+    required this.examplePrompt,
+    required this.exampleSteps,
+    required this.exampleResult,
+    required this.disclaimer,
+    this.sessionId,
+    this.revealLevel = 0,
+    this.hasMore = false,
+    this.workOnPaper = true,
+    this.solvesExercise = false,
+  });
+
+  factory AiCoach.fromJson(Map<String, dynamic> json) {
+    final example = json['example'] as Map<String, dynamic>? ?? {};
+    return AiCoach(
+      method: json['method'] as String? ?? '',
+      formulas: (json['formulas'] as List<dynamic>? ?? []).whereType<String>().toList(),
+      examplePrompt: example['prompt'] as String? ?? '',
+      exampleSteps:
+          (example['steps'] as List<dynamic>? ?? []).whereType<String>().toList(),
+      exampleResult: example['result'] as String? ?? '',
+      disclaimer: json['disclaimer'] as String? ?? '',
+      sessionId: json['sessionId'] as String?,
+      revealLevel: (json['revealLevel'] as num?)?.toInt() ?? 0,
+      hasMore: json['hasMore'] as bool? ?? false,
+      workOnPaper: json['workOnPaper'] as bool? ?? true,
+      solvesExercise: json['solvesExercise'] as bool? ?? false,
+    );
+  }
+
+  final String method;
+  final List<String> formulas;
+  final String examplePrompt;
+  final List<String> exampleSteps;
+  final String exampleResult;
+  final String disclaimer;
+  final String? sessionId;
+  final int revealLevel;
+  final bool hasMore;
+  final bool workOnPaper;
+  final bool solvesExercise;
+}
+
+class AiEssayFeedback {
+  const AiEssayFeedback({
+    required this.outline,
+    required this.arguments,
+    required this.style,
+    required this.gaps,
+    required this.disclaimer,
+    this.sessionId,
+    this.rewriteGuided,
+    this.rewriteTips = const [],
+    this.officialGrade = false,
+    this.juryCorrection = false,
+  });
+
+  factory AiEssayFeedback.fromJson(Map<String, dynamic> json) {
+    final rewrite = json['rewrite'] as Map<String, dynamic>?;
+    return AiEssayFeedback(
+      outline: (json['outline'] as List<dynamic>? ?? []).whereType<String>().toList(),
+      arguments:
+          (json['arguments'] as List<dynamic>? ?? []).whereType<String>().toList(),
+      style: json['style'] as String? ?? '',
+      gaps: (json['gaps'] as List<dynamic>? ?? []).whereType<String>().toList(),
+      disclaimer: json['disclaimer'] as String? ?? '',
+      sessionId: json['sessionId'] as String?,
+      rewriteGuided: rewrite?['guided'] as String?,
+      rewriteTips:
+          (rewrite?['tips'] as List<dynamic>? ?? []).whereType<String>().toList(),
+      officialGrade: json['officialGrade'] as bool? ?? false,
+      juryCorrection: json['juryCorrection'] as bool? ?? false,
+    );
+  }
+
+  final List<String> outline;
+  final List<String> arguments;
+  final String style;
+  final List<String> gaps;
+  final String disclaimer;
+  final String? sessionId;
+  final String? rewriteGuided;
+  final List<String> rewriteTips;
+  final bool officialGrade;
+  final bool juryCorrection;
+}
+
+class AiJudge {
+  const AiJudge({
+    required this.verdict,
+    required this.feedback,
+    required this.disclaimer,
+    this.hint,
+    this.sessionId,
+    this.revealLevel = 0,
+    this.coach,
+    this.imageReceived = false,
+    this.extractedText,
+    this.visionUsed = false,
+    this.solvesExercise = false,
+    this.officialGrade = false,
+    this.juryCorrection = false,
+  });
+
+  factory AiJudge.fromJson(Map<String, dynamic> json) {
+    final coachJson = json['coach'];
+    return AiJudge(
+      verdict: json['verdict'] as String? ?? 'partial',
+      feedback: json['feedback'] as String? ?? '',
+      disclaimer: json['disclaimer'] as String? ?? '',
+      hint: json['hint'] as String?,
+      sessionId: json['sessionId'] as String?,
+      revealLevel: (json['revealLevel'] as num?)?.toInt() ?? 0,
+      coach: coachJson is Map<String, dynamic> ? AiCoach.fromJson(coachJson) : null,
+      imageReceived: json['imageReceived'] as bool? ?? false,
+      extractedText: json['extractedText'] as String?,
+      visionUsed: json['visionUsed'] as bool? ?? false,
+      solvesExercise: json['solvesExercise'] as bool? ?? false,
+      officialGrade: json['officialGrade'] as bool? ?? false,
+      juryCorrection: json['juryCorrection'] as bool? ?? false,
+    );
+  }
+
+  final String verdict;
+  final String feedback;
+  final String disclaimer;
+  final String? hint;
+  final String? sessionId;
+  final int revealLevel;
+  final AiCoach? coach;
+  final bool imageReceived;
+  final String? extractedText;
+  final bool visionUsed;
+  final bool solvesExercise;
+  final bool officialGrade;
+  final bool juryCorrection;
+}
+
+class AiQuizStart {
+  const AiQuizStart({
+    required this.sessionId,
+    required this.disclaimer,
+    required this.questions,
+    this.currentQuestion,
+    this.progress,
+    this.grounded = false,
+    this.officialGrade = false,
+  });
+
+  factory AiQuizStart.fromJson(Map<String, dynamic> json) {
+    final questions = (json['questions'] as List<dynamic>? ?? [])
+        .whereType<Map<String, dynamic>>()
+        .map(AiQuizQuestion.fromJson)
+        .toList();
+    final current = json['currentQuestion'];
+    return AiQuizStart(
+      sessionId: json['sessionId'] as String? ?? json['quizId'] as String? ?? '',
+      disclaimer: json['disclaimer'] as String? ?? '',
+      questions: questions,
+      currentQuestion: current is Map<String, dynamic>
+          ? AiQuizQuestion.fromJson(current)
+          : (questions.isNotEmpty ? questions.first : null),
+      progress: AiProgress.fromJson(json['progress'] as Map<String, dynamic>?),
+      grounded: json['grounded'] as bool? ?? json['epreuveId'] != null,
+      officialGrade: json['officialGrade'] as bool? ?? false,
+    );
+  }
+
+  final String sessionId;
+  final String disclaimer;
+  final List<AiQuizQuestion> questions;
+  final AiQuizQuestion? currentQuestion;
+  final AiProgress progress;
+  final bool grounded;
+  final bool officialGrade;
+}
+
+class AiQuizAnswerResult {
+  const AiQuizAnswerResult({
+    required this.correct,
+    required this.progress,
+    required this.done,
+    required this.disclaimer,
+    this.explanation,
+    this.nextQuestion,
+    this.officialGrade = false,
+  });
+
+  factory AiQuizAnswerResult.fromJson(Map<String, dynamic> json) {
+    final next = json['nextQuestion'];
+    final expl = json['explanation'];
+    return AiQuizAnswerResult(
+      correct: json['correct'] as bool? ?? false,
+      progress: AiProgress.fromJson(json['progress'] as Map<String, dynamic>?),
+      done: json['done'] as bool? ?? false,
+      disclaimer: json['disclaimer'] as String? ?? '',
+      explanation:
+          expl is Map<String, dynamic> ? AiExplanation.fromJson(expl) : null,
+      nextQuestion: next is Map<String, dynamic> ? AiQuizQuestion.fromJson(next) : null,
+      officialGrade: json['officialGrade'] as bool? ?? false,
+    );
+  }
+
+  final bool correct;
+  final AiProgress progress;
+  final bool done;
+  final String disclaimer;
+  final AiExplanation? explanation;
+  final AiQuizQuestion? nextQuestion;
+  final bool officialGrade;
+}
+
+class AiSessionStart {
+  const AiSessionStart({
+    required this.sessionId,
+    required this.mode,
+    required this.disclaimer,
+    this.question,
+    this.matiere,
+    this.epreuveId,
+    this.grounded = false,
+    this.workOnPaper = false,
+    this.coach,
+    this.currentQuestion,
+    this.progress,
+    this.officialGrade = false,
+    this.juryCorrection = false,
+  });
+
+  factory AiSessionStart.fromJson(Map<String, dynamic> json) {
+    final coach = json['coach'];
+    final current = json['currentQuestion'];
+    return AiSessionStart(
+      sessionId: json['sessionId'] as String? ?? '',
+      mode: json['mode'] as String? ?? kAiModeQuiz,
+      disclaimer: json['disclaimer'] as String? ?? '',
+      question: json['question'] as String?,
+      matiere: json['matiere'] as String?,
+      epreuveId: json['epreuveId'] as String?,
+      grounded: json['grounded'] as bool? ?? false,
+      workOnPaper: json['workOnPaper'] as bool? ?? false,
+      coach: coach is Map<String, dynamic> ? AiCoach.fromJson(coach) : null,
+      currentQuestion:
+          current is Map<String, dynamic> ? AiQuizQuestion.fromJson(current) : null,
+      progress: json['progress'] is Map<String, dynamic>
+          ? AiProgress.fromJson(json['progress'] as Map<String, dynamic>)
+          : null,
+      officialGrade: json['officialGrade'] as bool? ?? false,
+      juryCorrection: json['juryCorrection'] as bool? ?? false,
+    );
+  }
+
+  final String sessionId;
+  final String mode;
+  final String disclaimer;
+  final String? question;
+  final String? matiere;
+  final String? epreuveId;
+  final bool grounded;
+  final bool workOnPaper;
+  final AiCoach? coach;
+  final AiQuizQuestion? currentQuestion;
+  final AiProgress? progress;
+  final bool officialGrade;
+  final bool juryCorrection;
+}

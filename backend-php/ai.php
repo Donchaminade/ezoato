@@ -50,6 +50,7 @@ function ai_user_is_premium(array $user): bool
 function ai_deps_from_db(array $user): array
 {
   return [
+    'db' => db(),
     'loadEpreuve' => static function (string $id): ?array {
       $stmt = db()->prepare("SELECT e.*, et.nom AS etablissement FROM epreuves e
         LEFT JOIN etablissements et ON et.id = e.etablissement_id

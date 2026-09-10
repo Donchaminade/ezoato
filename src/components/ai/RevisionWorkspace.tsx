@@ -71,8 +71,8 @@ export function RevisionWorkspace({
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {epreuveTitle
-              ? `Entraînement à partir de « ${epreuveTitle} ».`
-              : "Rédaction, sciences ou QCM — ce n'est pas la correction du jury."}
+              ? `Tuteur ancré sur « ${epreuveTitle} » — pas un chat générique.`
+              : "Tuteur ancré sur les épreuves : rédaction, sciences ou QCM — ce n'est pas la correction du jury."}
           </p>
         </div>
         <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-800 dark:text-amber-200">
@@ -427,6 +427,11 @@ function CalculPanel({ epreuveId, matiere }: { epreuveId?: string; matiere?: str
         <div className="rounded-xl border border-primary/25 bg-primary/5 p-4 text-sm">
           <p className="font-semibold capitalize">Avis : {verdictLabel(judge.verdict)}</p>
           <p className="mt-1">{judge.feedback}</p>
+          {judge.extractedText && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Texte lu sur la photo : {judge.extractedText}
+            </p>
+          )}
           {judge.hint && <p className="mt-2">{judge.hint}</p>}
           <p className="mt-3 text-xs text-muted-foreground">{judge.disclaimer}</p>
         </div>

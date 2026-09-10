@@ -1,14 +1,16 @@
-# Ezoato AI — révision interactive (MVP)
+# Ezoato AI — tuteur ancré sur les épreuves
 
 Couche **premium** (abonnement Pro : Flooz / T-Money) en plus de la bibliothèque d’épreuves. Ce n’est **pas** la correction officielle du jury.
+
+Le modèle n’est **pas** fine-tuné. Quand l’élève révise une épreuve, le backend charge le contenu déjà stocké (métadonnées + extraits PDF / sidecar) et l’injecte uniquement dans des blocs **UNTRUSTED_DATA** du message utilisateur. Les nouvelles épreuves de la bibliothèque deviennent automatiquement du contexte tuteur — pas de pipeline d’entraînement séparé.
 
 ## Modes
 
 | Mode | Usage |
 | --- | --- |
-| **A — Rédaction** | L’élève lit l’épreuve et écrit dans l’app. L’IA renvoie plan, arguments, style, manques. Réécriture guidée d’un paragraphe (optionnel). |
-| **B — Calcul / sciences** | Maths, physique-chimie, SVT. L’IA **n’est pas un solveur** : méthode, formules, exemple **similaire**. L’élève travaille **sur papier**, puis soumet sa réponse (texte et/ou photo). Verdict `correct` / `incorrect` / `partial`. Si faux : autre explication + nouvel exemple (révélation progressive). |
-| **QCM** | Question → réponse → feedback → explication si faux → suivante. Progression persistée (session). |
+| **A — Rédaction** | L’élève lit l’épreuve et écrit dans l’app. L’IA renvoie plan, arguments, style, manques. Réécriture guidée d’un paragraphe (optionnel). Jamais une note de jury. |
+| **B — Calcul / sciences** | Maths, physique-chimie, SVT. L’IA **n’est pas un solveur** : méthode, formules, exemple **similaire**. L’élève travaille **sur papier**, puis soumet sa réponse (texte et/ou photo). Verdict `correct` / `incorrect` / `partial`. Si faux : autre explication + nouvel exemple (révélation progressive, pas la solution complète). |
+| **QCM** | Question → réponse → feedback → explication si faux → suivante. Progression persistée (session MySQL). |
 
 ## Premium
 
@@ -34,25 +36,60 @@ Si un `epreuveId` payant est fourni, l’accès épreuve (paiement unitaire ou P
 | `POST` | `/ai/hints` | Indices après erreurs |
 | `GET` | `/ai/pack` | Stub pack hors-ligne |
 
-### Images (mode B)
+## Sessions MySQL
+
+Les sessions quiz / rédaction / calcul et les compteurs de rate-limit sont stockés en **MySQL** (`ai_sessions`, `ai_rate_limits`). Voir `backend-php/migration-ai-sessions.sql`.
+
+En production, `ai.php` injecte `db()` : aucun fichier JSON de session n’est utilisé. Les tests unitaires peuvent encore passer un `sessionDir` / `rateLimitDir` (fichiers temporaires) ou un PDO SQLite.
+
+IDOR : `GET /ai/session/{id}` et les écritures ne voient que les sessions du JWT courant (404 sinon).
+
+## Ancrage épreuve (RAG / contexte)
+
+Pour chaque appel avec `epreuveId` :
+
+1. Chargement de la ligne `epreuves` (titre, matière, classe, niveau, année, type, examen, ville, établissement, pages).
+2. Extrait de fichier si disponible : `extrait.txt` / `document.txt` / `ocr.txt` à côté du PDF, sinon `pdftotext` (4 premières pages) si le binaire est présent.
+3. Injection **uniquement** dans le message utilisateur, balises `<UNTRUSTED_DATA>`. Jamais dans le system prompt.
+
+Les épreuves ajoutées plus tard sont donc utilisables tout de suite, sans fine-tuning.
+
+## Images (mode B) — vision / OCR
 
 - JPG / PNG / WebP uniquement
 - 2 Mo max
 - Champ `image` en multipart, ou `imageBase64` + `imageMime` en JSON
-- Pas d’OCR complète en MVP : la photo est acceptée et signalée au juge
-
-Les sessions sont des fichiers JSON (répertoire temporaire). Pas encore de table MySQL.
+- Les octets image ne sont **jamais** interprétés comme instructions (system prompt OCR + blocs non fiables)
+- Chemin réel : **Gemini multimodal** (primaire) extrait le texte manuscrit / dactylographié, puis le juge s’appuie sur ce texte (+ l’image). Repli OpenAI vision si seule `OPENAI_API_KEY` est définie. Mode mock (CI) : texte d’entraînement déterministe
+- Réponse juge : `extractedText`, `visionUsed`, `imageReceived`
 
 ## Configuration
 
+Clés **uniquement** côté serveur PHP (jamais `VITE_*`).
+
 ```bash
+# Primaire — Gemini (offre gratuite / free-tier)
+GEMINI_API_KEY=...
+# ou
+GOOGLE_API_KEY=...
+GEMINI_MODEL=gemini-2.0-flash          # optionnel
+
+# Repli optionnel
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o-mini
 OPENAI_BASE_URL=https://api.openai.com/v1
-EZOATO_AI_ALLOW_MOCK=1   # local / CI sans clé
+
+# Local / CI sans clé
+EZOATO_AI_ALLOW_MOCK=1
+EZOATO_AI_PROVIDER=mock                # force le mock
+
+# Optionnel
+EZOATO_PDFTOTEXT=pdftotext
 ```
 
-Prod sans clé : `503` générique.
+**Production / `dev` déployé** : définir `GEMINI_API_KEY` (ou `GOOGLE_API_KEY`) et **`EZOATO_AI_ALLOW_MOCK=0`** (ou omettre la variable). Le mock ne doit pas servir de repli silencieux en prod. La clé Gemini n’est jamais commitée.
+
+Prod sans clé : `503` générique. Ordre des fournisseurs : `EZOATO_AI_PROVIDER` forcé → **Gemini** si clé → OpenAI si clé → mock si `EZOATO_AI_ALLOW_MOCK=1` → `none`.
 
 ## Tests
 
@@ -61,7 +98,20 @@ php backend-php/tests/test-ai-security.php
 # ou : npm run test:ai
 ```
 
+Couvre validation, injection, IDOR épreuve + session (fichiers et SQL), premium, modes A/B/QCM, Gemini payload, ancrage, vision/OCR, rate-limit.
+
 ## UI
+
+### Web
 
 - `/reviser` et fiche épreuve : choix de mode + paywall Pro
 - Garde-fou affiché en permanence
+
+### Flutter
+
+Écran dédié (mêmes endpoints `/ai/*`) :
+
+- `/reviser` — depuis Compte → « Réviser avec l’IA »
+- `/epreuve/:id/reviser` — bouton « Réviser avec l’IA » sur la fiche épreuve
+
+Modes A / B / QCM, paywall Pro (Flooz / T-Money), photo de copie en mode B, disclaimer jury.
