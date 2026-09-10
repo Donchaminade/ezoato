@@ -60,7 +60,7 @@ Les épreuves ajoutées plus tard sont donc utilisables tout de suite, sans fine
 - 2 Mo max
 - Champ `image` en multipart, ou `imageBase64` + `imageMime` en JSON
 - Les octets image ne sont **jamais** interprétés comme instructions (system prompt OCR + blocs non fiables)
-- Chemin réel : **Google multimodal** (Gemini, meilleur free-tier vision) extrait le texte manuscrit / dactylographié, puis le juge s’appuie sur ce texte (+ l’image). Repli OpenAI vision si seule `OPENAI_API_KEY` est définie. **Groq ne fait pas de vision** : photo sans Google ni OpenAI → erreur claire (`Analyse photo indisponible`), jamais un OCR inventé. Mode mock (CI) : texte d’entraînement déterministe
+- Chemin réel : **Google multimodal** (Gemini) extrait le texte manuscrit / dactylographié, puis le juge s’appuie sur ce texte (+ l’image). Sinon **OpenRouter** (VL OpenAI-compatible) si `OPENROUTER_API_KEY`, sinon OpenAI vision. **Groq ne fait pas de vision** : photo sans Google / OpenRouter / OpenAI → erreur claire (`Analyse photo indisponible`), jamais un OCR inventé. Mode mock (CI) : texte d’entraînement déterministe
 - Réponse juge : `extractedText`, `visionUsed`, `imageReceived`
 
 ## Configuration
@@ -68,7 +68,7 @@ Les épreuves ajoutées plus tard sont donc utilisables tout de suite, sans fine
 Clés **uniquement** côté serveur PHP (jamais `VITE_*`).
 
 ```bash
-# auto (défaut) | groq | google | openai | mock
+# auto (défaut) | groq | google | openrouter | openai | mock
 EZOATO_AI_PROVIDER=auto
 
 # Texte — Groq (OpenAI-compatible : https://api.groq.com/openai/v1/chat/completions)
@@ -88,6 +88,16 @@ EZOATO_AI_GOOGLE_MODEL=gemini-2.0-flash
 # EZOATO_AI_GOOGLE_MODEL=gemma-4-26b-a4b-it
 EZOATO_AI_GOOGLE_VISION_MODEL=gemini-2.0-flash
 
+# OpenRouter — vision Mode B + repli texte optionnel
+# OpenAI-compatible : https://openrouter.ai/api/v1/chat/completions
+OPENROUTER_API_KEY=...
+# VL gratuit listé sur GET https://openrouter.ai/api/v1/models (sept. 2026) :
+# input_modalities = image+text, pricing 0. Ne pas inventer d’IDs morts.
+EZOATO_AI_OPENROUTER_MODEL=google/gemma-4-26b-a4b-it:free
+# Autres VL gratuits listés au même moment : google/gemma-4-31b-it:free,
+# inclusionai/ling-3.0-flash-vl:free, ou le routeur openrouter/free.
+# google/gemini-2.0-flash-exp:free n’est plus exposé par l’API.
+
 # Repli optionnel
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o-mini
@@ -101,7 +111,7 @@ EZOATO_AI_PROVIDER=mock                # force le mock
 EZOATO_PDFTOTEXT=pdftotext
 ```
 
-**Production / `dev` déployé** : au moins `GROQ_API_KEY` et/ou `GEMINI_API_KEY` (ou `GOOGLE_API_KEY`) et **`EZOATO_AI_ALLOW_MOCK=0`** (ou omettre la variable). Le mock ne doit pas servir de repli silencieux en prod. Aucune clé n’est jamais commitée.
+**Production / `dev` déployé** : au moins `GROQ_API_KEY` et/ou `GEMINI_API_KEY` (ou `GOOGLE_API_KEY`) et/ou `OPENROUTER_API_KEY` et **`EZOATO_AI_ALLOW_MOCK=0`** (ou omettre la variable). Le mock ne doit pas servir de repli silencieux en prod. Aucune clé n’est jamais commitée.
 
 Prod sans clé : `503` générique. Photo sans fournisseur vision : `503` explicite (pas d’OCR fictif).
 
@@ -111,11 +121,14 @@ Prod sans clé : `503` générique. Photo sans fournisseur vision : `503` explic
 
 | Préférence | Texte (essai, coach, QCM, indices, juge-texte) | Vision / photo |
 | --- | --- | --- |
-| `auto` | Groq si `GROQ_API_KEY` → Google si `GEMINI_API_KEY` / `GOOGLE_API_KEY` → OpenAI → mock si `EZOATO_AI_ALLOW_MOCK=1` → `none` | Google multimodal → OpenAI vision → mock si autorisé → `none` |
-| `groq` | Groq uniquement (sinon mock/`none`) | Google → OpenAI ( Groq n’est pas utilisé ) |
-| `google` (alias `gemini`) | Google uniquement | Google, sinon OpenAI |
-| `openai` | OpenAI uniquement | OpenAI, sinon Google |
+| `auto` | Groq si `GROQ_API_KEY` → Google si `GEMINI_API_KEY` / `GOOGLE_API_KEY` → OpenRouter si `OPENROUTER_API_KEY` → OpenAI → mock si `EZOATO_AI_ALLOW_MOCK=1` → `none` | Google multimodal → OpenRouter → OpenAI vision → mock si autorisé → `none` |
+| `groq` | Groq uniquement (sinon mock/`none`) | Google → OpenRouter → OpenAI ( Groq n’est pas utilisé ) |
+| `google` (alias `gemini`) | Google uniquement | Google, sinon OpenRouter, sinon OpenAI |
+| `openrouter` | OpenRouter uniquement | OpenRouter, sinon Google, sinon OpenAI |
+| `openai` | OpenAI uniquement | OpenAI, sinon Google, sinon OpenRouter |
 | `mock` | générateur déterministe | texte OCR d’entraînement |
+
+Le **texte reste Groq-first** : OpenRouter n’est qu’un repli après Groq puis Google. La **vision** est le cas d’usage principal d’OpenRouter (photo Mode B / OCR).
 
 Forcer un fournisseur **sans** sa clé ne bascule pas silencieusement vers un autre pour le texte.
 
@@ -126,7 +139,7 @@ php backend-php/tests/test-ai-security.php
 # ou : npm run test:ai
 ```
 
-Couvre validation, injection, IDOR épreuve + session (fichiers et SQL), premium, modes A/B/QCM, sélection Groq/Google/OpenAI, payload Gemini/Gemma, ancrage, vision/OCR, rate-limit.
+Couvre validation, injection, IDOR épreuve + session (fichiers et SQL), premium, modes A/B/QCM, sélection Groq/Google/OpenRouter/OpenAI, payload Gemini/Gemma, ancrage, vision/OCR, rate-limit.
 
 ## UI
 

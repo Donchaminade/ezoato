@@ -47,9 +47,10 @@ putenv('OPENAI_API_KEY');
 putenv('GROQ_API_KEY');
 putenv('GEMINI_API_KEY');
 putenv('GOOGLE_API_KEY');
+putenv('OPENROUTER_API_KEY');
 $_ENV['EZOATO_AI_PROVIDER'] = 'mock';
 $_ENV['EZOATO_AI_ALLOW_MOCK'] = '1';
-unset($_ENV['OPENAI_API_KEY'], $_ENV['GROQ_API_KEY'], $_ENV['GEMINI_API_KEY'], $_ENV['GOOGLE_API_KEY']);
+unset($_ENV['OPENAI_API_KEY'], $_ENV['GROQ_API_KEY'], $_ENV['GEMINI_API_KEY'], $_ENV['GOOGLE_API_KEY'], $_ENV['OPENROUTER_API_KEY']);
 
 $rlDir = sys_get_temp_dir() . '/ezoato-ai-rl-test-' . bin2hex(random_bytes(4));
 $sessionDir = sys_get_temp_dir() . '/ezoato-ai-sess-test-' . bin2hex(random_bytes(4));
@@ -394,6 +395,8 @@ putenv('EZOATO_AI_PROVIDER');
 unset($_ENV['EZOATO_AI_PROVIDER']);
 putenv('GROQ_API_KEY');
 unset($_ENV['GROQ_API_KEY']);
+putenv('OPENROUTER_API_KEY');
+unset($_ENV['OPENROUTER_API_KEY']);
 putenv('GEMINI_API_KEY=test-gemini-key');
 $_ENV['GEMINI_API_KEY'] = 'test-gemini-key';
 putenv('OPENAI_API_KEY');
@@ -458,6 +461,8 @@ putenv('GEMINI_API_KEY');
 unset($_ENV['GEMINI_API_KEY']);
 putenv('OPENAI_API_KEY');
 unset($_ENV['OPENAI_API_KEY']);
+putenv('OPENROUTER_API_KEY');
+unset($_ENV['OPENROUTER_API_KEY']);
 assert_true(ai_provider() === 'mock', 'mock forcé pour la suite des tests');
 
 echo "\n=== Multi-provider (Groq / auto / vision) ===\n";
@@ -470,7 +475,8 @@ putenv('GROQ_API_KEY');
 putenv('GEMINI_API_KEY');
 putenv('GOOGLE_API_KEY');
 putenv('OPENAI_API_KEY');
-unset($_ENV['GROQ_API_KEY'], $_ENV['GEMINI_API_KEY'], $_ENV['GOOGLE_API_KEY'], $_ENV['OPENAI_API_KEY']);
+putenv('OPENROUTER_API_KEY');
+unset($_ENV['GROQ_API_KEY'], $_ENV['GEMINI_API_KEY'], $_ENV['GOOGLE_API_KEY'], $_ENV['OPENAI_API_KEY'], $_ENV['OPENROUTER_API_KEY']);
 assert_true(ai_text_provider() === 'none', 'auto sans clé → none (mock interdit)');
 assert_true(ai_vision_provider() === 'none', 'vision sans clé → none');
 assert_true(ai_provider_preference() === 'auto', 'défaut / auto = auto');
@@ -479,10 +485,12 @@ putenv('GROQ_API_KEY=gsk_test_not_a_real_key');
 $_ENV['GROQ_API_KEY'] = 'gsk_test_not_a_real_key';
 putenv('GEMINI_API_KEY=test-gemini-key');
 $_ENV['GEMINI_API_KEY'] = 'test-gemini-key';
+putenv('OPENROUTER_API_KEY=sk-or-test-not-a-real-key');
+$_ENV['OPENROUTER_API_KEY'] = 'sk-or-test-not-a-real-key';
 putenv('OPENAI_API_KEY=sk-test-fallback');
 $_ENV['OPENAI_API_KEY'] = 'sk-test-fallback';
 assert_true(ai_text_provider() === 'groq', 'auto texte : Groq prioritaire si GROQ_API_KEY');
-assert_true(ai_vision_provider() === 'google', 'auto vision : Google prioritaire même si Groq présent');
+assert_true(ai_vision_provider() === 'google', 'auto vision : Google prioritaire même si Groq/OpenRouter présents');
 assert_true(ai_model_name('groq') === AI_DEFAULT_GROQ_MODEL, 'modèle Groq par défaut public');
 assert_true(ai_groq_base_url() === 'https://api.groq.com/openai/v1', 'URL Groq OpenAI-compatible');
 
@@ -505,21 +513,27 @@ assert_true(!str_contains($groqPayloadSeen, 'gsk_test_not_a_real_key'), 'payload
 
 putenv('GROQ_API_KEY');
 unset($_ENV['GROQ_API_KEY']);
-assert_true(ai_text_provider() === 'google', 'auto texte : Google si pas de Groq');
+assert_true(ai_text_provider() === 'google', 'auto texte : Google si pas de Groq (OpenRouter n\'interrompt pas Groq-first)');
 putenv('GEMINI_API_KEY');
 unset($_ENV['GEMINI_API_KEY']);
+assert_true(ai_text_provider() === 'openrouter', 'auto texte : OpenRouter après Groq/Google');
+assert_true(ai_vision_provider() === 'openrouter', 'auto vision : OpenRouter si pas de Google (avant OpenAI)');
+putenv('OPENROUTER_API_KEY');
+unset($_ENV['OPENROUTER_API_KEY']);
 assert_true(ai_text_provider() === 'openai', 'auto texte : OpenAI en dernier repli');
-assert_true(ai_vision_provider() === 'openai', 'vision : OpenAI si pas de Google');
+assert_true(ai_vision_provider() === 'openai', 'vision : OpenAI si pas de Google ni OpenRouter');
 
 putenv('EZOATO_AI_PROVIDER=groq');
 $_ENV['EZOATO_AI_PROVIDER'] = 'groq';
 putenv('OPENAI_API_KEY');
 unset($_ENV['OPENAI_API_KEY']);
+putenv('OPENROUTER_API_KEY');
+unset($_ENV['OPENROUTER_API_KEY']);
 assert_true(ai_text_provider() === 'none', 'force groq sans clé → none (pas de repli silencieux)');
 putenv('GROQ_API_KEY=gsk_test_not_a_real_key');
 $_ENV['GROQ_API_KEY'] = 'gsk_test_not_a_real_key';
 assert_true(ai_text_provider() === 'groq', 'force groq avec clé');
-assert_true(ai_vision_provider() === 'none', 'force groq sans Google/OpenAI → pas de vision');
+assert_true(ai_vision_provider() === 'none', 'force groq sans Google/OpenRouter/OpenAI → pas de vision');
 
 $pngMini = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', true);
 $b64Mini = is_string($pngMini) ? base64_encode($pngMini) : '';
@@ -547,6 +561,64 @@ putenv('GEMINI_API_KEY=test-gemini-key');
 $_ENV['GEMINI_API_KEY'] = 'test-gemini-key';
 assert_true(ai_text_provider() === 'google' && ai_vision_provider() === 'google', 'force google avec clé');
 
+putenv('EZOATO_AI_PROVIDER=openrouter');
+$_ENV['EZOATO_AI_PROVIDER'] = 'openrouter';
+putenv('GROQ_API_KEY');
+putenv('GEMINI_API_KEY');
+putenv('OPENAI_API_KEY');
+unset($_ENV['GROQ_API_KEY'], $_ENV['GEMINI_API_KEY'], $_ENV['OPENAI_API_KEY']);
+assert_true(ai_text_provider() === 'none', 'force openrouter sans clé → none');
+putenv('OPENROUTER_API_KEY=sk-or-test-not-a-real-key');
+$_ENV['OPENROUTER_API_KEY'] = 'sk-or-test-not-a-real-key';
+assert_true(ai_provider_preference() === 'openrouter', 'EZOATO_AI_PROVIDER=openrouter accepté');
+assert_true(ai_text_provider() === 'openrouter' && ai_vision_provider() === 'openrouter', 'force openrouter avec clé');
+assert_true(ai_model_name('openrouter') === AI_DEFAULT_OPENROUTER_MODEL, 'modèle OpenRouter VL gratuit par défaut');
+assert_true(ai_openrouter_base_url() === 'https://openrouter.ai/api/v1', 'URL OpenRouter OpenAI-compatible');
+assert_true(str_contains(AI_DEFAULT_OPENROUTER_MODEL, ':free') || str_contains(AI_DEFAULT_OPENROUTER_MODEL, 'gemma'), 'défaut OpenRouter = id multimodal connu');
+
+putenv('EZOATO_AI_OPENROUTER_MODEL=google/gemma-4-31b-it:free');
+$_ENV['EZOATO_AI_OPENROUTER_MODEL'] = 'google/gemma-4-31b-it:free';
+assert_true(ai_model_name('openrouter') === 'google/gemma-4-31b-it:free', 'EZOATO_AI_OPENROUTER_MODEL override');
+putenv('EZOATO_AI_OPENROUTER_MODEL');
+unset($_ENV['EZOATO_AI_OPENROUTER_MODEL']);
+
+$orPayloadSeen = '';
+ai_call_openrouter('sys', 'user-data', static function (string $payload) use (&$orPayloadSeen): string {
+  $orPayloadSeen = $payload;
+  return '{"ok":true}';
+});
+$orDecoded = json_decode($orPayloadSeen, true);
+assert_true(is_array($orDecoded) && ($orDecoded['model'] ?? '') === AI_DEFAULT_OPENROUTER_MODEL, 'payload OpenRouter : modèle VL par défaut');
+assert_true(($orDecoded['messages'][0]['role'] ?? '') === 'system', 'payload OpenRouter : system isolé');
+assert_true(($orDecoded['messages'][1]['content'] ?? '') === 'user-data', 'payload OpenRouter : user non fusionné au system');
+assert_true(!str_contains($orPayloadSeen, 'sk-or-test-not-a-real-key'), 'payload OpenRouter sans clé');
+
+$orVisionSeen = '';
+ai_call_openrouter_vision('sys-ocr', 'user-ocr', [['mime' => 'image/png', 'data' => 'abc123']], static function (string $payload) use (&$orVisionSeen): string {
+  $orVisionSeen = $payload;
+  return '{"ok":true}';
+});
+$orVision = json_decode($orVisionSeen, true);
+$orUserContent = $orVision['messages'][1]['content'] ?? null;
+assert_true(is_array($orUserContent), 'payload vision OpenRouter : content multimodal');
+$orHasImage = false;
+foreach (is_array($orUserContent) ? $orUserContent : [] as $part) {
+  if (is_array($part) && ($part['type'] ?? '') === 'image_url') {
+    $orHasImage = str_contains((string)($part['image_url']['url'] ?? ''), 'data:image/png;base64,abc123');
+  }
+}
+assert_true($orHasImage, 'payload vision OpenRouter : image_url data-URI (pas d\'octets bruts comme instruction)');
+assert_true(($orVision['messages'][0]['content'] ?? '') === 'sys-ocr', 'payload vision OpenRouter : system isolé');
+assert_true(!str_contains($orVisionSeen, 'sk-or-test-not-a-real-key'), 'payload vision OpenRouter sans clé');
+
+$orHdrs = ai_openrouter_http_headers();
+$orHdrBlob = implode("\n", $orHdrs);
+assert_true(str_contains($orHdrBlob, 'HTTP-Referer:'), 'OpenRouter : header HTTP-Referer');
+assert_true(str_contains($orHdrBlob, 'X-Title: Ezoato') || str_contains($orHdrBlob, 'X-OpenRouter-Title: Ezoato'), 'OpenRouter : X-Title Ezoato');
+assert_true(!str_contains($orHdrBlob, 'sk-or-') && !str_contains($orHdrBlob, 'Bearer'), 'headers OpenRouter sans clé');
+$compatHdrs = implode("\n", ai_openai_compat_http_headers('sk-or-test-not-a-real-key', $orHdrs));
+assert_true(str_contains($compatHdrs, 'Authorization: Bearer ') && str_contains($compatHdrs, 'HTTP-Referer:'), 'headers compat : Bearer + Referer');
+
 putenv('EZOATO_AI_PROVIDER=auto');
 $_ENV['EZOATO_AI_PROVIDER'] = 'auto';
 putenv('EZOATO_AI_ALLOW_MOCK=1');
@@ -554,7 +626,8 @@ $_ENV['EZOATO_AI_ALLOW_MOCK'] = '1';
 putenv('GEMINI_API_KEY');
 putenv('GROQ_API_KEY');
 putenv('OPENAI_API_KEY');
-unset($_ENV['GEMINI_API_KEY'], $_ENV['GROQ_API_KEY'], $_ENV['OPENAI_API_KEY']);
+putenv('OPENROUTER_API_KEY');
+unset($_ENV['GEMINI_API_KEY'], $_ENV['GROQ_API_KEY'], $_ENV['OPENAI_API_KEY'], $_ENV['OPENROUTER_API_KEY']);
 assert_true(ai_text_provider() === 'mock', 'auto + ALLOW_MOCK=1 sans clé → mock');
 
 putenv('EZOATO_AI_PROVIDER=mock');
@@ -743,9 +816,11 @@ assert_true(str_contains($srcLib, "ai_env('OPENAI_API_KEY')"), 'clé OpenAI lue 
 assert_true(str_contains($srcLib, "ai_env('GEMINI_API_KEY')"), 'clé Gemini / Google via env');
 assert_true(str_contains($srcLib, "ai_env('GOOGLE_API_KEY')"), 'alias GOOGLE_API_KEY via env');
 assert_true(str_contains($srcLib, "ai_env('GROQ_API_KEY')"), 'clé Groq via env');
+assert_true(str_contains($srcLib, "ai_env('OPENROUTER_API_KEY')"), 'clé OpenRouter lue via env');
 assert_true(!str_contains($srcCfg, 'sk-'), 'config.php sans secret LLM');
 assert_true(!preg_match('/AIza[0-9A-Za-z_-]{20,}/', $srcLib . $srcHttp . $srcCfg), 'aucune clé Google commitée');
 assert_true(!preg_match('/gsk_[A-Za-z0-9]{10,}/', $srcLib . $srcHttp . $srcCfg), 'aucune clé Groq commitée');
+assert_true(!preg_match('/sk-or-v1-[A-Za-z0-9]{10,}/', $srcLib . $srcHttp . $srcCfg), 'aucune clé OpenRouter commitée');
 assert_true(str_contains($srcHttp, "'db' => db()") || str_contains($srcHttp, '"db" => db()'), 'HTTP injecte PDO pour les sessions');
 
 echo "\n=== Fichier HTTP / routes (statique) ===\n";

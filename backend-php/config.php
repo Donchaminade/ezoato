@@ -56,10 +56,10 @@ return [
   ],
   /**
    * Ezoato AI — les clés LLM ne sont JAMAIS stockées ici.
-   * EZOATO_AI_PROVIDER=auto|groq|google|openai (défaut auto).
-   * Texte auto : GROQ_API_KEY → GEMINI_API_KEY/GOOGLE_API_KEY → OPENAI_API_KEY.
-   * Vision auto : Google multimodal → OpenAI ( Groq = texte seul ).
-   * Modèles : EZOATO_AI_GROQ_MODEL, EZOATO_AI_GOOGLE_MODEL, OPENAI_MODEL.
+   * EZOATO_AI_PROVIDER=auto|groq|google|openrouter|openai (défaut auto).
+   * Texte auto : GROQ_API_KEY → GEMINI_API_KEY/GOOGLE_API_KEY → OPENROUTER_API_KEY → OPENAI_API_KEY.
+   * Vision auto : Google multimodal → OpenRouter → OpenAI ( Groq = texte seul ).
+   * Modèles : EZOATO_AI_GROQ_MODEL, EZOATO_AI_GOOGLE_MODEL, EZOATO_AI_OPENROUTER_MODEL, OPENAI_MODEL.
    * En local/CI sans clé : EZOATO_AI_ALLOW_MOCK=1 (générateur déterministe).
    * En production / dev déployé : EZOATO_AI_ALLOW_MOCK=0.
    */
