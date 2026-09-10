@@ -5,8 +5,8 @@
  * Règles de sécurité :
  * - Le texte élève / épreuve n'est JAMAIS injecté dans le system prompt.
  * - Les secrets LLM viennent uniquement des variables d'environnement
- *   (GROQ_API_KEY, GEMINI_API_KEY / GOOGLE_API_KEY, OPENAI_API_KEY).
- * - Texte : Groq → Google → OpenAI. Vision : Google → OpenAI (pas Groq).
+ *   (GROQ_API_KEY, GEMINI_API_KEY / GOOGLE_API_KEY, OPENROUTER_API_KEY, OPENAI_API_KEY).
+ * - Texte : Groq → Google → OpenRouter (repli) → OpenAI. Vision : Google → OpenRouter → OpenAI (pas Groq).
  * - Les messages d'erreur client ne exposent ni stack ni clés.
  */
 declare(strict_types=1);
@@ -29,7 +29,14 @@ const AI_DEFAULT_GROQ_MODEL = 'openai/gpt-oss-20b';
 const AI_DEFAULT_GOOGLE_MODEL = 'gemini-2.0-flash';
 const AI_DEFAULT_GOOGLE_VISION_MODEL = 'gemini-2.0-flash';
 const AI_DEFAULT_OPENAI_MODEL = 'gpt-4o-mini';
+/**
+ * Défaut OpenRouter (sept. 2026) : VL gratuit listé sur GET /api/v1/models
+ * (input_modalities inclut image, pricing 0). google/gemini-2.0-flash-exp:free
+ * n'est plus exposé — ne pas le réintroduire sans revérifier l'API.
+ */
+const AI_DEFAULT_OPENROUTER_MODEL = 'google/gemma-4-26b-a4b-it:free';
 const AI_GROQ_BASE_URL = 'https://api.groq.com/openai/v1';
+const AI_OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
 class AiValidationException extends RuntimeException
 {
@@ -53,7 +60,7 @@ class AiUnavailableException extends RuntimeException
 class AiVisionUnavailableException extends AiUnavailableException
 {
   public function __construct(
-    string $message = 'Analyse photo indisponible : aucun fournisseur vision (Google ou OpenAI) n\'est configuré.'
+    string $message = 'Analyse photo indisponible : aucun fournisseur vision (Google, OpenRouter ou OpenAI) n\'est configuré.'
   ) {
     parent::__construct($message, 503);
   }
@@ -614,13 +621,18 @@ function ai_groq_key(): ?string
   return ai_env('GROQ_API_KEY') ?? ai_env('EZOATO_GROQ_API_KEY');
 }
 
+function ai_openrouter_key(): ?string
+{
+  return ai_env('OPENROUTER_API_KEY') ?? ai_env('EZOATO_OPENROUTER_API_KEY');
+}
+
 function ai_allow_mock(): bool
 {
   return ai_env('EZOATO_AI_ALLOW_MOCK') === '1';
 }
 
 /**
- * Préférence brute : auto|groq|google|openai|mock
+ * Préférence brute : auto|groq|google|openrouter|openai|mock
  * Alias : gemini → google ; vide / inconnu → auto.
  */
 function ai_provider_preference(): string
@@ -632,7 +644,7 @@ function ai_provider_preference(): string
   if ($raw === 'gemini') {
     return 'google';
   }
-  if (in_array($raw, ['groq', 'google', 'openai', 'mock'], true)) {
+  if (in_array($raw, ['groq', 'google', 'openrouter', 'openai', 'mock'], true)) {
     return $raw;
   }
   return 'auto';
@@ -644,8 +656,30 @@ function ai_fallback_mock_or_none(): string
 }
 
 /**
+ * @param list<string> $order google|openrouter|openai|groq
+ */
+function ai_first_keyed_provider(array $order): string
+{
+  foreach ($order as $name) {
+    if ($name === 'groq' && ai_groq_key()) {
+      return 'groq';
+    }
+    if ($name === 'google' && ai_google_key()) {
+      return 'google';
+    }
+    if ($name === 'openrouter' && ai_openrouter_key()) {
+      return 'openrouter';
+    }
+    if ($name === 'openai' && ai_openai_key()) {
+      return 'openai';
+    }
+  }
+  return ai_fallback_mock_or_none();
+}
+
+/**
  * Fournisseur texte (essai, coach, QCM, indices, juge-sans-photo).
- * Auto : Groq → Google → OpenAI → mock (si autorisé) → none.
+ * Auto : Groq → Google → OpenRouter (repli optionnel) → OpenAI → mock (si autorisé) → none.
  */
 function ai_text_provider(): string
 {
@@ -659,25 +693,19 @@ function ai_text_provider(): string
   if ($pref === 'google') {
     return ai_google_key() ? 'google' : ai_fallback_mock_or_none();
   }
+  if ($pref === 'openrouter') {
+    return ai_openrouter_key() ? 'openrouter' : ai_fallback_mock_or_none();
+  }
   if ($pref === 'openai') {
     return ai_openai_key() ? 'openai' : ai_fallback_mock_or_none();
   }
-  if (ai_groq_key()) {
-    return 'groq';
-  }
-  if (ai_google_key()) {
-    return 'google';
-  }
-  if (ai_openai_key()) {
-    return 'openai';
-  }
-  return ai_fallback_mock_or_none();
+  return ai_first_keyed_provider(['groq', 'google', 'openrouter', 'openai']);
 }
 
 /**
  * Fournisseur vision / photo (OCR + juge multimodal).
- * Groq n'a pas de vision grand public : on bascule Google → OpenAI.
- * Auto : Google multimodal → OpenAI vision → mock (si autorisé) → none.
+ * Groq n'a pas de vision grand public.
+ * Auto : Google multimodal → OpenRouter → OpenAI vision → mock (si autorisé) → none.
  */
 function ai_vision_provider(): string
 {
@@ -686,18 +714,15 @@ function ai_vision_provider(): string
     return 'mock';
   }
   if ($pref === 'google') {
-    return ai_google_key() ? 'google' : (ai_openai_key() ? 'openai' : ai_fallback_mock_or_none());
+    return ai_first_keyed_provider(['google', 'openrouter', 'openai']);
+  }
+  if ($pref === 'openrouter') {
+    return ai_first_keyed_provider(['openrouter', 'google', 'openai']);
   }
   if ($pref === 'openai') {
-    return ai_openai_key() ? 'openai' : (ai_google_key() ? 'google' : ai_fallback_mock_or_none());
+    return ai_first_keyed_provider(['openai', 'google', 'openrouter']);
   }
-  if (ai_google_key()) {
-    return 'google';
-  }
-  if (ai_openai_key()) {
-    return 'openai';
-  }
-  return ai_fallback_mock_or_none();
+  return ai_first_keyed_provider(['google', 'openrouter', 'openai']);
 }
 
 /** Alias : fournisseur texte (chemins essay / coach / quiz / hints). */
@@ -733,6 +758,13 @@ function ai_openai_model(): string
   return ai_env('OPENAI_MODEL') ?: ai_env('EZOATO_AI_MODEL') ?: AI_DEFAULT_OPENAI_MODEL;
 }
 
+function ai_openrouter_model(): string
+{
+  return ai_env('EZOATO_AI_OPENROUTER_MODEL')
+    ?: ai_env('OPENROUTER_MODEL')
+    ?: AI_DEFAULT_OPENROUTER_MODEL;
+}
+
 function ai_model_name(?string $provider = null): string
 {
   $provider = $provider ?? ai_text_provider();
@@ -741,6 +773,9 @@ function ai_model_name(?string $provider = null): string
   }
   if ($provider === 'groq') {
     return ai_groq_model();
+  }
+  if ($provider === 'openrouter') {
+    return ai_openrouter_model();
   }
   return ai_openai_model();
 }
@@ -767,6 +802,25 @@ function ai_openai_base_url(): string
 function ai_groq_base_url(): string
 {
   return rtrim(ai_env('GROQ_BASE_URL') ?: ai_env('EZOATO_AI_GROQ_BASE_URL') ?: AI_GROQ_BASE_URL, '/');
+}
+
+function ai_openrouter_base_url(): string
+{
+  return rtrim(
+    ai_env('OPENROUTER_BASE_URL') ?: ai_env('EZOATO_AI_OPENROUTER_BASE_URL') ?: AI_OPENROUTER_BASE_URL,
+    '/'
+  );
+}
+
+/** En-têtes recommandés OpenRouter (attribution app, pas de secret). */
+function ai_openrouter_http_headers(): array
+{
+  $referer = ai_env('EZOATO_AI_OPENROUTER_REFERER') ?: 'https://ezoa-to.tg';
+  return [
+    'HTTP-Referer: ' . $referer,
+    'X-Title: Ezoato',
+    'X-OpenRouter-Title: Ezoato',
+  ];
 }
 
 function ai_build_user_message(string $task, array $parts): string
@@ -1094,11 +1148,37 @@ function ai_openai_compat_payload(string $model, string $system, string $user): 
 }
 
 /**
- * Chat Completions OpenAI-compatible (OpenAI + Groq).
- * $http injecté en tests : reçoit le JSON payload, renvoie le texte de complétion.
+ * @param list<string> $extraHeaders
+ * @return list<string>
  */
-function ai_call_openai_compat(string $key, string $baseUrl, string $model, string $system, string $user, ?callable $http = null): string
+function ai_openai_compat_http_headers(string $key, array $extraHeaders = []): array
 {
+  $headers = [
+    'Content-Type: application/json',
+    'Authorization: Bearer ' . $key,
+  ];
+  foreach ($extraHeaders as $h) {
+    if (is_string($h) && $h !== '') {
+      $headers[] = $h;
+    }
+  }
+  return $headers;
+}
+
+/**
+ * Chat Completions OpenAI-compatible (OpenAI + Groq + OpenRouter).
+ * $http injecté en tests : reçoit le JSON payload, renvoie le texte de complétion.
+ * @param list<string> $extraHeaders
+ */
+function ai_call_openai_compat(
+  string $key,
+  string $baseUrl,
+  string $model,
+  string $system,
+  string $user,
+  ?callable $http = null,
+  array $extraHeaders = []
+): string {
   if ($key === '') {
     throw new AiUnavailableException('Service IA temporairement indisponible');
   }
@@ -1122,10 +1202,7 @@ function ai_call_openai_compat(string $key, string $baseUrl, string $model, stri
   }
   curl_setopt_array($ch, [
     CURLOPT_POST => true,
-    CURLOPT_HTTPHEADER => [
-      'Content-Type: application/json',
-      'Authorization: Bearer ' . $key,
-    ],
+    CURLOPT_HTTPHEADER => ai_openai_compat_http_headers($key, $extraHeaders),
     CURLOPT_POSTFIELDS => $payload,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT => 45,
@@ -1168,6 +1245,19 @@ function ai_call_groq(string $system, string $user, ?callable $http = null): str
   );
 }
 
+function ai_call_openrouter(string $system, string $user, ?callable $http = null): string
+{
+  return ai_call_openai_compat(
+    (string)(ai_openrouter_key() ?? ''),
+    ai_openrouter_base_url(),
+    ai_openrouter_model(),
+    $system,
+    $user,
+    $http,
+    ai_openrouter_http_headers()
+  );
+}
+
 /**
  * @param list<array{mime:string,data:string}> $images
  */
@@ -1202,6 +1292,14 @@ function ai_complete(string $system, string $user, string $fallbackProvider, cal
     $data['_provider'] = 'groq';
     return $data;
   }
+  if ($provider === 'openrouter') {
+    $raw = $images !== []
+      ? ai_call_openrouter_vision($system, $user, $images)
+      : ai_call_openrouter($system, $user);
+    $data = ai_extract_json_object($raw);
+    $data['_provider'] = 'openrouter';
+    return $data;
+  }
   if ($images !== []) {
     $raw = ai_call_openai_vision($system, $user, $images);
   } else {
@@ -1213,12 +1311,21 @@ function ai_complete(string $system, string $user, string $fallbackProvider, cal
 }
 
 /**
+ * Vision OpenAI-compatible (OpenAI + OpenRouter) : image_url data-URI, jamais d'octets comme instructions.
  * @param list<array{mime:string,data:string}> $images
+ * @param list<string> $extraHeaders
  */
-function ai_call_openai_vision(string $system, string $user, array $images, ?callable $http = null): string
-{
-  $key = ai_openai_key();
-  if (!$key) {
+function ai_call_openai_compat_vision(
+  string $key,
+  string $baseUrl,
+  string $model,
+  string $system,
+  string $user,
+  array $images,
+  ?callable $http = null,
+  array $extraHeaders = []
+): string {
+  if ($key === '') {
     throw new AiUnavailableException('Service IA temporairement indisponible');
   }
   $content = [['type' => 'text', 'text' => $user]];
@@ -1234,7 +1341,7 @@ function ai_call_openai_vision(string $system, string $user, array $images, ?cal
     ];
   }
   $payload = json_encode([
-    'model' => ai_openai_model(),
+    'model' => $model,
     'temperature' => 0.3,
     'response_format' => ['type' => 'json_object'],
     'messages' => [
@@ -1252,17 +1359,14 @@ function ai_call_openai_vision(string $system, string $user, array $images, ?cal
     }
     return $raw;
   }
-  $url = ai_openai_base_url() . '/chat/completions';
+  $url = rtrim($baseUrl, '/') . '/chat/completions';
   $ch = curl_init($url);
   if ($ch === false) {
     throw new AiUnavailableException('Service IA temporairement indisponible');
   }
   curl_setopt_array($ch, [
     CURLOPT_POST => true,
-    CURLOPT_HTTPHEADER => [
-      'Content-Type: application/json',
-      'Authorization: Bearer ' . $key,
-    ],
+    CURLOPT_HTTPHEADER => ai_openai_compat_http_headers($key, $extraHeaders),
     CURLOPT_POSTFIELDS => $payload,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT => 45,
@@ -1279,6 +1383,39 @@ function ai_call_openai_vision(string $system, string $user, array $images, ?cal
     throw new AiUnavailableException('Service IA temporairement indisponible');
   }
   return $text;
+}
+
+/**
+ * @param list<array{mime:string,data:string}> $images
+ */
+function ai_call_openai_vision(string $system, string $user, array $images, ?callable $http = null): string
+{
+  return ai_call_openai_compat_vision(
+    (string)(ai_openai_key() ?? ''),
+    ai_openai_base_url(),
+    ai_openai_model(),
+    $system,
+    $user,
+    $images,
+    $http
+  );
+}
+
+/**
+ * @param list<array{mime:string,data:string}> $images
+ */
+function ai_call_openrouter_vision(string $system, string $user, array $images, ?callable $http = null): string
+{
+  return ai_call_openai_compat_vision(
+    (string)(ai_openrouter_key() ?? ''),
+    ai_openrouter_base_url(),
+    ai_openrouter_model(),
+    $system,
+    $user,
+    $images,
+    $http,
+    ai_openrouter_http_headers()
+  );
 }
 
 function ai_offline_pack(array $quiz, array $meta = []): array
