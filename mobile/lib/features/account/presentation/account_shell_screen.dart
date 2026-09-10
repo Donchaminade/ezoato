@@ -28,6 +28,7 @@ class AccountMenuScreen extends ConsumerWidget {
     ('Bibliothèque', 'Achats et téléchargements', '/account/bibliotheque', LucideIcons.library),
     ('Favoris', 'Épreuves enregistrées', '/account/favoris', LucideIcons.heart),
     ('Hors ligne', 'PDF téléchargés localement', '/account/offline', LucideIcons.hardDrive),
+    ('Réviser avec l\'IA', 'Tuteur Pro ancré sur les épreuves', '/reviser', LucideIcons.sparkles),
   ];
 
   static const _historySection = <_MenuEntry>[

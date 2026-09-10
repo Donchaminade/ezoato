@@ -687,6 +687,7 @@ export interface AiQuiz {
   juryCorrection?: boolean;
   provider?: string;
   pack?: AiOfflinePack;
+  grounded?: boolean;
 }
 
 export interface AiQuizAnswerResult extends AiEthical {
@@ -734,6 +735,8 @@ export interface AiJudge extends AiEthical {
   revealLevel: number;
   coach?: AiCoach | null;
   imageReceived?: boolean;
+  extractedText?: string | null;
+  visionUsed?: boolean;
   solvesExercise: boolean;
   provider?: string;
 }
@@ -743,6 +746,8 @@ export interface AiSessionStart extends AiEthical {
   mode: AiMode;
   question?: string;
   matiere?: string | null;
+  epreuveId?: string | null;
+  grounded?: boolean;
   workOnPaper?: boolean;
   coach?: AiCoach;
   currentQuestion?: AiQuizQuestion | null;

@@ -12,7 +12,7 @@ export const Route = createFileRoute("/reviser")({
       {
         name: "description",
         content:
-          "Génère un QCM d'entraînement à partir d'un extrait d'épreuve. Ce n'est pas une note officielle.",
+          "Tuteur ancré sur les épreuves : rédaction, sciences ou QCM. Ce n'est pas une note officielle.",
       },
     ],
   }),

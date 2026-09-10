@@ -322,6 +322,21 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
                   ),
                 ],
                 const SizedBox(height: 24),
+                if (isOnline) ...[
+                  EzoaScrollReveal(
+                    child: EzoaButton(
+                      label: 'Réviser avec l\'IA',
+                      variant: EzoaButtonVariant.outline,
+                      onPressed: () => context.push(
+                        '/epreuve/${widget.id}/reviser'
+                        '?titre=${Uri.encodeQueryComponent(epreuve.titre)}'
+                        '&matiere=${Uri.encodeQueryComponent(epreuve.matiere)}',
+                      ),
+                      icon: LucideIcons.sparkles,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 if (isOnline)
                   EzoaScrollReveal(
                     child: EzoaButton(

@@ -552,6 +552,188 @@ class ApiClient {
     return data['message'] as String? ??
         'Mot de passe mis à jour. Tu peux te connecter.';
   }
+
+  Options get _aiTimeout => Options(
+        sendTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 60),
+      );
+
+  Future<AiEntitlement> getAiEntitlement() =>
+      _get('/ai/entitlement', fromJson: AiEntitlement.fromJson);
+
+  Future<AiSessionStart> startAiSession({
+    String? mode,
+    String? epreuveId,
+    String? sourceText,
+    String? question,
+    String? matiere,
+    int? questionCount,
+  }) async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/ai/session',
+        data: {
+          if (mode != null) 'mode': mode,
+          if (epreuveId != null) 'epreuveId': epreuveId,
+          if (sourceText != null) 'sourceText': sourceText,
+          if (question != null) 'question': question,
+          if (matiere != null) 'matiere': matiere,
+          if (questionCount != null) 'questionCount': questionCount,
+        },
+        options: _aiTimeout,
+      );
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return AiSessionStart.fromJson(data);
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  Future<AiQuizStart> generateAiQuiz({
+    String? epreuveId,
+    String? sourceText,
+    int questionCount = 5,
+  }) async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/ai/quiz',
+        data: {
+          if (epreuveId != null) 'epreuveId': epreuveId,
+          if (sourceText != null) 'sourceText': sourceText,
+          'questionCount': questionCount,
+        },
+        options: _aiTimeout,
+      );
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return AiQuizStart.fromJson(data);
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  Future<AiQuizAnswerResult> answerAiQuiz({
+    required String sessionId,
+    required String questionId,
+    required String choiceId,
+  }) async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/ai/quiz/answer',
+        data: {
+          'sessionId': sessionId,
+          'questionId': questionId,
+          'choiceId': choiceId,
+        },
+        options: _aiTimeout,
+      );
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return AiQuizAnswerResult.fromJson(data);
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  Future<AiEssayFeedback> submitAiEssay({
+    String? sessionId,
+    String? epreuveId,
+    String? question,
+    required String essay,
+    String? rewriteParagraph,
+  }) async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/ai/essay',
+        data: {
+          if (sessionId != null) 'sessionId': sessionId,
+          if (epreuveId != null) 'epreuveId': epreuveId,
+          if (question != null) 'question': question,
+          'essay': essay,
+          if (rewriteParagraph != null) 'rewriteParagraph': rewriteParagraph,
+        },
+        options: _aiTimeout,
+      );
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return AiEssayFeedback.fromJson(data);
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  Future<AiCoach> getAiCoach({
+    String? sessionId,
+    required String question,
+    String? sourceText,
+    String? epreuveId,
+  }) async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/ai/coach',
+        data: {
+          if (sessionId != null) 'sessionId': sessionId,
+          'question': question,
+          if (sourceText != null) 'sourceText': sourceText,
+          if (epreuveId != null) 'epreuveId': epreuveId,
+        },
+        options: _aiTimeout,
+      );
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return AiCoach.fromJson(data);
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  Future<AiJudge> judgeAiAnswer({
+    String? sessionId,
+    required String question,
+    String? studentAnswer,
+    String? imagePath,
+    String? epreuveId,
+  }) async {
+    try {
+      final Response<Map<String, dynamic>> res;
+      if (imagePath != null && imagePath.isNotEmpty) {
+        final form = FormData.fromMap({
+          if (sessionId != null) 'sessionId': sessionId,
+          'question': question,
+          if (studentAnswer != null && studentAnswer.isNotEmpty)
+            'studentAnswer': studentAnswer,
+          if (epreuveId != null) 'epreuveId': epreuveId,
+          'image': await MultipartFile.fromFile(imagePath, filename: 'copie.jpg'),
+        });
+        res = await _dio.post<Map<String, dynamic>>(
+          '/ai/judge',
+          data: form,
+          options: Options(
+            contentType: 'multipart/form-data',
+            sendTimeout: const Duration(seconds: 60),
+            receiveTimeout: const Duration(seconds: 60),
+          ),
+        );
+      } else {
+        res = await _dio.post<Map<String, dynamic>>(
+          '/ai/judge',
+          data: {
+            if (sessionId != null) 'sessionId': sessionId,
+            'question': question,
+            if (studentAnswer != null) 'studentAnswer': studentAnswer,
+            if (epreuveId != null) 'epreuveId': epreuveId,
+          },
+          options: _aiTimeout,
+        );
+      }
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return AiJudge.fromJson(data);
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
 }
 
 final apiClientProvider = Provider<ApiClient>((ref) {
