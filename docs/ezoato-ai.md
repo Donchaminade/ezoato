@@ -60,7 +60,7 @@ Les épreuves ajoutées plus tard sont donc utilisables tout de suite, sans fine
 - 2 Mo max
 - Champ `image` en multipart, ou `imageBase64` + `imageMime` en JSON
 - Les octets image ne sont **jamais** interprétés comme instructions (system prompt OCR + blocs non fiables)
-- Chemin réel : **Gemini multimodal** (primaire) extrait le texte manuscrit / dactylographié, puis le juge s’appuie sur ce texte (+ l’image). Repli OpenAI vision si seule `OPENAI_API_KEY` est définie. Mode mock (CI) : texte d’entraînement déterministe
+- Chemin réel : **Google multimodal** (Gemini, meilleur free-tier vision) extrait le texte manuscrit / dactylographié, puis le juge s’appuie sur ce texte (+ l’image). Repli OpenAI vision si seule `OPENAI_API_KEY` est définie. **Groq ne fait pas de vision** : photo sans Google ni OpenAI → erreur claire (`Analyse photo indisponible`), jamais un OCR inventé. Mode mock (CI) : texte d’entraînement déterministe
 - Réponse juge : `extractedText`, `visionUsed`, `imageReceived`
 
 ## Configuration
@@ -68,11 +68,25 @@ Les épreuves ajoutées plus tard sont donc utilisables tout de suite, sans fine
 Clés **uniquement** côté serveur PHP (jamais `VITE_*`).
 
 ```bash
-# Primaire — Gemini (offre gratuite / free-tier)
+# auto (défaut) | groq | google | openai | mock
+EZOATO_AI_PROVIDER=auto
+
+# Texte — Groq (OpenAI-compatible : https://api.groq.com/openai/v1/chat/completions)
+GROQ_API_KEY=...
+EZOATO_AI_GROQ_MODEL=openai/gpt-oss-20b
+# Llama 3.1 / 3.3 sur Groq = offre Enterprise uniquement (août 2026+) :
+# EZOATO_AI_GROQ_MODEL=llama-3.3-70b-versatile
+# EZOATO_AI_GROQ_MODEL=llama-3.1-8b-instant
+
+# Google — Gemini *et* Gemma (Generative Language API)
 GEMINI_API_KEY=...
 # ou
 GOOGLE_API_KEY=...
-GEMINI_MODEL=gemini-2.0-flash          # optionnel
+EZOATO_AI_GOOGLE_MODEL=gemini-2.0-flash
+# Exemples d’IDs exposés par l’API (à vérifier si Google les retire) :
+# EZOATO_AI_GOOGLE_MODEL=gemma-3-27b-it
+# EZOATO_AI_GOOGLE_MODEL=gemma-4-26b-a4b-it
+EZOATO_AI_GOOGLE_VISION_MODEL=gemini-2.0-flash
 
 # Repli optionnel
 OPENAI_API_KEY=sk-...
@@ -87,9 +101,23 @@ EZOATO_AI_PROVIDER=mock                # force le mock
 EZOATO_PDFTOTEXT=pdftotext
 ```
 
-**Production / `dev` déployé** : définir `GEMINI_API_KEY` (ou `GOOGLE_API_KEY`) et **`EZOATO_AI_ALLOW_MOCK=0`** (ou omettre la variable). Le mock ne doit pas servir de repli silencieux en prod. La clé Gemini n’est jamais commitée.
+**Production / `dev` déployé** : au moins `GROQ_API_KEY` et/ou `GEMINI_API_KEY` (ou `GOOGLE_API_KEY`) et **`EZOATO_AI_ALLOW_MOCK=0`** (ou omettre la variable). Le mock ne doit pas servir de repli silencieux en prod. Aucune clé n’est jamais commitée.
 
-Prod sans clé : `503` générique. Ordre des fournisseurs : `EZOATO_AI_PROVIDER` forcé → **Gemini** si clé → OpenAI si clé → mock si `EZOATO_AI_ALLOW_MOCK=1` → `none`.
+Prod sans clé : `503` générique. Photo sans fournisseur vision : `503` explicite (pas d’OCR fictif).
+
+### Ordre de sélection
+
+`EZOATO_AI_PROVIDER` (défaut `auto`) :
+
+| Préférence | Texte (essai, coach, QCM, indices, juge-texte) | Vision / photo |
+| --- | --- | --- |
+| `auto` | Groq si `GROQ_API_KEY` → Google si `GEMINI_API_KEY` / `GOOGLE_API_KEY` → OpenAI → mock si `EZOATO_AI_ALLOW_MOCK=1` → `none` | Google multimodal → OpenAI vision → mock si autorisé → `none` |
+| `groq` | Groq uniquement (sinon mock/`none`) | Google → OpenAI ( Groq n’est pas utilisé ) |
+| `google` (alias `gemini`) | Google uniquement | Google, sinon OpenAI |
+| `openai` | OpenAI uniquement | OpenAI, sinon Google |
+| `mock` | générateur déterministe | texte OCR d’entraînement |
+
+Forcer un fournisseur **sans** sa clé ne bascule pas silencieusement vers un autre pour le texte.
 
 ## Tests
 
@@ -98,7 +126,7 @@ php backend-php/tests/test-ai-security.php
 # ou : npm run test:ai
 ```
 
-Couvre validation, injection, IDOR épreuve + session (fichiers et SQL), premium, modes A/B/QCM, Gemini payload, ancrage, vision/OCR, rate-limit.
+Couvre validation, injection, IDOR épreuve + session (fichiers et SQL), premium, modes A/B/QCM, sélection Groq/Google/OpenAI, payload Gemini/Gemma, ancrage, vision/OCR, rate-limit.
 
 ## UI
 

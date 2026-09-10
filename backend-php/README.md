@@ -48,8 +48,12 @@ Sans Pro : `402`. Épreuve payante : même règle que le téléchargement.
 #### Variables d'environnement (jamais dans git)
 
 ```
-GEMINI_API_KEY=...             # ou GOOGLE_API_KEY — fournisseur primaire
-GEMINI_MODEL=gemini-2.0-flash  # optionnel
+EZOATO_AI_PROVIDER=auto        # auto|groq|google|openai (mock = CI)
+GROQ_API_KEY=...               # texte auto prioritaire
+EZOATO_AI_GROQ_MODEL=openai/gpt-oss-20b
+GEMINI_API_KEY=...             # ou GOOGLE_API_KEY — Gemini / Gemma
+EZOATO_AI_GOOGLE_MODEL=gemini-2.0-flash   # ou gemma-3-27b-it
+EZOATO_AI_GOOGLE_VISION_MODEL=gemini-2.0-flash
 OPENAI_API_KEY=sk-...          # repli optionnel
 OPENAI_MODEL=gpt-4o-mini
 OPENAI_BASE_URL=https://api.openai.com/v1
@@ -57,7 +61,7 @@ EZOATO_AI_ALLOW_MOCK=1         # local/CI sans clé uniquement
 EZOATO_AI_PROVIDER=mock        # force le mock
 ```
 
-En **production / `dev` déployé** : `GEMINI_API_KEY` (ou `GOOGLE_API_KEY`) + `EZOATO_AI_ALLOW_MOCK=0`. Ne jamais committer la clé.
+En **production / `dev` déployé** : au moins une clé (Groq et/ou Google) + `EZOATO_AI_ALLOW_MOCK=0`. Ne jamais committer les clés. Vision photo : Google ou OpenAI ( Groq n’analyse pas les images ).
 
 Tests : `php tests/test-ai-security.php` (sans clé ni serveur).
 

@@ -56,10 +56,12 @@ return [
   ],
   /**
    * Ezoato AI — les clés LLM ne sont JAMAIS stockées ici.
-   * Primaire : GEMINI_API_KEY ou GOOGLE_API_KEY (Gemini).
-   * Repli : OPENAI_API_KEY (ou EZOATO_OPENAI_API_KEY).
+   * EZOATO_AI_PROVIDER=auto|groq|google|openai (défaut auto).
+   * Texte auto : GROQ_API_KEY → GEMINI_API_KEY/GOOGLE_API_KEY → OPENAI_API_KEY.
+   * Vision auto : Google multimodal → OpenAI ( Groq = texte seul ).
+   * Modèles : EZOATO_AI_GROQ_MODEL, EZOATO_AI_GOOGLE_MODEL, OPENAI_MODEL.
    * En local/CI sans clé : EZOATO_AI_ALLOW_MOCK=1 (générateur déterministe).
-   * En production / dev déployé : GEMINI_API_KEY + EZOATO_AI_ALLOW_MOCK=0.
+   * En production / dev déployé : EZOATO_AI_ALLOW_MOCK=0.
    */
   'ai' => [
     'rate_limit_per_hour' => 20,
