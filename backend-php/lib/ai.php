@@ -9,11 +9,14 @@
  */
 declare(strict_types=1);
 
-const AI_MAX_BODY_BYTES = 32000;
+const AI_MAX_BODY_BYTES = 48000;
 const AI_MAX_SOURCE_CHARS = 12000;
 const AI_MAX_QUESTION_CHARS = 2000;
 const AI_MAX_ANSWER_CHARS = 800;
+const AI_MAX_ESSAY_CHARS = 8000;
+const AI_MAX_IMAGE_BYTES = 2097152;
 const AI_MAX_HINT_ITEMS = 12;
+const AI_MAX_REVEAL_LEVEL = 2;
 const AI_MIN_QUESTIONS = 3;
 const AI_MAX_QUESTIONS = 8;
 const AI_RATE_WINDOW_SECONDS = 3600;
@@ -41,8 +44,8 @@ class AiUnavailableException extends RuntimeException
 
 function ai_disclaimer(): string
 {
-  return "Ceci n'est pas une note officielle. Les QCM et explications sont générés par une IA "
-    . "à titre de révision uniquement. Vérifiez toujours avec votre enseignant ou le corrigé officiel.";
+  return "Ceci n'est pas la correction officielle du jury. Les retours IA servent uniquement "
+    . "à l'entraînement. Vérifiez toujours avec votre enseignant.";
 }
 
 function ai_ethical_meta(): array
@@ -50,7 +53,58 @@ function ai_ethical_meta(): array
   return [
     'disclaimer' => ai_disclaimer(),
     'officialGrade' => false,
+    'juryCorrection' => false,
+    'verifyWithTeacher' => true,
   ];
+}
+
+function ai_premium_error(): AiValidationException
+{
+  return new AiValidationException('Abonnement Pro requis pour Ezoato AI', 402);
+}
+
+/**
+ * IA = fonctionnalité premium (abonnement Pro). Échec fermé si non injecté.
+ * @param array{skipPremium?:bool,hasPremium?:callable} $deps
+ */
+function ai_require_premium(array $user, array $deps = []): void
+{
+  if (!empty($deps['skipPremium'])) {
+    return;
+  }
+  $check = $deps['hasPremium'] ?? null;
+  if (is_callable($check) && $check((string)($user['id'] ?? ''))) {
+    return;
+  }
+  throw ai_premium_error();
+}
+
+/** @return list<string> */
+function ai_allowed_modes(): array
+{
+  return ['redaction', 'calcul', 'quiz'];
+}
+
+function ai_normalize_mode(?string $mode, ?string $matiere = null): string
+{
+  $mode = strtolower(trim((string)$mode));
+  if (in_array($mode, ai_allowed_modes(), true)) {
+    return $mode;
+  }
+  $m = function_exists('mb_strtolower')
+    ? mb_strtolower(trim((string)$matiere), 'UTF-8')
+    : strtolower(trim((string)$matiere));
+  foreach (['math', 'physique', 'chimie', 'svt', 'science de la vie', 'biologie', 'calcul'] as $needle) {
+    if ($m !== '' && str_contains($m, $needle)) {
+      return 'calcul';
+    }
+  }
+  foreach (['fran', 'philo', 'histoire', 'géo', 'geo', 'lettres', 'littér', 'anglais', 'dissert', 'comment'] as $needle) {
+    if ($m !== '' && str_contains($m, $needle)) {
+      return 'redaction';
+    }
+  }
+  return 'quiz';
 }
 
 function ai_uuid_valid(string $id): bool
@@ -735,6 +789,7 @@ function ai_offline_pack(array $quiz, array $meta = []): array
  */
 function ai_handle_quiz(array $user, array $in, array $deps = []): array
 {
+  ai_require_premium($user, $deps);
   $req = ai_validate_quiz_request($in);
   $ctx = [
     'epreuveId' => $req['epreuveId'],
@@ -791,12 +846,28 @@ function ai_handle_quiz(array $user, array $in, array $deps = []): array
   if ($req['includePack']) {
     $quiz['pack'] = ai_offline_pack($quiz);
   }
+
+  $session = ai_session_create($user, [
+    'mode' => 'quiz',
+    'epreuveId' => $quiz['epreuveId'] ?? null,
+    'matiere' => $ctx['matiere'] ?? null,
+    'quiz' => $quiz,
+    'index' => 0,
+    'answers' => [],
+  ], $deps);
+  $publicQuestions = array_map('ai_quiz_public_question', $quiz['questions']);
+  $quiz['sessionId'] = $session['id'];
+  $quiz['mode'] = 'quiz';
+  $quiz['progress'] = ai_quiz_progress($session);
+  $quiz['currentQuestion'] = $publicQuestions[0] ?? null;
+  $quiz['questions'] = $publicQuestions;
   return $quiz;
 }
 
 /** @param array{loadEpreuve?:callable,hasAccess?:callable,requiresPayment?:callable,llm?:?callable,skipRateLimit?:bool,rateLimitDir?:?string} $deps */
 function ai_handle_explain(array $user, array $in, array $deps = []): array
 {
+  ai_require_premium($user, $deps);
   $req = ai_validate_explain_request($in);
   if ($req['epreuveId']) {
     $load = $deps['loadEpreuve'] ?? null;
@@ -847,6 +918,7 @@ function ai_handle_explain(array $user, array $in, array $deps = []): array
 /** @param array{llm?:?callable,skipRateLimit?:bool,rateLimitDir?:?string} $deps */
 function ai_handle_hints(array $user, array $in, array $deps = []): array
 {
+  ai_require_premium($user, $deps);
   $req = ai_validate_hints_request($in);
   if (empty($deps['skipRateLimit'])) {
     ai_rate_limit_consume((string)($user['id'] ?? 'anon'), 'hints', null, $deps['rateLimitDir'] ?? null);
@@ -902,3 +974,5 @@ function ai_client_error_code(Throwable $e): int
   }
   return 503;
 }
+
+require_once __DIR__ . '/ai-flows.php';

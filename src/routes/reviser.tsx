@@ -25,7 +25,7 @@ function ReviserPage() {
       <PageHero
         badge={<PageHeroBadge icon={Sparkles}>Ezoato AI</PageHeroBadge>}
         title="Réviser avec l'IA"
-        description="Colle un extrait d'épreuve pour obtenir un QCM, des explications pas-à-pas et des indices. L'IA n'est pas un correcteur officiel : vérifie toujours avec ton enseignant."
+        description="Rédige une copie, révise un exercice de sciences sans te faire donner la solution, ou enchaîne un QCM. Fonction Pro — ce n'est pas la correction du jury : vérifie avec ton enseignant."
         primaryImage="hero"
         compact
       />

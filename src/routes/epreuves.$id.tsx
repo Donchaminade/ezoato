@@ -289,6 +289,7 @@ function EpreuveDetail() {
                 <RevisionWorkspace
                   epreuveId={data.id}
                   epreuveTitle={data.titre}
+                  matiere={data.matiere}
                   hasContentAccess={!!user && !!hasAccess}
                   lockedReason={!user ? "login" : !hasAccess ? "pay" : undefined}
                 />

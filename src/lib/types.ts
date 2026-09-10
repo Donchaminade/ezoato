@@ -624,6 +624,22 @@ export interface NotificationRulesMeta {
   message?: string;
 }
 
+export type AiMode = "redaction" | "calcul" | "quiz";
+
+export interface AiEthical {
+  disclaimer: string;
+  officialGrade: boolean;
+  juryCorrection?: boolean;
+  verifyWithTeacher?: boolean;
+}
+
+export interface AiEntitlement {
+  premium: boolean;
+  feature: string;
+  paywall: string;
+  message: string;
+}
+
 export interface AiQuizChoice {
   id: string;
   text: string;
@@ -633,8 +649,15 @@ export interface AiQuizQuestion {
   id: string;
   prompt: string;
   choices: AiQuizChoice[];
-  correctChoiceId: string;
+  correctChoiceId?: string;
   topic?: string | null;
+}
+
+export interface AiProgress {
+  index: number;
+  total: number;
+  answered: number;
+  correct: number;
 }
 
 export interface AiOfflinePack {
@@ -651,14 +674,81 @@ export interface AiOfflinePack {
 }
 
 export interface AiQuiz {
-  quizId: string;
+  quizId?: string;
+  sessionId?: string;
+  mode?: AiMode;
   epreuveId?: string | null;
   title: string;
   questions: AiQuizQuestion[];
+  currentQuestion?: AiQuizQuestion | null;
+  progress?: AiProgress;
   disclaimer: string;
   officialGrade: boolean;
+  juryCorrection?: boolean;
   provider?: string;
   pack?: AiOfflinePack;
+}
+
+export interface AiQuizAnswerResult extends AiEthical {
+  sessionId: string;
+  mode: "quiz";
+  questionId: string;
+  correct: boolean;
+  correctChoiceId?: string | null;
+  explanation?: AiExplanation | null;
+  nextQuestion?: AiQuizQuestion | null;
+  progress: AiProgress;
+  done: boolean;
+}
+
+export interface AiEssayFeedback extends AiEthical {
+  sessionId?: string | null;
+  mode: "redaction";
+  outline: string[];
+  arguments: string[];
+  style: string;
+  gaps: string[];
+  rewrite?: { guided: string; tips: string[] } | null;
+  provider?: string;
+}
+
+export interface AiCoach extends AiEthical {
+  sessionId?: string | null;
+  mode?: "calcul";
+  method: string;
+  formulas: string[];
+  example: { prompt: string; steps: string[]; result: string };
+  revealLevel: number;
+  hasMore: boolean;
+  workOnPaper: boolean;
+  solvesExercise: boolean;
+  provider?: string;
+}
+
+export interface AiJudge extends AiEthical {
+  sessionId?: string | null;
+  mode: "calcul";
+  verdict: "correct" | "incorrect" | "partial";
+  feedback: string;
+  hint?: string | null;
+  revealLevel: number;
+  coach?: AiCoach | null;
+  imageReceived?: boolean;
+  solvesExercise: boolean;
+  provider?: string;
+}
+
+export interface AiSessionStart extends AiEthical {
+  sessionId: string;
+  mode: AiMode;
+  question?: string;
+  matiere?: string | null;
+  workOnPaper?: boolean;
+  coach?: AiCoach;
+  currentQuestion?: AiQuizQuestion | null;
+  questions?: AiQuizQuestion[];
+  progress?: AiProgress;
+  title?: string;
 }
 
 export interface AiExplanation {

@@ -1,5 +1,5 @@
 <?php
-// backend-php/ai.php — Ezoato AI (QCM, explications, indices)
+// backend-php/ai.php — Ezoato AI (premium : rédaction, calcul, QCM)
 declare(strict_types=1);
 require __DIR__ . '/helpers.php';
 require __DIR__ . '/lib/ai.php';
@@ -24,7 +24,30 @@ function ai_require_json_post(string $method): void
   }
 }
 
-function ai_deps_from_db(): array
+function ai_is_multipart(): bool
+{
+  $ct = strtolower((string)($_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? ''));
+  return str_starts_with($ct, 'multipart/form-data');
+}
+
+function ai_request_body(): array
+{
+  if (ai_is_multipart()) {
+    return is_array($_POST) ? $_POST : [];
+  }
+  return ai_json_input();
+}
+
+function ai_user_is_premium(array $user): bool
+{
+  $role = (string)($user['role'] ?? '');
+  if (in_array($role, ['admin', 'gestionnaire'], true)) {
+    return true;
+  }
+  return user_has_active_subscription((string)$user['id']);
+}
+
+function ai_deps_from_db(array $user): array
 {
   return [
     'loadEpreuve' => static function (string $id): ?array {
@@ -41,39 +64,83 @@ function ai_deps_from_db(): array
     'requiresPayment' => static function (?array $row): bool {
       return is_array($row) && requires_payment($row);
     },
+    'hasPremium' => static function (string $userId) use ($user): bool {
+      if ($userId === ($user['id'] ?? '')) {
+        return ai_user_is_premium($user);
+      }
+      return user_has_active_subscription($userId);
+    },
   ];
 }
 
 try {
+  $user = require_user();
+  $deps = ai_deps_from_db($user);
+
+  if ($action === 'entitlement') {
+    if ($method !== 'GET') {
+      fail('Méthode non autorisée', 405);
+    }
+    json_out(ai_handle_entitlement($user, $deps));
+  }
+
+  if ($action === 'session' && $method === 'GET') {
+    $id = $_GET['id'] ?? $_GET['sessionId'] ?? '';
+    json_out(ai_handle_session_get($user, ['sessionId' => $id], $deps));
+  }
+
+  if ($action === 'session' && $method === 'POST') {
+    json_out(ai_handle_session_start($user, ai_request_body(), $deps));
+  }
+
   if ($action === 'quiz') {
     ai_require_json_post($method);
-    $user = require_user();
-    $in = ai_json_input();
-    json_out(ai_handle_quiz($user, $in, ai_deps_from_db()));
+    json_out(ai_handle_quiz($user, ai_json_input(), $deps));
+  }
+
+  if ($action === 'quiz_answer') {
+    ai_require_json_post($method);
+    json_out(ai_handle_quiz_answer($user, ai_json_input(), $deps));
   }
 
   if ($action === 'explain') {
     ai_require_json_post($method);
-    $user = require_user();
-    $in = ai_json_input();
-    json_out(ai_handle_explain($user, $in, ai_deps_from_db()));
+    json_out(ai_handle_explain($user, ai_json_input(), $deps));
   }
 
   if ($action === 'hints') {
     ai_require_json_post($method);
-    $user = require_user();
-    $in = ai_json_input();
-    json_out(ai_handle_hints($user, $in));
+    json_out(ai_handle_hints($user, ai_json_input(), $deps));
+  }
+
+  if ($action === 'essay') {
+    ai_require_json_post($method);
+    json_out(ai_handle_essay($user, ai_json_input(), $deps));
+  }
+
+  if ($action === 'coach') {
+    ai_require_json_post($method);
+    json_out(ai_handle_coach($user, ai_json_input(), $deps));
+  }
+
+  if ($action === 'judge') {
+    if ($method !== 'POST') {
+      fail('Méthode non autorisée', 405);
+    }
+    $in = ai_request_body();
+    if (ai_is_multipart()) {
+      $deps['uploadedImage'] = $_FILES['image'] ?? $_FILES['photo'] ?? null;
+    }
+    json_out(ai_handle_judge($user, $in, $deps));
   }
 
   if ($action === 'pack') {
     if ($method !== 'GET') {
       fail('Méthode non autorisée', 405);
     }
-    $user = require_user();
+    ai_require_premium($user, $deps);
     $epreuveId = ai_optional_uuid($_GET['epreuveId'] ?? $_GET['id'] ?? null, 'epreuveId');
     if ($epreuveId) {
-      $deps = ai_deps_from_db();
       $row = $deps['loadEpreuve']($epreuveId);
       $requires = $deps['requiresPayment']($row);
       $access = $deps['hasAccess']($user['id'], $epreuveId);
@@ -84,9 +151,9 @@ try {
 
   fail('Action IA inconnue', 404);
 } catch (Throwable $e) {
-  if (function_exists('fail') && ($e instanceof AiValidationException
+  if ($e instanceof AiValidationException
     || $e instanceof AiRateLimitException
-    || $e instanceof AiUnavailableException)) {
+    || $e instanceof AiUnavailableException) {
     ai_fail($e);
   }
   fail('Service IA temporairement indisponible', 503);

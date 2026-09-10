@@ -49,8 +49,11 @@ $_ENV['EZOATO_AI_ALLOW_MOCK'] = '1';
 unset($_ENV['OPENAI_API_KEY']);
 
 $rlDir = sys_get_temp_dir() . '/ezoato-ai-rl-test-' . bin2hex(random_bytes(4));
+$sessionDir = sys_get_temp_dir() . '/ezoato-ai-sess-test-' . bin2hex(random_bytes(4));
 $GLOBALS['ezoato_ai_rl_dir'] = $rlDir;
+$GLOBALS['ezoato_ai_session_dir'] = $sessionDir;
 @mkdir($rlDir, 0700, true);
+@mkdir($sessionDir, 0700, true);
 
 require dirname(__DIR__) . '/lib/ai.php';
 
@@ -79,6 +82,8 @@ $hiddenPaper = array_merge($freePaper, [
 $depsOk = [
   'skipRateLimit' => true,
   'rateLimitDir' => $rlDir,
+  'sessionDir' => $sessionDir,
+  'hasPremium' => static fn(string $id): bool => true,
   'loadEpreuve' => static function (string $id) use ($freePaper, $paidPaper, $hiddenPaper): ?array {
     foreach ([$freePaper, $paidPaper, $hiddenPaper] as $row) {
       if ($row['id'] === $id) {
@@ -254,6 +259,112 @@ $llmQuiz = ai_handle_quiz($user, ['sourceText' => $sampleText, 'questionCount' =
   },
 ]));
 assert_true(count($llmQuiz['questions']) === 3, 'fournisseur injecté (mock LLM)');
+assert_true(!isset($llmQuiz['questions'][0]['correctChoiceId']), 'QCM public sans bonne réponse');
+assert_true(!empty($llmQuiz['sessionId']), 'session QCM créée');
+
+echo "\n=== Premium ===\n";
+
+$noPrem = $depsOk;
+$noPrem['hasPremium'] = static fn(string $id): bool => false;
+expect_code(
+  fn() => ai_handle_quiz($user, ['sourceText' => $sampleText, 'questionCount' => 3], $noPrem),
+  402,
+  'QCM sans Pro'
+);
+expect_code(
+  fn() => ai_handle_essay($user, ['essay' => str_repeat('Argument. ', 20), 'question' => 'Sujet'], $noPrem),
+  402,
+  'rédaction sans Pro'
+);
+expect_code(
+  fn() => ai_handle_coach($user, ['question' => 'Calcule 2x+3=11'], $noPrem),
+  402,
+  'coach sans Pro'
+);
+$ent = ai_handle_entitlement($user, $noPrem);
+assert_true($ent['premium'] === false && $ent['paywall'] === 'abonnement', 'entitlement paywall abonnement');
+$entOk = ai_handle_entitlement($user, $depsOk);
+assert_true($entOk['premium'] === true, 'entitlement Pro');
+
+echo "\n=== Routage des modes ===\n";
+
+assert_true(ai_normalize_mode('redaction') === 'redaction', 'mode rédaction explicite');
+assert_true(ai_normalize_mode(null, 'Mathématiques') === 'calcul', 'maths → calcul');
+assert_true(ai_normalize_mode(null, 'Philosophie') === 'redaction', 'philo → rédaction');
+assert_true(ai_normalize_mode(null, 'SVT') === 'calcul', 'SVT → calcul');
+assert_true(ai_normalize_mode('nope', 'Autre') === 'quiz', 'défaut quiz');
+
+echo "\n=== Mode A — rédaction ===\n";
+
+expect_code(fn() => ai_handle_essay($user, ['essay' => ''], $depsOk), 400, 'copie vide');
+expect_code(fn() => ai_handle_essay($user, ['essay' => 12], $depsOk), 400, 'copie mauvais type');
+$essay = ai_handle_essay($user, [
+  'question' => 'La liberté consiste-t-elle à faire tout ce que l\'on veut ?',
+  'essay' => "La liberté n'est pas l'absence de règle. Dans le contrat social, la loi commune protège chacun. "
+    . "Cependant la contrainte injuste n'est pas une loi. Il faut donc distinguer autonomie et caprice.",
+  'rewriteParagraph' => "La liberté n'est pas l'absence de règle.",
+], $depsOk);
+assert_true(count($essay['outline']) >= 2, 'plan de copie');
+assert_true(count($essay['gaps']) >= 1, 'lacunes identifiées');
+assert_true($essay['juryCorrection'] === false && $essay['officialGrade'] === false, 'pas une note de jury');
+assert_true(isset($essay['rewrite']['guided']), 'réécriture guidée optionnelle');
+assert_true(str_contains($essay['disclaimer'], 'jury') || str_contains($essay['disclaimer'], 'enseignant'), 'garde-fou FR');
+
+echo "\n=== Mode B — calcul (pas de solution) ===\n";
+
+$coach = ai_handle_coach($user, ['question' => 'Un train part à 60 km/h pendant 2 h. Quelle distance ?'], $depsOk);
+assert_true($coach['solvesExercise'] === false && $coach['workOnPaper'] === true, 'travail sur papier, pas de solveur');
+assert_true($coach['method'] !== '', 'méthode présente');
+assert_true(!ai_looks_like_full_solution($coach['method']), 'méthode sans solution de l\'exercice');
+$blob = strtolower($coach['method'] . json_encode($coach['example'], JSON_UNESCAPED_UNICODE));
+assert_true(!str_contains($blob, '120 km'), 'n\'énonce pas le résultat de l\'exercice élève');
+
+expect_code(fn() => ai_handle_judge($user, ['question' => 'x+1=2'], $depsOk), 400, 'juge sans réponse ni image');
+expect_code(fn() => ai_validate_image_meta('application/pdf', 100), 415, 'image PDF rejetée');
+expect_code(fn() => ai_validate_image_meta('image/jpeg', AI_MAX_IMAGE_BYTES + 1), 413, 'image trop lourde');
+ai_validate_image_meta('image/png', 1024);
+assert_true(true, 'PNG 1 Ko accepté');
+
+$judge = ai_handle_judge($user, [
+  'question' => 'Un train part à 60 km/h pendant 2 h. Quelle distance ?',
+  'studentAnswer' => 'je sais pas',
+], $depsOk);
+assert_true(in_array($judge['verdict'], ['incorrect', 'partial'], true), 'verdict incorrect/partial');
+assert_true($judge['solvesExercise'] === false, 'juge ne dump pas la solution');
+assert_true(isset($judge['coach']['example']), 'nouvel exemple après erreur');
+assert_true(($judge['revealLevel'] ?? 0) >= 1, 'révélation progressive');
+assert_true(!str_contains(strtolower($judge['feedback'] . ($judge['hint'] ?? '')), '120 km'), 'pas le résultat final');
+
+$sessCalc = ai_handle_session_start($user, [
+  'mode' => 'calcul',
+  'question' => 'Calcule l\'aire d\'un carré de côté 5.',
+  'matiere' => 'Mathématiques',
+], $depsOk);
+assert_true($sessCalc['mode'] === 'calcul' && !empty($sessCalc['sessionId']), 'session calcul');
+assert_true(isset($sessCalc['coach']['formulas']), 'coach au démarrage calcul');
+
+echo "\n=== Boucle QCM persistée ===\n";
+
+$started = ai_handle_quiz($user, ['sourceText' => $sampleText, 'questionCount' => 3], $depsOk);
+$q1 = $started['currentQuestion']['id'] ?? $started['questions'][0]['id'];
+$ans = ai_handle_quiz_answer($user, [
+  'sessionId' => $started['sessionId'],
+  'questionId' => $q1,
+  'choiceId' => 'B',
+], $depsOk);
+assert_true(isset($ans['correct']) && is_bool($ans['correct']), 'feedback QCM');
+assert_true($ans['progress']['answered'] === 1, 'progression persistée');
+if (!$ans['correct']) {
+  assert_true(isset($ans['explanation']['steps']), 'explication si faux');
+}
+expect_code(fn() => ai_handle_quiz_answer($user, [
+  'sessionId' => $started['sessionId'],
+  'questionId' => $q1,
+  'choiceId' => 'A',
+], $depsOk), 409, 'double réponse refusée');
+
+$other = ['id' => 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'];
+expect_code(fn() => ai_handle_session_get($other, ['sessionId' => $started['sessionId']], $depsOk), 404, 'IDOR session autre user');
 
 echo "\n=== Rate-limit ===\n";
 
@@ -291,13 +402,13 @@ assert_true(!str_contains($srcCfg, 'sk-'), 'config.php sans secret LLM');
 echo "\n=== Fichier HTTP / routes (statique) ===\n";
 
 assert_true(str_contains($srcHttp, 'require_user()'), 'endpoints IA exigent JWT');
-assert_true(substr_count($srcHttp, 'require_user()') >= 4, 'quiz/explain/hints/pack protégés');
-assert_true(str_contains($srcHttp, 'ai_json_input()'), 'POST passent par ai_json_input');
+assert_true(str_contains($srcHttp, 'ai_user_is_premium') || str_contains($srcHttp, 'hasPremium'), 'gate premium');
+assert_true(str_contains($srcHttp, 'ai_handle_essay') && str_contains($srcHttp, 'ai_handle_judge'), 'routes rédaction + juge');
 assert_true(str_contains($srcHttp, 'Service IA temporairement indisponible'), 'message générique 503');
 assert_true(!str_contains($srcHttp, 'echo $e'), 'pas de dump d\'exception');
 
 $ht = file_get_contents(dirname(__DIR__) . '/.htaccess') ?: '';
-assert_true(str_contains($ht, 'ai/quiz') && str_contains($ht, 'ai/explain'), 'routes /ai exposées');
+assert_true(str_contains($ht, 'ai/essay') && str_contains($ht, 'ai/judge') && str_contains($ht, 'ai/quiz/answer'), 'routes /ai mode A/B/QCM');
 
 echo "\n=== Auth manquante (HTTP, skippable) ===\n";
 
@@ -349,5 +460,9 @@ foreach (glob($rlDir . '/*.json') ?: [] as $f) {
   @unlink($f);
 }
 @rmdir($rlDir);
+foreach (glob($sessionDir . '/*.json') ?: [] as $f) {
+  @unlink($f);
+}
+@rmdir($sessionDir);
 
 exit($failed > 0 ? 1 : 0);

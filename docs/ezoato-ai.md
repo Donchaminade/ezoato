@@ -1,47 +1,67 @@
 # Ezoato AI — révision interactive (MVP)
 
-Couche IA **en plus** de la bibliothèque d’épreuves : QCM, explications pas-à-pas, indices après erreurs. Ce n’est **pas** une note officielle.
+Couche **premium** (abonnement Pro : Flooz / T-Money) en plus de la bibliothèque d’épreuves. Ce n’est **pas** la correction officielle du jury.
 
-## Endpoints (backend PHP, JWT Bearer)
+## Modes
+
+| Mode | Usage |
+| --- | --- |
+| **A — Rédaction** | L’élève lit l’épreuve et écrit dans l’app. L’IA renvoie plan, arguments, style, manques. Réécriture guidée d’un paragraphe (optionnel). |
+| **B — Calcul / sciences** | Maths, physique-chimie, SVT. L’IA **n’est pas un solveur** : méthode, formules, exemple **similaire**. L’élève travaille **sur papier**, puis soumet sa réponse (texte et/ou photo). Verdict `correct` / `incorrect` / `partial`. Si faux : autre explication + nouvel exemple (révélation progressive). |
+| **QCM** | Question → réponse → feedback → explication si faux → suivante. Progression persistée (session). |
+
+## Premium
+
+Tous les endpoints `/ai/*` exigent un JWT **et** un abonnement Pro actif (`user_has_active_subscription`). Les rôles `admin` / `gestionnaire` passent pour la QA.
+
+Si un `epreuveId` payant est fourni, l’accès épreuve (paiement unitaire ou Pro) reste exigé — même règle que le téléchargement.
+
+`GET /ai/entitlement` → `{ premium, paywall: "abonnement", message }`.
+
+## Endpoints
 
 | Méthode | Chemin | Rôle |
 | --- | --- | --- |
-| `POST` | `/ai/quiz` | QCM à partir d’une épreuve validée et/ou d’un texte extrait |
-| `POST` | `/ai/explain` | Explication étape par étape quand l’élève est bloqué |
-| `POST` | `/ai/hints` | Indices de révision à partir des mauvaises réponses |
-| `GET` | `/ai/pack?epreuveId=` | Stub de pack JSON hors-ligne |
+| `GET` | `/ai/entitlement` | Flag Pro |
+| `POST` | `/ai/session` | Démarre une session (`mode`: `redaction` \| `calcul` \| `quiz`) |
+| `GET` | `/ai/session/{id}` | Reprend la progression |
+| `POST` | `/ai/essay` | Feedback de copie |
+| `POST` | `/ai/coach` | Méthode / formules / exemple voisin |
+| `POST` | `/ai/judge` | Verdict + nouvel indice (JSON ou `multipart` + `image`) |
+| `POST` | `/ai/quiz` | Démarre un QCM (sans bonnes réponses côté client) |
+| `POST` | `/ai/quiz/answer` | Répond à une question, persiste |
+| `POST` | `/ai/explain` | Explication (utilisée par la boucle QCM) |
+| `POST` | `/ai/hints` | Indices après erreurs |
+| `GET` | `/ai/pack` | Stub pack hors-ligne |
 
-AuthZ : utilisateur connecté. Pour un `epreuveId` payant, même règle que `GET /epreuves/{id}/download` (abonnement ou paiement).
+### Images (mode B)
+
+- JPG / PNG / WebP uniquement
+- 2 Mo max
+- Champ `image` en multipart, ou `imageBase64` + `imageMime` en JSON
+- Pas d’OCR complète en MVP : la photo est acceptée et signalée au juge
+
+Les sessions sont des fichiers JSON (répertoire temporaire). Pas encore de table MySQL.
 
 ## Configuration
 
-Secrets **uniquement** en variables d’environnement (pas dans `config.php` ni le dépôt) :
-
 ```bash
 OPENAI_API_KEY=sk-...
-# optionnel
 OPENAI_MODEL=gpt-4o-mini
 OPENAI_BASE_URL=https://api.openai.com/v1
+EZOATO_AI_ALLOW_MOCK=1   # local / CI sans clé
 ```
 
-Sans clé :
-
-- **CI / local** : `EZOATO_AI_ALLOW_MOCK=1` ou `EZOATO_AI_PROVIDER=mock`
-- **Prod** : l’API répond `503` « Service IA temporairement indisponible » (pas de stack, pas de secret)
+Prod sans clé : `503` générique.
 
 ## Tests
 
 ```bash
 php backend-php/tests/test-ai-security.php
+# ou : npm run test:ai
 ```
-
-Couvre : corps vide / trop gros / mauvais types, Content-Type, injection de prompt, IDOR (épreuve payante sans accès), rate-limit, messages d’erreur sûrs, chemin heureux avec fournisseur mock.
 
 ## UI
 
-- Page `/reviser` : coller un extrait et générer un QCM
-- Fiche épreuve : bloc « Réviser avec l’IA » (si connecté et accès au contenu)
-
-## Hors-ligne
-
-`includePack: true` sur `/ai/quiz` renvoie un JSON `revision-pack` téléchargeable. Les packs multimédia complets sont volontairement en stub.
+- `/reviser` et fiche épreuve : choix de mode + paywall Pro
+- Garde-fou affiché en permanence

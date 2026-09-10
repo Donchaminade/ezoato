@@ -11,8 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as PartenariatRouteImport } from './routes/partenariat'
 import { Route as ReviserRouteImport } from './routes/reviser'
+import { Route as PartenariatRouteImport } from './routes/partenariat'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as ContributorRouteImport } from './routes/contributor'
@@ -47,14 +47,14 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PartenariatRoute = PartenariatRouteImport.update({
-  id: '/partenariat',
-  path: '/partenariat',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ReviserRoute = ReviserRouteImport.update({
   id: '/reviser',
   path: '/reviser',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartenariatRoute = PartenariatRouteImport.update({
+  id: '/partenariat',
+  path: '/partenariat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -184,8 +184,8 @@ export interface FileRoutesByFullPath {
   '/contributor': typeof ContributorRoute
   '/docs': typeof DocsRoute
   '/faq': typeof FaqRoute
-  '/reviser': typeof ReviserRoute
   '/partenariat': typeof PartenariatRoute
+  '/reviser': typeof ReviserRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
   '/account/abonnement': typeof AccountAbonnementRoute
@@ -212,8 +212,8 @@ export interface FileRoutesByTo {
   '/contributor': typeof ContributorRoute
   '/docs': typeof DocsRoute
   '/faq': typeof FaqRoute
-  '/reviser': typeof ReviserRoute
   '/partenariat': typeof PartenariatRoute
+  '/reviser': typeof ReviserRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
   '/account/abonnement': typeof AccountAbonnementRoute
@@ -242,8 +242,8 @@ export interface FileRoutesById {
   '/contributor': typeof ContributorRoute
   '/docs': typeof DocsRoute
   '/faq': typeof FaqRoute
-  '/reviser': typeof ReviserRoute
   '/partenariat': typeof PartenariatRoute
+  '/reviser': typeof ReviserRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
   '/account/abonnement': typeof AccountAbonnementRoute
@@ -273,8 +273,8 @@ export interface FileRouteTypes {
     | '/contributor'
     | '/docs'
     | '/faq'
-    | '/reviser'
     | '/partenariat'
+    | '/reviser'
     | '/sitemap.xml'
     | '/submit'
     | '/account/abonnement'
@@ -301,8 +301,8 @@ export interface FileRouteTypes {
     | '/contributor'
     | '/docs'
     | '/faq'
-    | '/reviser'
     | '/partenariat'
+    | '/reviser'
     | '/sitemap.xml'
     | '/submit'
     | '/account/abonnement'
@@ -330,8 +330,8 @@ export interface FileRouteTypes {
     | '/contributor'
     | '/docs'
     | '/faq'
-    | '/reviser'
     | '/partenariat'
+    | '/reviser'
     | '/sitemap.xml'
     | '/submit'
     | '/account/abonnement'
@@ -360,8 +360,8 @@ export interface RootRouteChildren {
   ContributorRoute: typeof ContributorRoute
   DocsRoute: typeof DocsRoute
   FaqRoute: typeof FaqRoute
-  ReviserRoute: typeof ReviserRoute
   PartenariatRoute: typeof PartenariatRoute
+  ReviserRoute: typeof ReviserRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubmitRoute: typeof SubmitRoute
   EpreuvesIdRoute: typeof EpreuvesIdRoute
@@ -383,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reviser': {
+      id: '/reviser'
+      path: '/reviser'
+      fullPath: '/reviser'
+      preLoaderRoute: typeof ReviserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/partenariat': {
       id: '/partenariat'
       path: '/partenariat'
@@ -395,13 +402,6 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reviser': {
-      id: '/reviser'
-      path: '/reviser'
-      fullPath: '/reviser'
-      preLoaderRoute: typeof ReviserRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs': {
@@ -613,8 +613,8 @@ const rootRouteChildren: RootRouteChildren = {
   ContributorRoute: ContributorRoute,
   DocsRoute: DocsRoute,
   FaqRoute: FaqRoute,
-  ReviserRoute: ReviserRoute,
   PartenariatRoute: PartenariatRoute,
+  ReviserRoute: ReviserRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubmitRoute: SubmitRoute,
   EpreuvesIdRoute: EpreuvesIdRoute,

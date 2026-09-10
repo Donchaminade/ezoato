@@ -28,15 +28,21 @@ Définis `VITE_API_URL` côté front pour pointer vers cette API (ex: `https://a
 - `POST /admin/soumissions/{id}/valider` — copie le PDF en publié
 - `POST /admin/soumissions/{id}/rejeter` — { motif }
 
-### Ezoato AI (révision — JWT requis)
+### Ezoato AI (premium — JWT + abonnement Pro)
 
-- `POST /ai/quiz` — `{ epreuveId? | sourceText?, questionCount?, includePack? }` → QCM
-- `POST /ai/explain` — `{ question, choices?, studentAnswer?, sourceText?, epreuveId? }` → étapes
-- `POST /ai/hints` — `{ wrongAnswers: [{ question, chosen, correct? }] }` → indices
-- `GET  /ai/pack?epreuveId=` — stub de pack hors-ligne (JSON)
+Voir `docs/ezoato-ai.md`. Modes : rédaction, calcul/sciences (pas un solveur), QCM persisté.
 
-Limiteur : 20 requêtes / utilisateur / heure / action (fichier temporaire).
-Épreuve payante : même règle que le téléchargement (abonnement ou paiement).
+- `GET  /ai/entitlement`
+- `POST /ai/session` — `{ mode, epreuveId?, question?, sourceText?, matiere? }`
+- `GET  /ai/session/{id}`
+- `POST /ai/essay` — feedback de copie (pas une note de jury)
+- `POST /ai/coach` — méthode + formules + exemple similaire
+- `POST /ai/judge` — verdict ; `multipart` + `image` (JPG/PNG/WebP, 2 Mo)
+- `POST /ai/quiz` / `POST /ai/quiz/answer`
+- `POST /ai/explain` · `POST /ai/hints` · `GET /ai/pack`
+
+Limiteur : 20 requêtes / utilisateur / heure / action.
+Sans Pro : `402`. Épreuve payante : même règle que le téléchargement.
 
 #### Variables d'environnement (jamais dans git)
 
