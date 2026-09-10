@@ -28,6 +28,28 @@ Définis `VITE_API_URL` côté front pour pointer vers cette API (ex: `https://a
 - `POST /admin/soumissions/{id}/valider` — copie le PDF en publié
 - `POST /admin/soumissions/{id}/rejeter` — { motif }
 
+### Ezoato AI (révision — JWT requis)
+
+- `POST /ai/quiz` — `{ epreuveId? | sourceText?, questionCount?, includePack? }` → QCM
+- `POST /ai/explain` — `{ question, choices?, studentAnswer?, sourceText?, epreuveId? }` → étapes
+- `POST /ai/hints` — `{ wrongAnswers: [{ question, chosen, correct? }] }` → indices
+- `GET  /ai/pack?epreuveId=` — stub de pack hors-ligne (JSON)
+
+Limiteur : 20 requêtes / utilisateur / heure / action (fichier temporaire).
+Épreuve payante : même règle que le téléchargement (abonnement ou paiement).
+
+#### Variables d'environnement (jamais dans git)
+
+```
+OPENAI_API_KEY=sk-...          # ou EZOATO_OPENAI_API_KEY
+OPENAI_MODEL=gpt-4o-mini       # optionnel
+OPENAI_BASE_URL=https://api.openai.com/v1   # compatible OpenAI
+EZOATO_AI_ALLOW_MOCK=1         # local/CI sans clé (générateur déterministe)
+EZOATO_AI_PROVIDER=mock        # force le mock
+```
+
+Tests : `php tests/test-ai-security.php` (sans clé ni serveur).
+
 ## Cron — rappels abonnement
 
 Script CLI-only : `cron/abonnement_rappels.php` (refus HTTP 403).
@@ -45,6 +67,9 @@ Voir aussi le commentaire en tête de `cron/abonnement_rappels.php` (crontab Lin
 
 ## Sécurité
 - Toujours valider les inputs (type, longueur, MIME des images)
-- Rate-limit côté serveur web (mod_evasive / nginx)
+- Rate-limit côté serveur web (mod_evasive / nginx) + limiteur applicatif sur `/ai/*`
 - HTTPS obligatoire en prod
 - Les scripts `cron/*` doivent rester CLI-only (pas d’exposition HTTP)
+- Clé LLM uniquement via env (`OPENAI_API_KEY`) — jamais dans `config.php` / git
+- Le texte élève ou d'épreuve n'est jamais exécuté comme instruction système
+- Les réponses IA portent un avertissement : ce n'est pas une note officielle

@@ -624,6 +624,60 @@ export interface NotificationRulesMeta {
   message?: string;
 }
 
+export interface AiQuizChoice {
+  id: string;
+  text: string;
+}
+
+export interface AiQuizQuestion {
+  id: string;
+  prompt: string;
+  choices: AiQuizChoice[];
+  correctChoiceId: string;
+  topic?: string | null;
+}
+
+export interface AiOfflinePack {
+  version: number;
+  kind: string;
+  offline: boolean;
+  status: string;
+  generatedAt?: string;
+  epreuveId?: string | null;
+  quiz?: AiQuiz | null;
+  note?: string;
+  disclaimer: string;
+  officialGrade: boolean;
+}
+
+export interface AiQuiz {
+  quizId: string;
+  epreuveId?: string | null;
+  title: string;
+  questions: AiQuizQuestion[];
+  disclaimer: string;
+  officialGrade: boolean;
+  provider?: string;
+  pack?: AiOfflinePack;
+}
+
+export interface AiExplanation {
+  steps: string[];
+  summary: string;
+  verifyWithTeacher: boolean;
+  disclaimer: string;
+  officialGrade: boolean;
+  provider?: string;
+}
+
+export interface AiHints {
+  hints: string[];
+  focusTopics: string[];
+  disclaimer: string;
+  officialGrade: boolean;
+  provider?: string;
+}
+
 export interface UpdateProfilePayload {
   nom: string;
   email: string;

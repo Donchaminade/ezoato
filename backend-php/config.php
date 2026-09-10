@@ -54,6 +54,17 @@ return [
     'adresse' => 'Lomé, Togo',
     'horaires' => 'Lun–Ven, 8h–18h (GMT)',
   ],
+  /**
+   * Ezoato AI — la clé LLM n'est JAMAIS stockée ici.
+   * Définir OPENAI_API_KEY (ou EZOATO_OPENAI_API_KEY) dans l'environnement.
+   * En local/CI sans clé : EZOATO_AI_ALLOW_MOCK=1 (générateur déterministe).
+   */
+  'ai' => [
+    'rate_limit_per_hour' => 20,
+    'max_source_chars' => 12000,
+    'max_body_bytes' => 32000,
+    'model' => 'gpt-4o-mini',
+  ],
   /** Web Push (VAPID) — voir generate-vapid-keys.php en local */
   'push' => [
     'vapid_public_key' => null,

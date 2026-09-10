@@ -2,6 +2,10 @@
  * Client API EZOA-TO — toujours branché sur le backend PHP (VITE_API_URL).
  */
 import type {
+  AiExplanation,
+  AiHints,
+  AiOfflinePack,
+  AiQuiz,
   AdminReferentielUpdate,
   AdminReferentiels,
   AdminRetrait,
@@ -715,6 +719,36 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ token, password }),
     });
+  },
+
+  async generateAiQuiz(data: {
+    epreuveId?: string;
+    sourceText?: string;
+    questionCount?: number;
+    includePack?: boolean;
+  }): Promise<AiQuiz> {
+    return http("/ai/quiz", { method: "POST", body: JSON.stringify(data) });
+  },
+
+  async explainAiQuestion(data: {
+    question: string;
+    choices?: string[];
+    studentAnswer?: string;
+    sourceText?: string;
+    epreuveId?: string;
+  }): Promise<AiExplanation> {
+    return http("/ai/explain", { method: "POST", body: JSON.stringify(data) });
+  },
+
+  async getAiRevisionHints(data: {
+    wrongAnswers: { question: string; chosen: string; correct?: string }[];
+  }): Promise<AiHints> {
+    return http("/ai/hints", { method: "POST", body: JSON.stringify(data) });
+  },
+
+  async getAiOfflinePack(epreuveId?: string): Promise<AiOfflinePack> {
+    const qs = epreuveId ? `?epreuveId=${encodeURIComponent(epreuveId)}` : "";
+    return http(`/ai/pack${qs}`);
   },
 
   async submitEpreuve(formData: FormData): Promise<{ id: string; pdfPreviewUrl: string }> {
