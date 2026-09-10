@@ -172,7 +172,9 @@ export function RevisionWorkspace({
       {!user && (
         <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4 text-sm">
           <p className="font-medium">Connexion requise</p>
-          <p className="mt-1 text-muted-foreground">Les endpoints IA sont réservés aux comptes EZOA-TO.</p>
+          <p className="mt-1 text-muted-foreground">
+            Les endpoints IA sont réservés aux comptes EZOA-TO.
+          </p>
           <Button asChild className="mt-3" size="sm">
             <Link to="/auth/login">Se connecter</Link>
           </Button>
@@ -196,7 +198,7 @@ export function RevisionWorkspace({
         </div>
       )}
 
-      {user && hasContentAccess && (
+      {(!user || hasContentAccess) && (
         <div className="mt-5 space-y-3">
           <label className="block text-sm font-medium" htmlFor="ai-source">
             Extrait (optionnel si une épreuve est liée)
@@ -229,7 +231,11 @@ export function RevisionWorkspace({
               ))}
             </select>
             <Button onClick={generate} disabled={!canGenerate || busy !== null}>
-              {busy === "quiz" ? <Loader2 className="size-4 animate-spin" /> : <Brain className="size-4" />}
+              {busy === "quiz" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Brain className="size-4" />
+              )}
               Générer le QCM
             </Button>
             {quiz?.pack && (
@@ -271,14 +277,23 @@ export function RevisionWorkspace({
                         onClick={() => setAnswers((prev) => ({ ...prev, [q.id]: c.id }))}
                         className={cn(
                           "flex w-full items-start gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
-                          chosen === c.id ? "border-primary bg-primary/10" : "border-border hover:bg-muted/40",
-                          revealed && c.id === q.correctChoiceId && "border-emerald-500/50 bg-emerald-500/10",
-                          revealed && chosen === c.id && c.id !== q.correctChoiceId && "border-destructive/40 bg-destructive/5",
+                          chosen === c.id
+                            ? "border-primary bg-primary/10"
+                            : "border-border hover:bg-muted/40",
+                          revealed &&
+                            c.id === q.correctChoiceId &&
+                            "border-emerald-500/50 bg-emerald-500/10",
+                          revealed &&
+                            chosen === c.id &&
+                            c.id !== q.correctChoiceId &&
+                            "border-destructive/40 bg-destructive/5",
                         )}
                       >
                         <span className="font-semibold">{c.id}.</span>
                         <span>{c.text}</span>
-                        {revealed && c.id === q.correctChoiceId && <CheckCircle2 className="ml-auto size-4 text-emerald-600" />}
+                        {revealed && c.id === q.correctChoiceId && (
+                          <CheckCircle2 className="ml-auto size-4 text-emerald-600" />
+                        )}
                         {revealed && chosen === c.id && c.id !== q.correctChoiceId && (
                           <XCircle className="ml-auto size-4 text-destructive" />
                         )}
@@ -316,13 +331,25 @@ export function RevisionWorkspace({
               </Button>
             ) : (
               <>
-                <Button variant="outline" onClick={() => { setRevealed(false); setAnswers({}); setHints(null); setExplanation(null); }}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setRevealed(false);
+                    setAnswers({});
+                    setHints(null);
+                    setExplanation(null);
+                  }}
+                >
                   <RotateCcw className="size-4" />
                   Recommencer
                 </Button>
                 {wrong.length > 0 && (
                   <Button variant="secondary" onClick={askHints} disabled={busy !== null}>
-                    {busy === "hints" ? <Loader2 className="size-4 animate-spin" /> : <Lightbulb className="size-4" />}
+                    {busy === "hints" ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Lightbulb className="size-4" />
+                    )}
                     Indices de révision
                   </Button>
                 )}
