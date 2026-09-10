@@ -59,6 +59,7 @@ return [
    * Primaire : GEMINI_API_KEY ou GOOGLE_API_KEY (Gemini).
    * Repli : OPENAI_API_KEY (ou EZOATO_OPENAI_API_KEY).
    * En local/CI sans clé : EZOATO_AI_ALLOW_MOCK=1 (générateur déterministe).
+   * En production / dev déployé : GEMINI_API_KEY + EZOATO_AI_ALLOW_MOCK=0.
    */
   'ai' => [
     'rate_limit_per_hour' => 20,
