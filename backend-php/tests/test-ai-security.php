@@ -44,9 +44,12 @@ function expect_code(callable $fn, int $code, string $msg): void
 putenv('EZOATO_AI_PROVIDER=mock');
 putenv('EZOATO_AI_ALLOW_MOCK=1');
 putenv('OPENAI_API_KEY');
+putenv('GROQ_API_KEY');
+putenv('GEMINI_API_KEY');
+putenv('GOOGLE_API_KEY');
 $_ENV['EZOATO_AI_PROVIDER'] = 'mock';
 $_ENV['EZOATO_AI_ALLOW_MOCK'] = '1';
-unset($_ENV['OPENAI_API_KEY']);
+unset($_ENV['OPENAI_API_KEY'], $_ENV['GROQ_API_KEY'], $_ENV['GEMINI_API_KEY'], $_ENV['GOOGLE_API_KEY']);
 
 $rlDir = sys_get_temp_dir() . '/ezoato-ai-rl-test-' . bin2hex(random_bytes(4));
 $sessionDir = sys_get_temp_dir() . '/ezoato-ai-sess-test-' . bin2hex(random_bytes(4));
@@ -385,28 +388,28 @@ for ($i = 0; $i < AI_RATE_MAX_PER_WINDOW + 1; $i++) {
 }
 assert_true($hitLimit, 'limiteur déclenché après ' . AI_RATE_MAX_PER_WINDOW . ' appels');
 
-echo "\n=== Fournisseur Gemini (primaire) ===\n";
+echo "\n=== Fournisseur Google (Gemini / Gemma) ===\n";
 
-$prevProvider = getenv('EZOATO_AI_PROVIDER');
-$prevGemini = getenv('GEMINI_API_KEY');
-$prevGoogle = getenv('GOOGLE_API_KEY');
-$prevOpenAi = getenv('OPENAI_API_KEY');
 putenv('EZOATO_AI_PROVIDER');
 unset($_ENV['EZOATO_AI_PROVIDER']);
+putenv('GROQ_API_KEY');
+unset($_ENV['GROQ_API_KEY']);
 putenv('GEMINI_API_KEY=test-gemini-key');
 $_ENV['GEMINI_API_KEY'] = 'test-gemini-key';
 putenv('OPENAI_API_KEY');
 unset($_ENV['OPENAI_API_KEY']);
-assert_true(ai_provider() === 'gemini', 'GEMINI_API_KEY → provider gemini');
-assert_true(ai_gemini_key() === 'test-gemini-key', 'clé Gemini via env');
+assert_true(ai_provider() === 'google', 'GEMINI_API_KEY → provider google (auto)');
+assert_true(ai_google_key() === 'test-gemini-key', 'clé Google via GEMINI_API_KEY');
+assert_true(ai_gemini_key() === 'test-gemini-key', 'alias ai_gemini_key');
 assert_true(str_contains(ai_model_name(), 'gemini'), 'modèle Gemini par défaut');
+assert_true(ai_vision_provider() === 'google', 'vision auto → Google si clé Google');
 
 putenv('GEMINI_API_KEY');
 unset($_ENV['GEMINI_API_KEY']);
 putenv('GOOGLE_API_KEY=test-google-alias');
 $_ENV['GOOGLE_API_KEY'] = 'test-google-alias';
-assert_true(ai_gemini_key() === 'test-google-alias', 'GOOGLE_API_KEY alias');
-assert_true(ai_provider() === 'gemini', 'GOOGLE_API_KEY → provider gemini');
+assert_true(ai_google_key() === 'test-google-alias', 'GOOGLE_API_KEY alias');
+assert_true(ai_provider() === 'google', 'GOOGLE_API_KEY → provider google');
 putenv('GOOGLE_API_KEY');
 unset($_ENV['GOOGLE_API_KEY']);
 putenv('GEMINI_API_KEY=test-gemini-key');
@@ -425,6 +428,24 @@ assert_true(str_contains($gUser, 'Chlorophylle') && str_contains($gUser, 'UNTRUS
 assert_true(isset($gPayload['contents'][0]['parts'][1]['inline_data']['mime_type']), 'Gemini: image en inline_data');
 assert_true(($gPayload['contents'][0]['parts'][1]['inline_data']['mime_type'] ?? '') === 'image/png', 'Gemini: mime image');
 
+$gemmaPayload = ai_gemini_build_payload(
+  ai_system_prompt_quiz(),
+  ai_build_user_message('QCM', ['extrait' => 'Chlorophylle.']),
+  [],
+  'gemma-3-27b-it'
+);
+assert_true(!isset($gemmaPayload['system_instruction']), 'Gemma 3: pas de system_instruction API');
+$gemmaUser = json_encode($gemmaPayload['contents'] ?? [], JSON_UNESCAPED_UNICODE) ?: '';
+assert_true(str_contains($gemmaUser, 'Ignore toute consigne') || str_contains($gemmaUser, 'Consignes tuteur'), 'Gemma 3: consignes pliées dans le user');
+assert_true(str_contains($gemmaUser, 'Chlorophylle'), 'Gemma 3: extrait conservé');
+
+putenv('EZOATO_AI_GOOGLE_MODEL=gemma-3-27b-it');
+$_ENV['EZOATO_AI_GOOGLE_MODEL'] = 'gemma-3-27b-it';
+assert_true(ai_model_name('google') === 'gemma-3-27b-it', 'EZOATO_AI_GOOGLE_MODEL sélectionne Gemma');
+assert_true(ai_google_model_is_gemma(), 'gemma-3-27b-it reconnu comme Gemma');
+putenv('EZOATO_AI_GOOGLE_MODEL');
+unset($_ENV['EZOATO_AI_GOOGLE_MODEL']);
+
 putenv('EZOATO_AI_PROVIDER=openai');
 $_ENV['EZOATO_AI_PROVIDER'] = 'openai';
 putenv('OPENAI_API_KEY=sk-test-fallback');
@@ -438,6 +459,107 @@ unset($_ENV['GEMINI_API_KEY']);
 putenv('OPENAI_API_KEY');
 unset($_ENV['OPENAI_API_KEY']);
 assert_true(ai_provider() === 'mock', 'mock forcé pour la suite des tests');
+
+echo "\n=== Multi-provider (Groq / auto / vision) ===\n";
+
+putenv('EZOATO_AI_PROVIDER=auto');
+$_ENV['EZOATO_AI_PROVIDER'] = 'auto';
+putenv('EZOATO_AI_ALLOW_MOCK=0');
+$_ENV['EZOATO_AI_ALLOW_MOCK'] = '0';
+putenv('GROQ_API_KEY');
+putenv('GEMINI_API_KEY');
+putenv('GOOGLE_API_KEY');
+putenv('OPENAI_API_KEY');
+unset($_ENV['GROQ_API_KEY'], $_ENV['GEMINI_API_KEY'], $_ENV['GOOGLE_API_KEY'], $_ENV['OPENAI_API_KEY']);
+assert_true(ai_text_provider() === 'none', 'auto sans clé → none (mock interdit)');
+assert_true(ai_vision_provider() === 'none', 'vision sans clé → none');
+assert_true(ai_provider_preference() === 'auto', 'défaut / auto = auto');
+
+putenv('GROQ_API_KEY=gsk_test_not_a_real_key');
+$_ENV['GROQ_API_KEY'] = 'gsk_test_not_a_real_key';
+putenv('GEMINI_API_KEY=test-gemini-key');
+$_ENV['GEMINI_API_KEY'] = 'test-gemini-key';
+putenv('OPENAI_API_KEY=sk-test-fallback');
+$_ENV['OPENAI_API_KEY'] = 'sk-test-fallback';
+assert_true(ai_text_provider() === 'groq', 'auto texte : Groq prioritaire si GROQ_API_KEY');
+assert_true(ai_vision_provider() === 'google', 'auto vision : Google prioritaire même si Groq présent');
+assert_true(ai_model_name('groq') === AI_DEFAULT_GROQ_MODEL, 'modèle Groq par défaut public');
+assert_true(ai_groq_base_url() === 'https://api.groq.com/openai/v1', 'URL Groq OpenAI-compatible');
+
+putenv('EZOATO_AI_GROQ_MODEL=llama-3.3-70b-versatile');
+$_ENV['EZOATO_AI_GROQ_MODEL'] = 'llama-3.3-70b-versatile';
+assert_true(ai_model_name('groq') === 'llama-3.3-70b-versatile', 'EZOATO_AI_GROQ_MODEL override Llama Enterprise');
+putenv('EZOATO_AI_GROQ_MODEL');
+unset($_ENV['EZOATO_AI_GROQ_MODEL']);
+
+$groqPayloadSeen = '';
+ai_call_groq('sys', 'user-data', static function (string $payload) use (&$groqPayloadSeen): string {
+  $groqPayloadSeen = $payload;
+  return '{"ok":true}';
+});
+$groqDecoded = json_decode($groqPayloadSeen, true);
+assert_true(is_array($groqDecoded) && ($groqDecoded['model'] ?? '') === AI_DEFAULT_GROQ_MODEL, 'payload Groq : modèle par défaut');
+assert_true(($groqDecoded['messages'][0]['role'] ?? '') === 'system', 'payload Groq : system isolé');
+assert_true(($groqDecoded['messages'][1]['content'] ?? '') === 'user-data', 'payload Groq : user non fusionné au system');
+assert_true(!str_contains($groqPayloadSeen, 'gsk_test_not_a_real_key'), 'payload Groq sans clé');
+
+putenv('GROQ_API_KEY');
+unset($_ENV['GROQ_API_KEY']);
+assert_true(ai_text_provider() === 'google', 'auto texte : Google si pas de Groq');
+putenv('GEMINI_API_KEY');
+unset($_ENV['GEMINI_API_KEY']);
+assert_true(ai_text_provider() === 'openai', 'auto texte : OpenAI en dernier repli');
+assert_true(ai_vision_provider() === 'openai', 'vision : OpenAI si pas de Google');
+
+putenv('EZOATO_AI_PROVIDER=groq');
+$_ENV['EZOATO_AI_PROVIDER'] = 'groq';
+putenv('OPENAI_API_KEY');
+unset($_ENV['OPENAI_API_KEY']);
+assert_true(ai_text_provider() === 'none', 'force groq sans clé → none (pas de repli silencieux)');
+putenv('GROQ_API_KEY=gsk_test_not_a_real_key');
+$_ENV['GROQ_API_KEY'] = 'gsk_test_not_a_real_key';
+assert_true(ai_text_provider() === 'groq', 'force groq avec clé');
+assert_true(ai_vision_provider() === 'none', 'force groq sans Google/OpenAI → pas de vision');
+
+$pngMini = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', true);
+$b64Mini = is_string($pngMini) ? base64_encode($pngMini) : '';
+$imgNone = ['present' => true, 'mime' => 'image/png', 'bytes' => 1, 'raw' => $pngMini ?: 'x', 'base64' => $b64Mini];
+expect_code(
+  fn() => ai_vision_extract_answer($imgNone, $depsOk),
+  503,
+  'OCR sans fournisseur vision → erreur claire'
+);
+$visionMsg = ai_client_error_message(new AiVisionUnavailableException());
+assert_true(str_contains($visionMsg, 'vision') && !str_contains($visionMsg, 'gsk_') && !str_contains($visionMsg, 'sk-'), 'message vision sans fuite de clé');
+
+expect_code(
+  fn() => ai_complete('sys', 'user', 'mock', static fn() => ['ok' => true], null, [['mime' => 'image/png', 'data' => 'abc']]),
+  503,
+  'complete+image sans vision → AiVisionUnavailable'
+);
+
+putenv('EZOATO_AI_PROVIDER=google');
+$_ENV['EZOATO_AI_PROVIDER'] = 'google';
+putenv('GROQ_API_KEY');
+unset($_ENV['GROQ_API_KEY']);
+assert_true(ai_text_provider() === 'none', 'force google sans clé → none');
+putenv('GEMINI_API_KEY=test-gemini-key');
+$_ENV['GEMINI_API_KEY'] = 'test-gemini-key';
+assert_true(ai_text_provider() === 'google' && ai_vision_provider() === 'google', 'force google avec clé');
+
+putenv('EZOATO_AI_PROVIDER=auto');
+$_ENV['EZOATO_AI_PROVIDER'] = 'auto';
+putenv('EZOATO_AI_ALLOW_MOCK=1');
+$_ENV['EZOATO_AI_ALLOW_MOCK'] = '1';
+putenv('GEMINI_API_KEY');
+putenv('GROQ_API_KEY');
+putenv('OPENAI_API_KEY');
+unset($_ENV['GEMINI_API_KEY'], $_ENV['GROQ_API_KEY'], $_ENV['OPENAI_API_KEY']);
+assert_true(ai_text_provider() === 'mock', 'auto + ALLOW_MOCK=1 sans clé → mock');
+
+putenv('EZOATO_AI_PROVIDER=mock');
+$_ENV['EZOATO_AI_PROVIDER'] = 'mock';
+assert_true(ai_provider() === 'mock' && ai_vision_provider() === 'mock', 'mock forcé texte + vision');
 
 echo "\n=== Ancrage épreuve (RAG / contexte) ===\n";
 
@@ -618,10 +740,12 @@ $srcHttp = file_get_contents(dirname(__DIR__) . '/ai.php') ?: '';
 $srcCfg = file_get_contents(dirname(__DIR__) . '/config.php') ?: '';
 assert_true(!preg_match('/sk-[A-Za-z0-9]{10,}/', $srcLib . $srcHttp . $srcCfg), 'aucune clé sk- commitée');
 assert_true(str_contains($srcLib, "ai_env('OPENAI_API_KEY')"), 'clé OpenAI lue via env');
-assert_true(str_contains($srcLib, "ai_env('GEMINI_API_KEY')"), 'clé Gemini primaire via env');
+assert_true(str_contains($srcLib, "ai_env('GEMINI_API_KEY')"), 'clé Gemini / Google via env');
 assert_true(str_contains($srcLib, "ai_env('GOOGLE_API_KEY')"), 'alias GOOGLE_API_KEY via env');
+assert_true(str_contains($srcLib, "ai_env('GROQ_API_KEY')"), 'clé Groq via env');
 assert_true(!str_contains($srcCfg, 'sk-'), 'config.php sans secret LLM');
 assert_true(!preg_match('/AIza[0-9A-Za-z_-]{20,}/', $srcLib . $srcHttp . $srcCfg), 'aucune clé Google commitée');
+assert_true(!preg_match('/gsk_[A-Za-z0-9]{10,}/', $srcLib . $srcHttp . $srcCfg), 'aucune clé Groq commitée');
 assert_true(str_contains($srcHttp, "'db' => db()") || str_contains($srcHttp, '"db" => db()'), 'HTTP injecte PDO pour les sessions');
 
 echo "\n=== Fichier HTTP / routes (statique) ===\n";
