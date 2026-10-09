@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
@@ -733,6 +735,88 @@ class ApiClient {
     } on DioException catch (e) {
       throw _wrap(e);
     }
+  }
+
+  Future<Map<String, dynamic>> getReglagesCorrectionPublics() async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>('/corrections/reglages-publics');
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return data;
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getMesDemandesCorrection() async {
+    try {
+      final res = await _dio.get<dynamic>('/corrections/mes-demandes');
+      return _asMapList(res.data);
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> getDemandeCorrection(String id) async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>('/corrections/demandes/$id');
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return data;
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> creerDemandeCorrection({
+    required String epreuveId,
+    required List<String> exercices,
+    required String blocage,
+    String? audioPath,
+  }) async {
+    try {
+      final form = FormData.fromMap({
+        'epreuveId': epreuveId,
+        'exercices': jsonEncode(exercices),
+        'blocage': blocage,
+        if (audioPath != null && audioPath.isNotEmpty)
+          'audio': await MultipartFile.fromFile(audioPath),
+      });
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/corrections/demandes',
+        data: form,
+        options: Options(contentType: 'multipart/form-data'),
+      );
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return data;
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  Future<String> repondreQcmCorrection({
+    required String demandeId,
+    required String questionId,
+    required int choice,
+  }) async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/corrections/demandes/$demandeId/qcm',
+        data: {'questionId': questionId, 'choice': choice},
+      );
+      return res.data?['feedback'] as String? ?? 'Réponse enregistrée';
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  List<Map<String, dynamic>> _asMapList(dynamic data) {
+    if (data is! List) throw ApiException('Réponse vide');
+    return data
+        .whereType<Map>()
+        .map((row) => Map<String, dynamic>.from(row))
+        .toList();
   }
 }
 

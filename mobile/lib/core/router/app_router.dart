@@ -26,6 +26,9 @@ import '../../features/epreuves/presentation/home_screen.dart';
 import '../../features/epreuves/presentation/main_shell_screen.dart';
 import '../../features/favorites/presentation/favoris_screen.dart';
 import '../../features/offline/presentation/offline_library_screen.dart';
+import '../../features/corrections/presentation/correction_detail_screen.dart';
+import '../../features/corrections/presentation/correction_nouvelle_screen.dart';
+import '../../features/corrections/presentation/corrections_list_screen.dart';
 import '../../features/submit/presentation/submit_screen.dart';
 import '../onboarding/onboarding_provider.dart';
 
@@ -208,6 +211,24 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/account/notifications',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, __) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/corrections',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, __) => const CorrectionsListScreen(),
+      ),
+      GoRoute(
+        path: '/corrections/nouvelle',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) => CorrectionNouvelleScreen(
+          epreuveId: state.uri.queryParameters['epreuve'],
+        ),
+      ),
+      GoRoute(
+        path: '/corrections/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) =>
+            CorrectionDetailScreen(id: state.pathParameters['id']!),
       ),
     ],
   );

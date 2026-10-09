@@ -36,6 +36,14 @@ import { Route as AccountFavorisRouteImport } from './routes/account.favoris'
 import { Route as AccountBibliothequeRouteImport } from './routes/account.bibliotheque'
 import { Route as AccountAbonnementRouteImport } from './routes/account.abonnement'
 import { Route as AccountSoumissionsIdRouteImport } from './routes/account.soumissions_.$id'
+import { Route as AdminCorrectionsRouteImport } from './routes/admin_.corrections'
+import { Route as CorrectionsRouteImport } from './routes/corrections'
+import { Route as CorrectionsIndexRouteImport } from './routes/corrections.index'
+import { Route as CorrectionsNouvelleRouteImport } from './routes/corrections.nouvelle'
+import { Route as CorrectionsIdRouteImport } from './routes/corrections.$id'
+import { Route as CorrectionsCandidatureRouteImport } from './routes/corrections.candidature'
+import { Route as CorrectionsCorrecteurRouteImport } from './routes/corrections.correcteur'
+import { Route as CorrectionsValidateurRouteImport } from './routes/corrections.validateur'
 
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
@@ -173,6 +181,47 @@ const AccountSoumissionsIdRoute = AccountSoumissionsIdRouteImport.update({
   getParentRoute: () => AccountRoute,
 } as any)
 
+const AdminCorrectionsRoute = AdminCorrectionsRouteImport.update({
+  id: '/admin_/corrections',
+  path: '/admin/corrections',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorrectionsRoute = CorrectionsRouteImport.update({
+  id: '/corrections',
+  path: '/corrections',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorrectionsIndexRoute = CorrectionsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsNouvelleRoute = CorrectionsNouvelleRouteImport.update({
+  id: '/nouvelle',
+  path: '/nouvelle',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsCandidatureRoute = CorrectionsCandidatureRouteImport.update({
+  id: '/candidature',
+  path: '/candidature',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsCorrecteurRoute = CorrectionsCorrecteurRouteImport.update({
+  id: '/correcteur',
+  path: '/correcteur',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsValidateurRoute = CorrectionsValidateurRouteImport.update({
+  id: '/validateur',
+  path: '/validateur',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsIdRoute = CorrectionsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
@@ -201,6 +250,14 @@ export interface FileRoutesByFullPath {
   '/epreuves/$id': typeof EpreuvesIdRoute
   '/account/': typeof AccountIndexRoute
   '/account/soumissions/$id': typeof AccountSoumissionsIdRoute
+  '/admin/corrections': typeof AdminCorrectionsRoute
+  '/corrections': typeof CorrectionsRouteWithChildren
+  '/corrections/': typeof CorrectionsIndexRoute
+  '/corrections/nouvelle': typeof CorrectionsNouvelleRoute
+  '/corrections/candidature': typeof CorrectionsCandidatureRoute
+  '/corrections/correcteur': typeof CorrectionsCorrecteurRoute
+  '/corrections/validateur': typeof CorrectionsValidateurRoute
+  '/corrections/$id': typeof CorrectionsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -229,6 +286,13 @@ export interface FileRoutesByTo {
   '/epreuves/$id': typeof EpreuvesIdRoute
   '/account': typeof AccountIndexRoute
   '/account/soumissions/$id': typeof AccountSoumissionsIdRoute
+  '/admin/corrections': typeof AdminCorrectionsRoute
+  '/corrections': typeof CorrectionsIndexRoute
+  '/corrections/nouvelle': typeof CorrectionsNouvelleRoute
+  '/corrections/candidature': typeof CorrectionsCandidatureRoute
+  '/corrections/correcteur': typeof CorrectionsCorrecteurRoute
+  '/corrections/validateur': typeof CorrectionsValidateurRoute
+  '/corrections/$id': typeof CorrectionsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -259,6 +323,14 @@ export interface FileRoutesById {
   '/epreuves/$id': typeof EpreuvesIdRoute
   '/account/': typeof AccountIndexRoute
   '/account/soumissions_/$id': typeof AccountSoumissionsIdRoute
+  '/admin_/corrections': typeof AdminCorrectionsRoute
+  '/corrections': typeof CorrectionsRouteWithChildren
+  '/corrections/': typeof CorrectionsIndexRoute
+  '/corrections/nouvelle': typeof CorrectionsNouvelleRoute
+  '/corrections/candidature': typeof CorrectionsCandidatureRoute
+  '/corrections/correcteur': typeof CorrectionsCorrecteurRoute
+  '/corrections/validateur': typeof CorrectionsValidateurRoute
+  '/corrections/$id': typeof CorrectionsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -290,6 +362,14 @@ export interface FileRouteTypes {
     | '/epreuves/$id'
     | '/account/'
     | '/account/soumissions/$id'
+    | '/admin/corrections'
+    | '/corrections'
+    | '/corrections/'
+    | '/corrections/nouvelle'
+    | '/corrections/candidature'
+    | '/corrections/correcteur'
+    | '/corrections/validateur'
+    | '/corrections/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -318,6 +398,13 @@ export interface FileRouteTypes {
     | '/epreuves/$id'
     | '/account'
     | '/account/soumissions/$id'
+    | '/admin/corrections'
+    | '/corrections'
+    | '/corrections/nouvelle'
+    | '/corrections/candidature'
+    | '/corrections/correcteur'
+    | '/corrections/validateur'
+    | '/corrections/$id'
   id:
     | '__root__'
     | '/'
@@ -347,6 +434,14 @@ export interface FileRouteTypes {
     | '/epreuves/$id'
     | '/account/'
     | '/account/soumissions_/$id'
+    | '/admin_/corrections'
+    | '/corrections'
+    | '/corrections/'
+    | '/corrections/nouvelle'
+    | '/corrections/candidature'
+    | '/corrections/correcteur'
+    | '/corrections/validateur'
+    | '/corrections/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -365,6 +460,8 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubmitRoute: typeof SubmitRoute
   EpreuvesIdRoute: typeof EpreuvesIdRoute
+  AdminCorrectionsRoute: typeof AdminCorrectionsRoute
+  CorrectionsRoute: typeof CorrectionsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -558,6 +655,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountSoumissionsIdRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/admin_/corrections': {
+      id: '/admin_/corrections'
+      path: '/admin/corrections'
+      fullPath: '/admin/corrections'
+      preLoaderRoute: typeof AdminCorrectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/corrections': {
+      id: '/corrections'
+      path: '/corrections'
+      fullPath: '/corrections'
+      preLoaderRoute: typeof CorrectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/corrections/': {
+      id: '/corrections/'
+      path: '/'
+      fullPath: '/corrections/'
+      preLoaderRoute: typeof CorrectionsIndexRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/nouvelle': {
+      id: '/corrections/nouvelle'
+      path: '/nouvelle'
+      fullPath: '/corrections/nouvelle'
+      preLoaderRoute: typeof CorrectionsNouvelleRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/candidature': {
+      id: '/corrections/candidature'
+      path: '/candidature'
+      fullPath: '/corrections/candidature'
+      preLoaderRoute: typeof CorrectionsCandidatureRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/correcteur': {
+      id: '/corrections/correcteur'
+      path: '/correcteur'
+      fullPath: '/corrections/correcteur'
+      preLoaderRoute: typeof CorrectionsCorrecteurRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/validateur': {
+      id: '/corrections/validateur'
+      path: '/validateur'
+      fullPath: '/corrections/validateur'
+      preLoaderRoute: typeof CorrectionsValidateurRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/$id': {
+      id: '/corrections/$id'
+      path: '/$id'
+      fullPath: '/corrections/$id'
+      preLoaderRoute: typeof CorrectionsIdRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
   }
 }
 
@@ -602,6 +755,27 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface CorrectionsRouteChildren {
+  CorrectionsIndexRoute: typeof CorrectionsIndexRoute
+  CorrectionsNouvelleRoute: typeof CorrectionsNouvelleRoute
+  CorrectionsCandidatureRoute: typeof CorrectionsCandidatureRoute
+  CorrectionsCorrecteurRoute: typeof CorrectionsCorrecteurRoute
+  CorrectionsValidateurRoute: typeof CorrectionsValidateurRoute
+  CorrectionsIdRoute: typeof CorrectionsIdRoute
+}
+
+const CorrectionsRouteChildren: CorrectionsRouteChildren = {
+  CorrectionsIndexRoute: CorrectionsIndexRoute,
+  CorrectionsNouvelleRoute: CorrectionsNouvelleRoute,
+  CorrectionsCandidatureRoute: CorrectionsCandidatureRoute,
+  CorrectionsCorrecteurRoute: CorrectionsCorrecteurRoute,
+  CorrectionsValidateurRoute: CorrectionsValidateurRoute,
+  CorrectionsIdRoute: CorrectionsIdRoute,
+}
+
+const CorrectionsRouteWithChildren =
+  CorrectionsRoute._addFileChildren(CorrectionsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -618,6 +792,8 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubmitRoute: SubmitRoute,
   EpreuvesIdRoute: EpreuvesIdRoute,
+  AdminCorrectionsRoute: AdminCorrectionsRoute,
+  CorrectionsRoute: CorrectionsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

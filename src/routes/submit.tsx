@@ -68,6 +68,7 @@ function SubmitPage() {
   const [nomEpreuve, setNomEpreuve] = useState("");
   const [organisme, setOrganisme] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [attesteEnonce, setAttesteEnonce] = useState(false);
 
   const { data: meta } = useQuery({
     queryKey: ["meta"],
@@ -132,6 +133,9 @@ function SubmitPage() {
     if (files.length === 0) return toast.error("Ajoute au moins une image ou un fichier PDF.");
     if (files.some(isPdfFile) && files.length > 1) {
       return toast.error("Un seul fichier PDF à la fois.");
+    }
+    if (!attesteEnonce) {
+      return toast.error("Coche l'attestation : seul un énoncé, sans corrigé, peut être envoyé.");
     }
 
     if (niveau === "college" || niveau === "lycee") {
@@ -214,6 +218,7 @@ function SubmitPage() {
       } else {
         imageFiles.forEach((f) => fd.append("images[]", f));
       }
+      fd.append("attestation_enonce", "1");
       await api.submitEpreuve(fd);
       toast.success(
         pdfFile
@@ -528,7 +533,21 @@ function SubmitPage() {
               </FormField>
             </div>
 
-            <Button type="submit" size="lg" className="h-12 w-full rounded-xl text-base" disabled={submitting}>
+            <label className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-4 text-sm leading-relaxed">
+              <input
+                type="checkbox"
+                className="mt-1 size-4 accent-primary"
+                checked={attesteEnonce}
+                onChange={(e) => setAttesteEnonce(e.target.checked)}
+                required
+              />
+              <span>
+                J'atteste que ce fichier est un énoncé seul. Je n'envoie pas une épreuve complète accompagnée de son corrigé.
+                Si le contenu ressemble à un corrigé, l'administration est alertée et décide.
+              </span>
+            </label>
+
+            <Button type="submit" size="lg" className="h-12 w-full rounded-xl text-base" disabled={submitting || !attesteEnonce}>
               {submitting
                 ? pdfFile ? "Envoi du PDF…" : "Conversion en PDF…"
                 : pdfFile

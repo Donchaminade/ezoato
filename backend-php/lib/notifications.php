@@ -12,6 +12,8 @@ function notification_declencheurs(): array {
     'retrait_demande' => 'Demande de retrait (modération)',
     'paiement_confirme' => 'Paiement confirmé (acheteur)',
     'compte_cree' => 'Bienvenue — compte créé',
+    'correction_triage' => 'Demande de correction triée (administration)',
+    'correction_candidature' => 'Candidature correcteur (administration)',
   ];
 }
 
