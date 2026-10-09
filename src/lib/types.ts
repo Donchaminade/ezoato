@@ -73,6 +73,8 @@ export interface Epreuve {
   requiresPayment?: boolean;
   requiresPro?: boolean;
   accessTier?: "pro" | "quota";
+  /** officiel = examens nationaux et concours ; quota = devoirs et compositions. */
+  categorieContenu?: "officiel" | "quota" | "corrige";
   prixFcfa?: number | null;
   epreuveParentId?: string;
   epreuveParent?: { id: string; titre: string };

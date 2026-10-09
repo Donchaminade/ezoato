@@ -19,7 +19,8 @@ $full = isset($_GET['full']) && $_GET['full'] !== '0' && $_GET['full'] !== '';
 $page = max(1, min(20, (int)($_GET['page'] ?? 1)));
 
 $tier = epreuve_access_tier($ep);
-$consultation = $tier === 'pro' || $full || $page > 1;
+$lire = isset($_GET['lire']) && $_GET['lire'] !== '0' && $_GET['lire'] !== '';
+$consultation = visionneuse_requiert_acces($tier, $page, $full, $lire);
 if ($consultation) {
   $user = current_user();
   if (!$user) fail('Connexion requise', 401);

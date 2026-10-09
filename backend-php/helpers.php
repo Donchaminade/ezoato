@@ -754,6 +754,7 @@ function map_epreuve(array $row): array {
     $mapped['thumbnailUrl'] = $base . '/epreuves/' . $row['id'] . '/preview';
   }
   $tier = epreuve_access_tier($row);
+  $mapped['categorieContenu'] = epreuve_categorie_contenu($row);
   $mapped['accessTier'] = $tier;
   $mapped['requiresPro'] = $tier === 'pro';
   $mapped['requiresPayment'] = $tier === 'pro';

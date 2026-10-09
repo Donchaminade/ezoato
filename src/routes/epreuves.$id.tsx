@@ -11,11 +11,7 @@ import { PageHeroBadge } from "@/components/layout/PageHeroBadge";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  AuthenticatedImage,
-  AuthenticatedPdf,
-  PORTRAIT_PREVIEW_FRAME,
-} from "@/components/admin/AuthenticatedMedia";
+import { AuthenticatedPdf } from "@/components/admin/AuthenticatedMedia";
 import { RevisionWorkspace } from "@/components/ai/RevisionWorkspace";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -23,6 +19,7 @@ import { shareEpreuve } from "@/lib/epreuve-share";
 import { isProTier, typeLabel } from "@/lib/pricing";
 import { subscriptionProCtaLabel } from "@/components/subscription/SubscriptionProBanner";
 import { FreemiumQuotaNote } from "@/components/subscription/FreemiumQuotaNote";
+import { EpreuveReader } from "@/components/epreuves/EpreuveReader";
 
 export const Route = createFileRoute("/epreuves/$id")({
   head: () => ({
@@ -158,10 +155,17 @@ function EpreuveDetail() {
                   <Link to="/auth/login">Se connecter pour télécharger</Link>
                 </Button>
               ) : hasAccess ? (
-                <Button size="lg" onClick={() => handleDownload(data.id, setDownloading)} disabled={downloading}>
-                  {downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-                  Télécharger le PDF
-                </Button>
+                <>
+                  <Button size="lg" asChild variant="default">
+                    <a href="#visionneuse">
+                      <Eye className="size-4" /> Lire l&apos;épreuve
+                    </a>
+                  </Button>
+                  <Button size="lg" variant="outline" onClick={() => handleDownload(data.id, setDownloading)} disabled={downloading}>
+                    {downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+                    Télécharger le PDF
+                  </Button>
+                </>
               ) : (
                 <Button size="lg" asChild>
                   <Link to="/account/abonnement">
@@ -205,13 +209,8 @@ function EpreuveDetail() {
                           </Button>
                         )}
                       </div>
-                    ) : data.thumbnailUrl ? (
-                      <AuthenticatedImage
-                        url={data.thumbnailUrl}
-                        alt={`Aperçu — ${data.titre}`}
-                        className={PORTRAIT_PREVIEW_FRAME}
-                        imgClassName="absolute inset-0 h-full w-full object-contain"
-                      />
+                    ) : user && hasAccess && data.thumbnailUrl ? (
+                      <EpreuveReader epreuve={data} />
                     ) : user && hasAccess && data.pdfPreviewUrl ? (
                       <AuthenticatedPdf url={data.pdfPreviewUrl} />
                     ) : (

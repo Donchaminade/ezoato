@@ -186,6 +186,7 @@ class EpreuvePreviewViewer extends StatefulWidget {
 
 class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
   int _page = 1;
+  bool _paperDark = false;
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +219,7 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
 
     return SecureScreenScope(
       child: Scaffold(
-        backgroundColor: pal.background,
+        backgroundColor: _paperDark ? const Color(0xFF121816) : pal.background,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -228,10 +229,20 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Text(
-            'Aperçu',
+            'Lire l\'épreuve',
             style: EzoaTypography.titleMedium(context).copyWith(fontSize: 16),
           ),
           centerTitle: true,
+          actions: [
+            IconButton(
+              tooltip: _paperDark ? 'Mode clair' : 'Mode sombre',
+              onPressed: () => setState(() => _paperDark = !_paperDark),
+              icon: Icon(
+                _paperDark ? LucideIcons.sun : LucideIcons.moon,
+                color: pal.text,
+              ),
+            ),
+          ],
         ),
         body: Column(
           children: [
@@ -240,7 +251,8 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
                 itemCount: pageCount,
                 onPageChanged: (i) => setState(() => _page = i + 1),
                 itemBuilder: (context, index) => _PreviewPage(
-                  url: epreuvePreviewPageUrl(widget.epreuve.id, index + 1),
+                  url: epreuvePreviewPageUrl(widget.epreuve.id, index + 1, lire: true),
+                  paperDark: _paperDark,
                 ),
               ),
             ),
@@ -272,9 +284,10 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
 }
 
 class _PreviewPage extends ConsumerStatefulWidget {
-  const _PreviewPage({required this.url});
+  const _PreviewPage({required this.url, this.paperDark = false});
 
   final String url;
+  final bool paperDark;
 
   @override
   ConsumerState<_PreviewPage> createState() => _PreviewPageState();
@@ -315,7 +328,7 @@ class _PreviewPageState extends ConsumerState<_PreviewPage> {
       );
     }
 
-    return InteractiveViewer(
+    final image = InteractiveViewer(
       maxScale: 5,
       child: Center(
         child: CachedNetworkImage(
@@ -343,6 +356,16 @@ class _PreviewPageState extends ConsumerState<_PreviewPage> {
           ),
         ),
       ),
+    );
+    if (!widget.paperDark) return image;
+    return ColorFiltered(
+      colorFilter: const ColorFilter.matrix(<double>[
+        -1, 0, 0, 0, 255,
+        0, -1, 0, 0, 255,
+        0, 0, -1, 0, 255,
+        0, 0, 0, 1, 0,
+      ]),
+      child: image,
     );
   }
 }

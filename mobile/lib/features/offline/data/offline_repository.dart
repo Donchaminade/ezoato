@@ -109,7 +109,49 @@ class OfflineRepository {
     }
   }
 
-  Future<void> download(Epreuve epreuve) async {
+  Future<String> pageImagePath(String id, int page) async {
+    final dir = await _offlineDir();
+    final n = page.toString().padLeft(2, '0');
+    return p.join(dir.path, '$id.p$n.jpg');
+  }
+
+  Future<List<String>> existingPageImages(String id) async {
+    final dir = await _offlineDir();
+    if (!await dir.exists()) return [];
+    final prefix = '$id.p';
+    final files = dir
+        .listSync()
+        .whereType<File>()
+        .where((f) => p.basename(f.path).startsWith(prefix) && f.path.endsWith('.jpg'))
+        .toList();
+    files.sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
+    return files.map((f) => f.path).toList();
+  }
+
+  /// Accès enregistré au téléchargement. Null = quota sans échéance.
+  bool lectureAutorisee(Epreuve? meta, [DateTime? now]) {
+    final until = meta?.offlineAccessUntil;
+    if (until == null || until.isEmpty) return true;
+    final fin = DateTime.tryParse(until);
+    if (fin == null) return true;
+    return fin.isAfter(now ?? DateTime.now());
+  }
+
+  Future<void> _cachePages(Epreuve epreuve) async {
+    final total = epreuve.pages < 1 ? 1 : (epreuve.pages > 20 ? 20 : epreuve.pages);
+    for (var page = 1; page <= total; page++) {
+      try {
+        final bytes = await _api.downloadEpreuvePreviewBytes(epreuve.id, page: page);
+        if (bytes.isEmpty) continue;
+        final path = await pageImagePath(epreuve.id, page);
+        await File(path).writeAsBytes(bytes, flush: true);
+      } catch (_) {
+        // Une page manquante n'empêche pas de garder le PDF.
+      }
+    }
+  }
+
+  Future<void> download(Epreuve epreuve, {String? accessUntil}) async {
     final bytes = await _api.downloadEpreuveBytes(epreuve.id);
     if (bytes.isEmpty) throw ApiException('Fichier vide');
 
@@ -117,6 +159,7 @@ class OfflineRepository {
     final filePath = p.join(dir.path, '${epreuve.id}.pdf');
     await File(filePath).writeAsBytes(bytes, flush: true);
     await _cachePreview(epreuve);
+    await _cachePages(epreuve);
 
     final db = await _database();
     await db.insert(
@@ -144,7 +187,10 @@ class OfflineRepository {
           'soumisLe': epreuve.soumisLe,
           'statut': epreuve.statut,
           'requiresPayment': epreuve.requiresPayment,
+          'requiresPro': epreuve.requiresPro,
+          'accessTier': epreuve.accessTier,
           'prixFcfa': epreuve.prixFcfa,
+          'offlineAccessUntil': accessUntil,
         }),
         'local_pdf_path': filePath,
         'downloaded_at': DateTime.now().toIso8601String(),
@@ -184,6 +230,10 @@ class OfflineRepository {
     }
     final preview = File(await previewPathFor(id));
     if (await preview.exists()) await preview.delete();
+    for (final path in await existingPageImages(id)) {
+      final file = File(path);
+      if (await file.exists()) await file.delete();
+    }
     await db.delete('offline_epreuves', where: 'id = ?', whereArgs: [id]);
   }
 }

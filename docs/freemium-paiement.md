@@ -4,7 +4,9 @@ Modèle validé : 50 épreuves gratuites, puis l'abonnement Pro à **1 000 FCFA 
 
 ## Quota gratuit
 
-Par défaut, devoirs et compositions partagent **un seul quota de 50** consultations ou téléchargements par compte. Une épreuve déjà comptée pour l'utilisateur ne consomme pas une deuxième fois. La miniature de la page 1 ne consomme pas le quota ; la page suivante, le PDF complet et le téléchargement le consomment.
+Par défaut, devoirs et compositions partagent **un seul quota de 50** consultations ou téléchargements par compte. Une épreuve déjà comptée pour l'utilisateur ne consomme pas une deuxième fois. La miniature de catalogue (page 1, sans `lire=1`) ne consomme pas le quota. Ouvrir la visionneuse (`lire=1`), tourner les pages, le PDF complet et le téléchargement le consomment. Les concours (ENAM, fonction publique, etc.) sont dans la même catégorie `officiel` que le CEPD, le BEPC et le BAC : Pro dès la première page, même déduplication (sans établissement), même barème de contribution.
+
+Les chemins `/annales` et `/annale` répondent en 301 vers `/docs`. Les URL `/docs` et `/epreuves/{id}` ne changent pas.
 
 | Variable | Défaut | Rôle |
 |----------|--------|------|

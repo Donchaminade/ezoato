@@ -217,5 +217,59 @@ assert_true(confirmation_client_peut_activer(true, false), 'simulé : le client 
 assert_true(!confirmation_client_peut_activer(false, false), 'opérateur : confirmation client sans paiement refusée');
 assert_true(confirmation_client_peut_activer(false, true), 'opérateur : paiement vérifié accepté');
 
+echo "\n=== Visionneuse ===\n";
+$mini = visionneuse_decision($devoir, ['page' => 1, 'used' => 49, 'limit' => 50]);
+assert_true($mini['reason'] === 'miniature' && !$mini['consume'], 'miniature page 1 ne consomme pas');
+$lire = visionneuse_decision($devoir, ['page' => 1, 'lire' => true, 'used' => 49, 'limit' => 50]);
+assert_true($lire['allowed'] && $lire['consume'], 'ouvrir la visionneuse compte dans le quota');
+$lirePlein = visionneuse_decision($devoir, ['page' => 1, 'lire' => true, 'used' => 50, 'limit' => 50]);
+assert_true(!$lirePlein['allowed'] && $lirePlein['reason'] === 'quota_exceeded', 'visionneuse bloquée à 50/50');
+$lireDeja = visionneuse_decision($devoir, ['page' => 2, 'lire' => true, 'alreadyCounted' => true, 'used' => 50, 'limit' => 50]);
+assert_true($lireDeja['allowed'] && !$lireDeja['consume'], 'épreuve déjà comptée reste lisible');
+$lireConcours = visionneuse_decision($concours, ['page' => 1, 'lire' => true, 'isPro' => false, 'used' => 0, 'limit' => 50]);
+assert_true(!$lireConcours['allowed'] && $lireConcours['reason'] === 'pro_required', 'visionneuse concours réservée au Pro');
+$lirePro = visionneuse_decision($concours, ['lire' => true, 'isPro' => true]);
+assert_true($lirePro['allowed'] && !$lirePro['consume'], 'Pro lit le concours sans quota');
+
+echo "\n=== Concours = examens officiels ===\n";
+assert_true(epreuve_categorie_contenu($concours) === 'officiel', 'ENAM classé officiel');
+assert_true(epreuve_categorie_contenu($bepc) === 'officiel', 'BEPC classé officiel');
+assert_true(epreuve_categorie_contenu($concours) === epreuve_categorie_contenu($bepc), 'même catégorie concours et examen officiel');
+assert_true(epreuve_categorie_contenu($compo) === 'quota', 'composition hors catégorie officielle');
+$enamA = [
+  'niveau' => 'concours', 'type' => 'examen', 'matiere' => 'Culture générale',
+  'classe' => 'ENAM', 'annee' => 2024, 'etablissement' => 'Lomé',
+  'meta_niveau' => ['concours' => 'ENAM', 'session' => '2024', 'nomEpreuve' => 'Culture générale'],
+];
+$enamB = $enamA;
+$enamB['etablissement'] = 'Kara';
+assert_true(!dedup_inclut_etablissement($enamA), 'concours : établissement hors clé, comme un examen officiel');
+assert_true(epreuve_dedup_key($enamA) === epreuve_dedup_key($enamB), 'deux soumissions ENAM identiques = un doublon');
+$bepcRow = [
+  'niveau' => 'college', 'type' => 'examen', 'matiere' => 'Mathématiques',
+  'classe' => '3e', 'annee' => 2024, 'examen' => 'BEPC', 'etablissement' => 'Collège A',
+];
+$bepcRowB = $bepcRow;
+$bepcRowB['etablissement'] = 'Collège B';
+assert_true(epreuve_dedup_key($bepcRow) === epreuve_dedup_key($bepcRowB), 'BEPC : établissement ignoré');
+$recompenseConcours = calculer_recompense_palier(50, 0, 50, 1000);
+assert_true($recompenseConcours['credite'] === 1000, 'concours rémunéré au même barème (50 = 1 000)');
+
+echo "\n=== Redirections annales ===\n";
+assert_true(legacy_redirect_cible('/annales') === '/docs', '/annales → /docs');
+assert_true(legacy_redirect_cible('/annale/') === '/docs', '/annale/ → /docs');
+assert_true(legacy_redirect_cible('/docs') === null, '/docs inchangé');
+assert_true(legacy_redirect_cible('/epreuves/abc') === null, 'fiche épreuve inchangée');
+$ts = file_get_contents(dirname(__DIR__, 2) . '/src/lib/legacy-redirects.ts');
+assert_true(is_string($ts) && str_contains($ts, '"/annales": "/docs"') && str_contains($ts, '"/annale": "/docs"'), 'même table côté web');
+
+echo "\n=== Hors ligne ===\n";
+$futur = date('c', strtotime('2026-06-01 00:00:00 UTC'));
+$passe = date('c', strtotime('2025-01-01 00:00:00 UTC'));
+$now = strtotime('2026-03-01 00:00:00 UTC');
+assert_true(lecture_hors_ligne_autorisee(null, $now), 'quota : relecture sans échéance');
+assert_true(lecture_hors_ligne_autorisee($futur, $now), 'Pro encore valide hors ligne');
+assert_true(!lecture_hors_ligne_autorisee($passe, $now), 'Pro expiré : relecture refusée');
+
 echo "\n=== Resultat : $passed OK, $failed echec(s) ===\n";
 exit($failed > 0 ? 1 : 0);

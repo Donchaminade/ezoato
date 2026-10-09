@@ -9,8 +9,9 @@ import '../../core/theme/ezoa_theme.dart';
 import '../models/models.dart';
 
 /// URL d'aperçu page N — toujours via [Env.apiUrl] (hôte LAN joignable).
-String epreuvePreviewPageUrl(String epreuveId, int page) {
-  return '${Env.apiUrl}/epreuves/$epreuveId/preview?page=$page';
+String epreuvePreviewPageUrl(String epreuveId, int page, {bool lire = false}) {
+  final flag = lire ? '&lire=1' : '';
+  return '${Env.apiUrl}/epreuves/$epreuveId/preview?page=$page$flag';
 }
 
 /// URL miniature pour une carte : [thumbnailUrl] réécrit, sinon endpoint preview.

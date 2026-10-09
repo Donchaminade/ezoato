@@ -45,6 +45,7 @@ class Epreuve {
     this.prixFcfa,
     this.accessTier,
     this.requiresPro,
+    this.offlineAccessUntil,
   });
 
   factory Epreuve.fromJson(Map<String, dynamic> json) {
@@ -73,6 +74,7 @@ class Epreuve {
       prixFcfa: (json['prixFcfa'] as num?)?.toInt(),
       accessTier: json['accessTier'] as String?,
       requiresPro: json['requiresPro'] as bool?,
+      offlineAccessUntil: json['offlineAccessUntil'] as String?,
     );
   }
 
@@ -100,6 +102,7 @@ class Epreuve {
   final int? prixFcfa;
   final String? accessTier;
   final bool? requiresPro;
+  final String? offlineAccessUntil;
 
   bool get isProTier =>
       requiresPro == true || accessTier == 'pro' || requiresPayment == true;

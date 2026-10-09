@@ -48,9 +48,78 @@ function freemium_config(): array {
   ];
 }
 
-/** Examens officiels : CEPD, BEPC, BAC I/II. Les concours sont un niveau à part. */
+/** Examens officiels : CEPD, BEPC, BAC I/II. Les concours suivent les mêmes règles. */
 function examens_officiels(): array {
   return ['CEPD', 'BEPC', 'BAC1', 'BAC2'];
+}
+
+/**
+ * Même catégorie que les examens officiels : Pro dès la première consultation,
+ * déduplication sans établissement, contribution rémunérée au même barème.
+ * officiel = CEPD/BEPC/BAC ou concours. corrige = corrigé (Pro, autre objet).
+ * quota = devoir, composition, examen universitaire.
+ */
+function epreuve_categorie_contenu(array $epreuve): string {
+  $type = (string)($epreuve['type'] ?? '');
+  $niveau = (string)($epreuve['niveau'] ?? '');
+  if ($niveau === 'concours') return 'officiel';
+  $examen = strtoupper(trim((string)($epreuve['examen'] ?? '')));
+  if ($type === 'examen' && in_array($examen, examens_officiels(), true)) return 'officiel';
+  if ($type === 'corrige') return 'corrige';
+  return 'quota';
+}
+
+/** La visionneuse (lire=1, page > 1 ou PDF complet) passe par le quota ou le paywall. La miniature page 1 non. */
+function visionneuse_requiert_acces(string $tier, int $page, bool $full, bool $lire): bool {
+  return $tier === 'pro' || $full || $page > 1 || $lire;
+}
+
+/**
+ * Décision d'ouverture de la visionneuse. $lire = consultation intégrée (compte dans les 50).
+ * @return array{allowed:bool,reason:string,consume:bool,requiresPro:bool}
+ */
+function visionneuse_decision(array $epreuve, array $opts): array {
+  $tier = epreuve_access_tier($epreuve);
+  $page = max(1, (int)($opts['page'] ?? 1));
+  $full = !empty($opts['full']);
+  $lire = !empty($opts['lire']);
+  if (!visionneuse_requiert_acces($tier, $page, $full, $lire)) {
+    return ['allowed' => true, 'reason' => 'miniature', 'consume' => false, 'requiresPro' => false];
+  }
+  return freemium_decision([
+    'tier' => $tier,
+    'isPro' => !empty($opts['isPro']),
+    'legacyAccess' => !empty($opts['legacyAccess']),
+    'alreadyCounted' => !empty($opts['alreadyCounted']),
+    'used' => (int)($opts['used'] ?? 0),
+    'limit' => (int)($opts['limit'] ?? 0),
+  ]);
+}
+
+/** Une copie hors ligne reste lisible tant que l'accès Pro enregistré au téléchargement n'est pas expiré. Quota : pas d'échéance. */
+function lecture_hors_ligne_autorisee(?string $accessUntil, int $now): bool {
+  if ($accessUntil === null || trim($accessUntil) === '') return true;
+  $ts = strtotime($accessUntil);
+  if ($ts === false) return true;
+  return $ts > $now;
+}
+
+/** Anciens chemins « annales » → archives, sans changer les URL actuelles. */
+function legacy_redirect_table(): array {
+  return [
+    '/annales' => '/docs',
+    '/annale' => '/docs',
+  ];
+}
+
+function legacy_redirect_cible(string $path): ?string {
+  $path = rawurldecode($path);
+  $q = strpos($path, '?');
+  if ($q !== false) $path = substr($path, 0, $q);
+  $path = preg_replace('#/+#', '/', $path) ?? $path;
+  if ($path !== '/' && str_ends_with($path, '/')) $path = rtrim($path, '/');
+  if ($path === '') $path = '/';
+  return legacy_redirect_table()[$path] ?? null;
 }
 
 /**

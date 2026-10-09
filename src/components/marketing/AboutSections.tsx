@@ -97,7 +97,7 @@ const ARCHIVE_TYPES = [
   {
     icon: Trophy,
     title: "Concours & supérieur",
-    text: "Annales de concours et épreuves universitaires pour élargir la révision au-delà du secondaire.",
+    text: "Sujets de concours et épreuves universitaires pour élargir la révision au-delà du secondaire.",
     free: false,
   },
 ] as const;
@@ -106,7 +106,7 @@ const AUDIENCES = [
   {
     icon: GraduationCap,
     title: "Élèves & candidats",
-    text: "Révise avec de vrais sujets — collège, lycée, université ou concours — et télécharge un PDF lisible sur ton téléphone.",
+    text: "Révise avec de vrais sujets — collège, lycée, université ou concours — dans la visionneuse ou en PDF sur ton téléphone.",
   },
   {
     icon: Users,
@@ -220,7 +220,7 @@ export function AboutMission() {
             réels, où qu&apos;il soit au Togo.
           </p>
           <p className="mt-4 text-muted-foreground leading-relaxed">
-            Avant EZOA-TO, retrouver un ancien sujet du BEPC, une composition de Terminale ou une annales de
+            Avant EZOA-TO, retrouver un ancien sujet du BEPC, une composition de Terminale ou un sujet de
             concours passait par le bouche-à-oreille, des photocopies perdues ou des groupes dispersés.
             Aujourd&apos;hui, une recherche par niveau, ville, matière ou établissement suffit — sur mobile
             comme sur le web.
@@ -707,7 +707,7 @@ export function AboutCTA() {
               Prêt à rejoindre la communauté EZOA-TO ?
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-              Que tu cherches un sujet du BEPC, une annales de concours ou que tu veuilles archiver les
+              Que tu cherches un sujet du BEPC, un sujet de concours ou que tu veuilles archiver les
               épreuves de ton établissement — EZOA-TO est fait pour toi.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

@@ -26,6 +26,7 @@ import '../../features/epreuves/presentation/home_screen.dart';
 import '../../features/epreuves/presentation/main_shell_screen.dart';
 import '../../features/favorites/presentation/favoris_screen.dart';
 import '../../features/offline/presentation/offline_library_screen.dart';
+import '../../features/offline/presentation/offline_reader_screen.dart';
 import '../../features/submit/presentation/submit_screen.dart';
 import '../onboarding/onboarding_provider.dart';
 
@@ -172,6 +173,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/account/offline',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, __) => const OfflineLibraryScreen(),
+      ),
+      GoRoute(
+        path: '/offline/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) => OfflineReaderScreen(id: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/account/portefeuille',

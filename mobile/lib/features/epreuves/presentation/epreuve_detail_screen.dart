@@ -50,7 +50,11 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
   Future<void> _download(Epreuve epreuve) async {
     setState(() => _downloading = true);
     try {
-      await ref.read(offlineRepositoryProvider).download(epreuve);
+      final access = ref.read(paymentAccessProvider(widget.id)).value;
+      await ref.read(offlineRepositoryProvider).download(
+            epreuve,
+            accessUntil: access?.expiresAt,
+          );
       ref.invalidate(offlineListProvider);
       ref.invalidate(epreuveOfflineAvailableProvider(widget.id));
       if (mounted) {
@@ -355,10 +359,19 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
                   const SizedBox(height: 12),
                   EzoaScrollReveal(
                     child: EzoaButton(
-                      label: 'Ouvrir PDF hors ligne',
+                      label: 'Réviser hors ligne',
+                      variant: EzoaButtonVariant.outline,
+                      onPressed: () => context.push('/offline/${widget.id}'),
+                      icon: LucideIcons.bookOpen,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  EzoaScrollReveal(
+                    child: EzoaButton(
+                      label: 'Ouvrir le PDF',
                       variant: EzoaButtonVariant.outline,
                       onPressed: _openOffline,
-                      icon: LucideIcons.bookOpen,
+                      icon: LucideIcons.fileText,
                     ),
                   ),
                 ],
