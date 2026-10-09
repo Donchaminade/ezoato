@@ -671,7 +671,38 @@ export interface NotificationRulesMeta {
   message?: string;
 }
 
-export type AiMode = "redaction" | "calcul" | "quiz";
+export type AiMode = "guide" | "redaction" | "calcul" | "quiz";
+
+export type AiGuidePhase = "identify" | "confirm" | "exercise" | "guide" | "remediate";
+
+export interface AiGuideCandidate {
+  id: string;
+  titre: string;
+  matiere?: string | null;
+  annee?: number | null;
+  examen?: string | null;
+  etablissement?: string | null;
+  classe?: string | null;
+  ville?: string | null;
+  type?: string | null;
+}
+
+export interface AiGuideTurn extends AiEthical {
+  sessionId: string;
+  mode: "guide";
+  phase: AiGuidePhase;
+  reply: string;
+  candidates: AiGuideCandidate[];
+  epreuve?: AiGuideCandidate | null;
+  epreuveId?: string | null;
+  matiere?: string | null;
+  exercise?: string | null;
+  leakBlocked: boolean;
+  imageReceived?: boolean;
+  solvesExercise: boolean;
+  grounded?: boolean;
+  provider?: string;
+}
 
 export interface AiEthical {
   disclaimer: string;

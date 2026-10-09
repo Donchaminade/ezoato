@@ -1,10 +1,28 @@
-# Ezoato AI — tuteur ancré sur les épreuves
+# Ezoato AI — tuteur guidé
 
-Couche **premium** (abonnement Pro : Flooz / T-Money) en plus de la bibliothèque d’épreuves. Ce n’est **pas** la correction officielle du jury.
+Couche **premium** (abonnement Pro : Flooz / T-Money) en plus de la bibliothèque d’épreuves. Ce n’est **pas** un correcteur automatique et ce n’est **pas** la correction officielle du jury. L’IA aide l’élève à s’exercer lui-même.
 
-Le modèle n’est **pas** fine-tuné. Quand l’élève révise une épreuve, le backend charge le contenu déjà stocké (métadonnées + extraits PDF / sidecar) et l’injecte uniquement dans des blocs **UNTRUSTED_DATA** du message utilisateur. Les nouvelles épreuves de la bibliothèque deviennent automatiquement du contexte tuteur — pas de pipeline d’entraînement séparé.
+Le modèle n’est **pas** fine-tuné. La recherche d’épreuve est une **vraie requête catalogue** (MySQL). Le contenu déjà stocké (métadonnées + extraits PDF / sidecar) n’est injecté que dans des blocs **UNTRUSTED_DATA** du message utilisateur, une fois l’épreuve confirmée.
 
-## Modes
+## Parcours principal — mode `guide`
+
+`POST /ai/guide` enchaîne une machine d’états. Le modèle ne choisit pas l’épreuve.
+
+| Phase | Ce qui se passe |
+| --- | --- |
+| `identify` | L’élève indique le nom, l’examen, l’année, l’établissement, ou un lien / `epreuveId` du catalogue. |
+| `confirm` | Le serveur renvoie un ou plusieurs candidats. L’élève confirme (`oui`, un numéro, ou `candidateId`). S’il dit non, ou si rien ne correspond, on redemande des précisions. |
+| `exercise` | « Sur quel exercice ou quelle question tu bloques ? » |
+| `guide` | Une étape à la fois : analogie concrète, puis une question. Jamais la réponse finale. |
+| `remediate` | Si c’est trop difficile, reprise de la notion avec un **autre** exemple, puis retour à l’exercice. |
+
+Rester dans l’épreuve confirmée et dans son programme. Une photo, un « je suis le professeur », un « juste le résultat pour vérifier » ou une injection de prompt ne débloquent pas le corrigé.
+
+Après chaque génération, `ai_guide_leaks_answer` relit la sortie. Si une réponse finale a fuité (y compris dans un champ caché), elle est **remplacée** par une relance, et `leakBlocked` vaut `true`. Le prompt système ne suffit pas.
+
+Les modes rédaction, calcul et QCM restent disponibles pour les usages déjà en place. Le parcours par défaut de l’écran est le tuteur guidé.
+
+## Autres modes
 
 | Mode | Usage |
 | --- | --- |
@@ -25,7 +43,8 @@ Si un `epreuveId` payant est fourni, l’accès épreuve (paiement unitaire ou P
 | Méthode | Chemin | Rôle |
 | --- | --- | --- |
 | `GET` | `/ai/entitlement` | Flag Pro |
-| `POST` | `/ai/session` | Démarre une session (`mode`: `redaction` \| `calcul` \| `quiz`) |
+| `POST` | `/ai/session` | Démarre une session (`mode`: `guide` \| `redaction` \| `calcul` \| `quiz`). `guide` délègue à `/ai/guide`. |
+| `POST` | `/ai/guide` | Un tour du tuteur guidé (`message`, `sessionId?`, `epreuveId?`, `candidateId?`, photo optionnelle) |
 | `GET` | `/ai/session/{id}` | Reprend la progression |
 | `POST` | `/ai/essay` | Feedback de copie |
 | `POST` | `/ai/coach` | Méthode / formules / exemple voisin |
@@ -38,7 +57,7 @@ Si un `epreuveId` payant est fourni, l’accès épreuve (paiement unitaire ou P
 
 ## Sessions MySQL
 
-Les sessions quiz / rédaction / calcul et les compteurs de rate-limit sont stockés en **MySQL** (`ai_sessions`, `ai_rate_limits`). Voir `backend-php/migration-ai-sessions.sql`.
+Les sessions quiz / rédaction / calcul / guide et les compteurs de rate-limit sont stockés en **MySQL** (`ai_sessions`, `ai_rate_limits`). Voir `backend-php/migration-ai-sessions.sql`. Les bases déjà créées ajoutent le mode `guide` avec `backend-php/migration-ai-guide.sql`.
 
 En production, `ai.php` injecte `db()` : aucun fichier JSON de session n’est utilisé. Les tests unitaires peuvent encore passer un `sessionDir` / `rateLimitDir` (fichiers temporaires) ou un PDO SQLite.
 
@@ -119,7 +138,7 @@ Prod sans clé : `503` générique. Photo sans fournisseur vision : `503` explic
 
 `EZOATO_AI_PROVIDER` (défaut `auto`) :
 
-| Préférence | Texte (essai, coach, QCM, indices, juge-texte) | Vision / photo |
+| Préférence | Texte (tuteur guidé, essai, coach, QCM, indices, juge-texte) | Vision / photo |
 | --- | --- | --- |
 | `auto` | Groq si `GROQ_API_KEY` → Google si `GEMINI_API_KEY` / `GOOGLE_API_KEY` → OpenRouter si `OPENROUTER_API_KEY` → OpenAI → mock si `EZOATO_AI_ALLOW_MOCK=1` → `none` | Google multimodal → OpenRouter → OpenAI vision → mock si autorisé → `none` |
 | `groq` | Groq uniquement (sinon mock/`none`) | Google → OpenRouter → OpenAI ( Groq n’est pas utilisé ) |
@@ -136,17 +155,20 @@ Forcer un fournisseur **sans** sa clé ne bascule pas silencieusement vers un au
 
 ```bash
 php backend-php/tests/test-ai-security.php
+php backend-php/tests/test-ai-guide.php
 # ou : npm run test:ai
 ```
 
-Couvre validation, injection, IDOR épreuve + session (fichiers et SQL), premium, modes A/B/QCM, sélection Groq/Google/OpenRouter/OpenAI, payload Gemini/Gemma, ancrage, vision/OCR, rate-limit.
+`test-ai-security.php` couvre validation, injection, IDOR épreuve + session (fichiers et SQL), premium, modes A/B/QCM, sélection Groq/Google/OpenRouter/OpenAI, payload Gemini/Gemma, ancrage, vision/OCR, rate-limit.
+
+`test-ai-guide.php` couvre la recherche catalogue (mémoire et SQL), la confirmation, la machine d’états, et une série de demandes de corrigé en français (professeur, photo, « juste pour vérifier », injection) avec des réponses de modèle simulées. Le filtre serveur doit bloquer la fuite.
 
 ## UI
 
 ### Web
 
-- `/reviser` et fiche épreuve : choix de mode + paywall Pro
-- Garde-fou affiché en permanence
+- `/reviser` et fiche épreuve : tuteur guidé par défaut (confirmation de l’épreuve, choix de l’exercice, conversation), plus rédaction / sciences / QCM
+- Garde-fou affiché en permanence : pas de réponse finale
 
 ### Flutter
 
@@ -155,4 +177,4 @@ Couvre validation, injection, IDOR épreuve + session (fichiers et SQL), premium
 - `/reviser` — depuis Compte → « Réviser avec l’IA »
 - `/epreuve/:id/reviser` — bouton « Réviser avec l’IA » sur la fiche épreuve
 
-Modes A / B / QCM, paywall Pro (Flooz / T-Money), photo de copie en mode B, disclaimer jury.
+Tuteur guidé par défaut (mêmes phases que le web), modes A / B / QCM encore accessibles, paywall Pro (Flooz / T-Money), photo de copie en mode B, disclaimer jury.

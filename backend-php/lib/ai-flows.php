@@ -501,6 +501,13 @@ function ai_handle_session_start(array $user, array $in, array $deps = []): arra
     ];
     return ai_handle_quiz($user, $quizIn, $deps);
   }
+  if ($ctx['mode'] === 'guide') {
+    $hint = $in['message'] ?? $in['question'] ?? null;
+    return ai_handle_guide($user, [
+      'message' => is_string($hint) ? $hint : '',
+      'epreuveId' => $ctx['epreuveId'],
+    ], $deps);
+  }
   if (empty($deps['skipRateLimit'])) {
     ai_rate_limit_consume((string)($user['id'] ?? 'anon'), 'session', null, $deps['rateLimitDir'] ?? null, $deps);
   }
@@ -822,6 +829,13 @@ function ai_handle_session_get(array $user, array $in, array $deps = []): array
   ]);
   if (isset($session['quiz']['questions'][$session['index'] ?? 0])) {
     $public['currentQuestion'] = ai_quiz_public_question($session['quiz']['questions'][$session['index'] ?? 0]);
+  }
+  if (($session['mode'] ?? '') === 'guide') {
+    $public['phase'] = (string)($session['phase'] ?? 'identify');
+    $public['candidates'] = is_array($session['candidates'] ?? null) ? $session['candidates'] : [];
+    $public['exercise'] = $session['exercise'] ?? null;
+    $public['epreuve'] = $session['epreuveCard'] ?? null;
+    $public['solvesExercise'] = false;
   }
   return $public;
 }

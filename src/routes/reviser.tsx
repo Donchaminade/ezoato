@@ -12,7 +12,7 @@ export const Route = createFileRoute("/reviser")({
       {
         name: "description",
         content:
-          "Tuteur ancré sur les épreuves : rédaction, sciences ou QCM. Ce n'est pas une note officielle.",
+          "Tuteur guidé sur une épreuve du catalogue. Il aide à chercher, sans donner le corrigé.",
       },
     ],
   }),
@@ -25,7 +25,7 @@ function ReviserPage() {
       <PageHero
         badge={<PageHeroBadge icon={Sparkles}>Ezoato AI</PageHeroBadge>}
         title="Réviser avec l'IA"
-        description="Rédige une copie, révise un exercice de sciences sans te faire donner la solution, ou enchaîne un QCM. Fonction Pro — ce n'est pas la correction du jury : vérifie avec ton enseignant."
+        description="Retrouve une épreuve, confirme que c'est la bonne, puis avance une étape à la fois. Le tuteur ne donne pas la réponse. Fonction Pro — vérifie avec ton enseignant."
         primaryImage="hero"
         compact
       />

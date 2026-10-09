@@ -30,9 +30,10 @@ Définis `VITE_API_URL` côté front pour pointer vers cette API (ex: `https://a
 
 ### Ezoato AI (premium — JWT + abonnement Pro)
 
-Voir `docs/ezoato-ai.md`. Tuteur **ancré sur l’épreuve** (métadonnées + extraits), pas un chat générique ni un fine-tuning. Modes : rédaction, calcul/sciences (pas un solveur), QCM persisté.
+Voir `docs/ezoato-ai.md`. Tuteur **guidé** (recherche catalogue, confirmation, une étape à la fois, sans corrigé). Modes encore là : rédaction, calcul/sciences, QCM.
 
 - `GET  /ai/entitlement`
+- `POST /ai/guide` — un tour du tuteur (`message`, `sessionId?`, `epreuveId?`, `candidateId?`)
 - `POST /ai/session` — `{ mode, epreuveId?, question?, sourceText?, matiere? }`
 - `GET  /ai/session/{id}`
 - `POST /ai/essay` — feedback de copie (pas une note de jury)

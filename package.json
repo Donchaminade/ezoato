@@ -13,7 +13,7 @@
     "mobile:dev": "cd mobile-expo-legacy && npx expo start",
     "mobile:flutter": "cd mobile && flutter run",
     "mobile:flutter:analyze": "cd mobile && flutter analyze",
-    "test:ai": "php backend-php/tests/test-ai-security.php"
+    "test:ai": "php backend-php/tests/test-ai-security.php && php backend-php/tests/test-ai-guide.php"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

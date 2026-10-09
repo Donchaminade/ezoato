@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { GuideTutorPanel } from "@/components/ai/GuideTutorPanel";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { subscriptionProCtaLabel } from "@/components/subscription/SubscriptionProBanner";
@@ -51,8 +52,7 @@ export function RevisionWorkspace({
   lockedReason,
 }: Props) {
   const { user } = useAuth();
-  const defaultMode = useMemo(() => inferMode(matiere), [matiere]);
-  const [mode, setMode] = useState<AiMode>(defaultMode);
+  const [mode, setMode] = useState<AiMode>("guide");
 
   const { data: sub } = useQuery({
     queryKey: ["subscription-status"],
@@ -71,8 +71,8 @@ export function RevisionWorkspace({
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {epreuveTitle
-              ? `Tuteur ancré sur « ${epreuveTitle} » — pas un chat générique.`
-              : "Tuteur ancré sur les épreuves : rédaction, sciences ou QCM — ce n'est pas la correction du jury."}
+              ? `Tuteur guidé sur « ${epreuveTitle} ». Tu confirmes l'épreuve, puis on avance sans le corrigé.`
+              : "Tuteur guidé : on retrouve l'épreuve dans le catalogue, tu confirmes, puis une étape à la fois. Pas le corrigé."}
           </p>
         </div>
         <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-800 dark:text-amber-200">
@@ -85,14 +85,15 @@ export function RevisionWorkspace({
         <AlertTriangle className="size-4" />
         <AlertTitle>Garde-fou</AlertTitle>
         <AlertDescription>
-          Ceci n&apos;est pas la correction officielle du jury. Vérifie toujours avec ton
-          enseignant. En sciences, l&apos;IA explique la méthode : tu travailles au brouillon.
+          Ceci n&apos;est pas un correcteur et ce n&apos;est pas la correction du jury. Le tuteur
+          ne donne pas la réponse finale, même si tu insistes. Vérifie avec ton enseignant.
         </AlertDescription>
       </Alert>
 
       <div className="mt-4 flex flex-wrap gap-2">
         {(
           [
+            ["guide", "Tuteur guidé", Sparkles],
             ["redaction", "Rédaction", FilePenLine],
             ["calcul", "Maths / sciences", FlaskConical],
             ["quiz", "QCM", Brain],
@@ -123,7 +124,7 @@ export function RevisionWorkspace({
       {user && !premium && (
         <LockBox
           title="Fonctionnalité Pro"
-          body="Les modes rédaction, sciences et QCM IA sont inclus dans l'abonnement Pro (Flooz ou T-Money)."
+          body="Le tuteur guidé, comme la rédaction, les sciences et le QCM, est inclus dans l'abonnement Pro (Flooz ou T-Money)."
           to="/account/abonnement"
           cta={subscriptionProCtaLabel()}
           icon="crown"
@@ -139,6 +140,9 @@ export function RevisionWorkspace({
         />
       )}
 
+      {user && premium && hasContentAccess && mode === "guide" && (
+        <GuideTutorPanel epreuveId={epreuveId} />
+      )}
       {user && premium && hasContentAccess && mode === "redaction" && (
         <EssayPanel epreuveId={epreuveId} matiere={matiere} />
       )}
@@ -150,13 +154,6 @@ export function RevisionWorkspace({
       )}
     </section>
   );
-}
-
-function inferMode(matiere?: string): AiMode {
-  const m = (matiere ?? "").toLowerCase();
-  if (/math|physique|chimie|svt|biologie|science/.test(m)) return "calcul";
-  if (/fran|philo|histoire|géo|geo|lettre|anglais|dissert/.test(m)) return "redaction";
-  return "quiz";
 }
 
 function LockBox({

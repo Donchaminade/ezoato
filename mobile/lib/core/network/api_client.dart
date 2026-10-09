@@ -561,6 +561,31 @@ class ApiClient {
   Future<AiEntitlement> getAiEntitlement() =>
       _get('/ai/entitlement', fromJson: AiEntitlement.fromJson);
 
+  Future<AiGuideTurn> guideAiTurn({
+    String? sessionId,
+    String? message,
+    String? epreuveId,
+    String? candidateId,
+  }) async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/ai/guide',
+        data: {
+          if (sessionId != null) 'sessionId': sessionId,
+          if (message != null && message.isNotEmpty) 'message': message,
+          if (epreuveId != null) 'epreuveId': epreuveId,
+          if (candidateId != null) 'candidateId': candidateId,
+        },
+        options: _aiTimeout,
+      );
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return AiGuideTurn.fromJson(data);
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
   Future<AiSessionStart> startAiSession({
     String? mode,
     String? epreuveId,

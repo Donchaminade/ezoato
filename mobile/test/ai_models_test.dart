@@ -3,6 +3,32 @@ import 'package:ezoa_to/features/ai/presentation/revision_screen.dart';
 import 'package:ezoa_to/shared/models/models.dart';
 
 void main() {
+  test('AiGuideTurn.fromJson conserve la phase et refuse le corrigé', () {
+    final turn = AiGuideTurn.fromJson({
+      'sessionId': 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'phase': 'confirm',
+      'reply': 'Est-ce bien celle-là ?',
+      'disclaimer': "Ceci n'est pas la correction officielle du jury.",
+      'officialGrade': false,
+      'solvesExercise': false,
+      'leakBlocked': false,
+      'candidates': [
+        {
+          'id': 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+          'titre': 'BEPC Mathématiques 2021',
+          'examen': 'BEPC',
+          'annee': 2021,
+          'etablissement': 'Lycée de Tokoin',
+        },
+      ],
+    });
+    expect(turn.phase, 'confirm');
+    expect(turn.solvesExercise, isFalse);
+    expect(turn.officialGrade, isFalse);
+    expect(turn.candidates.single.line, contains('Tokoin'));
+    expect(turn.reply, contains('celle-là'));
+  });
+
   test('inferAiMode route les matières', () {
     expect(inferAiMode('Mathématiques'), kAiModeCalcul);
     expect(inferAiMode('Philosophie'), kAiModeRedaction);
