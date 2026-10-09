@@ -138,10 +138,10 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 ## 6. Business model
 
-- Freemium : devoirs / compositions gratuits ; examens nationaux monétisés.
-- **Pro 1 000 FCFA / 6 mois** (~167 FCFA/mois) + achat à l’unité (~100–200 FCFA).
-- Contributeurs ~1 000 FCFA / soumission validée — croissance du catalogue alignée sur l’usage.
-- Mobile Money : Flooz / T-Money.
+- Freemium : 50 devoirs et compositions gratuits par compte (quota commun, configurable) ; au-delà, Pro.
+- Examens officiels (CEPD, BEPC, BAC), concours et corrigés : Pro dès la première épreuve.
+- **Pro 1 000 FCFA / 6 mois** (~167 FCFA/mois), payé via Flooz ou T-Money.
+- Contributeurs : **1 000 FCFA pour 50 épreuves validées** (seule la première soumission validée compte). Retrait dès **2 000 FCFA**.
 
 ### Justification prix 1 000 FCFA / 6 mois
 
@@ -255,7 +255,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 |----------|--------|
 | Prix Pro | **1 000 FCFA / 6 mois** |
 | ARPU annuel (si renouvellement) | **~2 000 FCFA / abonné / an** |
-| Achat à l’unité | 100–200 FCFA / examen (complément, non modélisé ici) |
+| Freemium | 50 épreuves gratuites, puis Pro (plus d’achat unitaire dans le modèle) |
 
 ### Hypothèses de projection (conservateur / médian / ambitieux)
 

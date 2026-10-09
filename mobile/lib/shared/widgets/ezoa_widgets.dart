@@ -792,16 +792,13 @@ class EpreuveGridCard extends StatelessWidget {
   String? get _priceLabel {
     final e = epreuve;
     if (e == null) return showPriceBadge ? 'GRATUIT' : null;
-    if (e.requiresPayment == true && e.prixFcfa != null) {
-      return '${e.prixFcfa} F';
-    }
-    // Badge opaque GRATUIT/PAYANT toujours visible sur cartes produit.
+    if (e.isProTier) return 'PRO';
     return 'GRATUIT';
   }
 
   bool get _isPaid {
     final e = epreuve;
-    return e != null && e.requiresPayment == true && e.prixFcfa != null;
+    return e != null && e.isProTier;
   }
 
   @override

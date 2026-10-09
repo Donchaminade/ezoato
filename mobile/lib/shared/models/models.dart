@@ -43,6 +43,8 @@ class Epreuve {
     this.thumbnailUrl,
     this.requiresPayment,
     this.prixFcfa,
+    this.accessTier,
+    this.requiresPro,
   });
 
   factory Epreuve.fromJson(Map<String, dynamic> json) {
@@ -69,6 +71,8 @@ class Epreuve {
       thumbnailUrl: json['thumbnailUrl'] as String?,
       requiresPayment: json['requiresPayment'] as bool?,
       prixFcfa: (json['prixFcfa'] as num?)?.toInt(),
+      accessTier: json['accessTier'] as String?,
+      requiresPro: json['requiresPro'] as bool?,
     );
   }
 
@@ -94,6 +98,11 @@ class Epreuve {
   final String statut;
   final bool? requiresPayment;
   final int? prixFcfa;
+  final String? accessTier;
+  final bool? requiresPro;
+
+  bool get isProTier =>
+      requiresPro == true || accessTier == 'pro' || requiresPayment == true;
 }
 
 class User {
@@ -703,6 +712,9 @@ class PaymentInit {
     this.methode,
     this.instructions,
     this.alreadyPaid = false,
+    this.simulated = false,
+    this.provider,
+    this.redirectUrl,
   });
 
   factory PaymentInit.fromJson(Map<String, dynamic> json) {
@@ -715,6 +727,9 @@ class PaymentInit {
           ? PaymentInstructions.fromJson(json['instructions'] as Map<String, dynamic>)
           : null,
       alreadyPaid: json['alreadyPaid'] as bool? ?? false,
+      simulated: json['simulated'] as bool? ?? false,
+      provider: json['provider'] as String?,
+      redirectUrl: json['redirectUrl'] as String?,
     );
   }
 
@@ -724,6 +739,9 @@ class PaymentInit {
   final String? methode;
   final PaymentInstructions? instructions;
   final bool alreadyPaid;
+  final bool simulated;
+  final String? provider;
+  final String? redirectUrl;
 }
 
 /// Réponse de `POST /soumissions`.
@@ -957,16 +975,36 @@ class PaymentAccess {
     this.devise,
     this.expiresAt,
     this.hasSubscription = false,
+    this.requiresPro = false,
+    this.accessMode,
+    this.reason,
+    this.message,
+    this.quotaLabel,
   });
 
   factory PaymentAccess.fromJson(Map<String, dynamic> json) {
+    final quota = json['quota'];
+    String? quotaLabel;
+    if (quota is Map) {
+      final usage = quota['usage'];
+      if (usage is Map && usage['label'] is String) {
+        quotaLabel = usage['label'] as String;
+      } else if (quota['label'] is String) {
+        quotaLabel = quota['label'] as String;
+      }
+    }
     return PaymentAccess(
-      requiresPayment: json['requiresPayment'] as bool,
-      hasAccess: json['hasAccess'] as bool,
-      montant: (json['montant'] as num).toInt(),
+      requiresPayment: json['requiresPayment'] as bool? ?? false,
+      hasAccess: json['hasAccess'] as bool? ?? false,
+      montant: (json['montant'] as num?)?.toInt() ?? 0,
       devise: json['devise'] as String?,
       expiresAt: json['expiresAt'] as String?,
       hasSubscription: json['hasSubscription'] as bool? ?? false,
+      requiresPro: json['requiresPro'] as bool? ?? false,
+      accessMode: json['accessMode'] as String?,
+      reason: json['reason'] as String?,
+      message: json['message'] as String?,
+      quotaLabel: quotaLabel,
     );
   }
 
@@ -976,6 +1014,21 @@ class PaymentAccess {
   final String? devise;
   final String? expiresAt;
   final bool hasSubscription;
+  final bool requiresPro;
+  final String? accessMode;
+  final String? reason;
+  final String? message;
+  final String? quotaLabel;
+
+  /// Libellé « 12/50 épreuves gratuites » (ou le libellé séparé renvoyé par l'API).
+  String? get quotaDisplay {
+    final label = quotaLabel;
+    if (label == null || label.isEmpty) return null;
+    if (label.contains('épreuve') || label.contains('devoir') || label.contains('composition')) {
+      return label;
+    }
+    return '$label épreuves gratuites';
+  }
 }
 
 /// Statut abonnement plateforme (`GET /account/abonnement/status`).
@@ -988,9 +1041,11 @@ class SubscriptionStatus {
     required this.joursRestants,
     required this.montant,
     required this.dureeMois,
+    this.freemiumLabel,
   });
 
   factory SubscriptionStatus.fromJson(Map<String, dynamic> json) {
+    final freemium = json['freemium'];
     return SubscriptionStatus(
       actif: json['actif'] as bool? ?? false,
       expire: json['expire'] as bool? ?? false,
@@ -999,6 +1054,7 @@ class SubscriptionStatus {
       joursRestants: (json['joursRestants'] as num?)?.toInt() ?? 0,
       montant: (json['montant'] as num?)?.toInt() ?? 1000,
       dureeMois: (json['dureeMois'] as num?)?.toInt() ?? 6,
+      freemiumLabel: freemium is Map ? freemium['label'] as String? : null,
     );
   }
 
@@ -1009,6 +1065,16 @@ class SubscriptionStatus {
   final int joursRestants;
   final int montant;
   final int dureeMois;
+  final String? freemiumLabel;
+
+  String? get freemiumDisplay {
+    final label = freemiumLabel;
+    if (label == null || label.isEmpty) return null;
+    if (label.contains('épreuve') || label.contains('devoir') || label.contains('composition')) {
+      return label;
+    }
+    return '$label épreuves gratuites';
+  }
 }
 
 /// Modes tuteur IA — parité web / `docs/ezoato-ai.md`.

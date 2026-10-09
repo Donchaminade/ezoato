@@ -71,11 +71,14 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
     try {
       if (ref.read(isOnlineProvider)) {
         final access = await ref.read(paymentAccessProvider(widget.id).future);
-        if (access?.requiresPayment == true && access?.hasAccess != true) {
+        if (access != null && !access.hasAccess) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Accès expiré ou non payé — renouvelez pour ouvrir le PDF'),
+              SnackBar(
+                content: Text(
+                  access.message ??
+                      'Abonnement Pro requis pour ouvrir ce PDF',
+                ),
               ),
             );
           }
@@ -108,23 +111,6 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
       }
     } finally {
       if (mounted) setState(() => _togglingFavori = false);
-    }
-  }
-
-  Future<void> _openPaymentSheet(Epreuve epreuve, PaymentAccess access) async {
-    final paid = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => PaymentSheet(epreuveId: epreuve.id, montant: access.montant),
-    );
-    if (paid == true) {
-      ref.invalidate(paymentAccessProvider(widget.id));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Paiement confirmé — épreuve débloquée')),
-        );
-      }
     }
   }
 
@@ -187,12 +173,11 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
 
           final offline = offlineAsync.value ?? false;
           final access = accessAsync.value;
-          final requiresPayment =
-              access?.requiresPayment ?? (epreuve.requiresPayment == true);
-          final hasAccess = access?.hasAccess ?? !requiresPayment;
+          final proTier = epreuve.isProTier || access?.requiresPayment == true;
+          final hasAccess = access?.hasAccess ?? !proTier;
           final hasSubscription = access?.hasSubscription == true;
-          final locked = requiresPayment && !hasAccess;
-          final montant = access?.montant ?? epreuve.prixFcfa ?? 0;
+          final locked = access != null ? !access.hasAccess : proTier;
+          final quotaLabel = access?.quotaDisplay;
 
           Widget content = SingleChildScrollView(
             padding: const EdgeInsets.all(20),
@@ -256,14 +241,27 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
                     child: EpreuvePreviewCard(
                       epreuve: epreuve,
                       locked: locked,
-                      montant: montant,
-                      onUnlock: locked && access != null
-                          ? () => _openPaymentSheet(epreuve, access)
+                      message: access?.message,
+                      onUnlock: locked
+                          ? () => context.push('/account/abonnement')
                           : null,
                     ),
                   ),
                 ],
-                if (requiresPayment) ...[
+                if (quotaLabel != null && !hasSubscription) ...[
+                  const SizedBox(height: 12),
+                  EzoaScrollReveal(
+                    child: EzoaGlassCard(
+                      margin: EdgeInsets.zero,
+                      enableShine: false,
+                      child: Text(
+                        quotaLabel,
+                        style: EzoaTypography.titleSmall(context),
+                      ),
+                    ),
+                  ),
+                ],
+                if (locked || proTier) ...[
                   const SizedBox(height: 12),
                   EzoaScrollReveal(
                     child: EzoaGlassCard(
@@ -287,7 +285,9 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Épreuve payante — $montant FCFA',
+                                      locked
+                                          ? 'Abonnement Pro requis'
+                                          : 'Accès Pro',
                                       style: EzoaTypography.titleSmall(context),
                                     ),
                                     const SizedBox(height: 4),
@@ -300,7 +300,8 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
                                               : access?.expiresAt != null
                                                   ? 'Accès débloqué jusqu\'au ${_formatExpiry(access!.expiresAt!)}'
                                                   : 'Accès débloqué — téléchargement disponible'
-                                          : 'Payez par Flooz ou T-Money, ou abonnez-vous pour tout débloquer',
+                                          : (access?.message ??
+                                              'Passe en Pro (1 000 FCFA / 6 mois) via Flooz ou T-Money.'),
                                       style: EzoaTypography.bodySmall(context),
                                     ),
                                   ],
@@ -308,12 +309,10 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
                               ),
                             ],
                           ),
-                          if (locked && isOnline && access != null) ...[
+                          if (locked && isOnline) ...[
                             const SizedBox(height: 16),
                             SubscriptionProPaywallActions(
-                              montant: montant,
                               onSubscribe: () => context.push('/account/abonnement'),
-                              onPayExam: () => _openPaymentSheet(epreuve, access),
                             ),
                           ],
                         ],
@@ -341,7 +340,7 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
                   EzoaScrollReveal(
                     child: EzoaButton(
                       label: locked
-                          ? 'Paiement requis'
+                          ? 'Abonnement Pro requis'
                           : offline
                               ? 'Déjà téléchargée'
                               : 'Télécharger hors ligne',
@@ -367,7 +366,7 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
             ),
           );
 
-          if (requiresPayment) {
+          if (proTier || locked) {
             content = SecureScreenScope(child: content);
           }
 

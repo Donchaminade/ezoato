@@ -1243,21 +1243,18 @@ if ($action === 'valider') {
   $sub = $s->fetch(); if (!$sub) fail('Introuvable', 404);
   $sub = apply_soumission_corrections($id, $sub, json_input());
 
-  $newId = uuid();
-  $published = publish_soumission_to_epreuve($cfg, $sub, $newId);
-  $metaJson = $sub['meta_niveau'] ?? null;
-  if (is_array($metaJson)) $metaJson = json_encode($metaJson, JSON_UNESCAPED_UNICODE);
-
-  db()->prepare("INSERT INTO epreuves
-    (id,titre,matiere,niveau,classe,annee,type,periode,examen,meta_niveau,etablissement_id,ville,
-     pdf_path,pages,taille_ko,soumis_par,valide_le,statut)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),'validee')")
-    ->execute([$newId, $sub['titre'], $sub['matiere'], $sub['niveau'], $sub['classe'],
-               $sub['annee'], $sub['type'], $sub['periode'], $sub['examen'], $metaJson,
-               $sub['etablissement_id'], $sub['ville'], $published['pdf_path'],
-               $published['pages'], $published['taille_ko'],
-               $sub['soumis_par']]);
-  db()->prepare("UPDATE soumissions SET statut='validee', epreuve_id=? WHERE id=?")->execute([$newId, $id]);
+  $published = publier_et_valider_soumission($cfg, $sub, false);
+  if (empty($published['ok'])) {
+    $authorNom = db()->prepare('SELECT nom FROM users WHERE id = ?');
+    $authorNom->execute([$sub['soumis_par']]);
+    dispatch_notification_event('soumission_rejetee', [
+      'nom' => $authorNom->fetchColumn() ?: 'Contributeur',
+      'titre' => $sub['titre'],
+      'motif' => $published['message'] ?? message_doublon_epreuve(),
+    ], ['userId' => $sub['soumis_par'], 'url' => '/account/soumissions/' . $id]);
+    fail($published['message'] ?? message_doublon_epreuve(), 409);
+  }
+  $newId = $published['epreuve_id'];
   $reward = reward_contributor($sub['soumis_par']);
   $authorNom = db()->prepare('SELECT nom FROM users WHERE id = ?');
   $authorNom->execute([$sub['soumis_par']]);
@@ -1307,25 +1304,9 @@ if ($action === 'remplacer') {
   $old->execute([$doublonId, 'validee']);
   $existing = $old->fetch(); if (!$existing) fail('Épreuve existante introuvable', 404);
 
-  // Archiver l'ancienne
-  db()->prepare("UPDATE epreuves SET statut='archivee' WHERE id=?")->execute([$doublonId]);
-
-  // Publier la nouvelle à la place
-  $newId = uuid();
-  $published = publish_soumission_to_epreuve($cfg, $sub, $newId);
-  $metaJson = $sub['meta_niveau'] ?? null;
-  if (is_array($metaJson)) $metaJson = json_encode($metaJson, JSON_UNESCAPED_UNICODE);
-
-  db()->prepare("INSERT INTO epreuves
-    (id,titre,matiere,niveau,classe,annee,type,periode,examen,meta_niveau,etablissement_id,ville,
-     pdf_path,pages,taille_ko,soumis_par,valide_le,statut)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),'validee')")
-    ->execute([$newId, $sub['titre'], $sub['matiere'], $sub['niveau'], $sub['classe'],
-               $sub['annee'], $sub['type'], $sub['periode'], $sub['examen'], $metaJson,
-               $sub['etablissement_id'], $sub['ville'], $published['pdf_path'],
-               $published['pages'], $published['taille_ko'],
-               $sub['soumis_par']]);
-  db()->prepare("UPDATE soumissions SET statut='validee', epreuve_id=? WHERE id=?")->execute([$newId, $id]);
+  $published = publier_et_valider_soumission($cfg, $sub, true, $doublonId);
+  if (empty($published['ok'])) fail($published['message'] ?? 'Remplacement impossible', 409);
+  $newId = $published['epreuve_id'];
   $reward = reward_contributor($sub['soumis_par']);
   notify_classe_users_new_epreuve([
     'id' => $newId,

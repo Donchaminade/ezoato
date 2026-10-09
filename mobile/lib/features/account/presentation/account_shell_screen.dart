@@ -24,7 +24,7 @@ class AccountMenuScreen extends ConsumerWidget {
   ];
 
   static const _contentSection = <_MenuEntry>[
-    ('Abonnement', 'Accès illimité 6 mois — 1000 FCFA', '/account/abonnement', LucideIcons.crown),
+    ('Abonnement', 'Pro 1 000 FCFA / 6 mois', '/account/abonnement', LucideIcons.crown),
     ('Bibliothèque', 'Achats et téléchargements', '/account/bibliotheque', LucideIcons.library),
     ('Favoris', 'Épreuves enregistrées', '/account/favoris', LucideIcons.heart),
     ('Hors ligne', 'PDF téléchargés localement', '/account/offline', LucideIcons.hardDrive),
@@ -56,9 +56,9 @@ class AccountMenuScreen extends ConsumerWidget {
         if (s.expire) {
           return 'Expiré — renouvelez pour retrouver l\'accès';
         }
-        return 'Accès illimité 6 mois — 1000 FCFA';
+        return s.freemiumDisplay ?? 'Pro 1 000 FCFA / 6 mois';
       },
-      orElse: () => 'Accès illimité 6 mois — 1000 FCFA',
+      orElse: () => 'Pro 1 000 FCFA / 6 mois',
     );
 
     return EzoaScreen(

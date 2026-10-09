@@ -455,9 +455,19 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
                               : const ['T1', 'T2', 'T3'],
                           onChanged: (v) => setState(() => _periode = v),
                         ),
+                        if (_type == 'devoir' || _type == 'composition')
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              _type == 'devoir'
+                                  ? 'Un devoir est propre à un établissement : le champ est obligatoire. Seule la première soumission validée de cette épreuve, pour cet établissement, est rémunérée.'
+                                  : 'Une composition vient de l\'inspection et vaut pour tout le territoire : pas d\'établissement. Envoie-la vite, seule la première validée est rémunérée.',
+                              style: EzoaTypography.bodySmall(context),
+                            ),
+                          ),
                         if (_type == 'devoir')
                           EzoaTextField(
-                            label: 'Établissement',
+                            label: 'Établissement (obligatoire)',
                             controller: _etablissementController,
                             prefixIcon: LucideIcons.school,
                             onChanged: (_) => setState(() {}),
@@ -490,10 +500,17 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
                         onChanged: (v) => setState(() => _matiere = v),
                       ),
                       EzoaTextField(
-                        label: 'Université',
+                        label: 'Université (obligatoire)',
                         controller: _universiteController,
                         prefixIcon: LucideIcons.school,
                         onChanged: (_) => setState(() {}),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          'La déduplication d\'une épreuve universitaire inclut l\'université. Seule la première soumission validée est rémunérée.',
+                          style: EzoaTypography.bodySmall(context),
+                        ),
                       ),
                       EzoaSearchablePicker(
                         label: 'Ville',

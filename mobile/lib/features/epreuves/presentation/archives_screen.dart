@@ -517,14 +517,11 @@ class _ArchiveEpreuveGridCard extends StatelessWidget {
   ];
 
   String get _priceLabel {
-    if (epreuve.requiresPayment == true && epreuve.prixFcfa != null) {
-      return '${epreuve.prixFcfa} F';
-    }
+    if (epreuve.isProTier) return 'PRO';
     return 'GRATUIT';
   }
 
-  bool get _isPaid =>
-      epreuve.requiresPayment == true && epreuve.prixFcfa != null;
+  bool get _isPaid => epreuve.isProTier;
 
   @override
   Widget build(BuildContext context) {

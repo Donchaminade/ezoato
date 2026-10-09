@@ -91,7 +91,7 @@ const ARCHIVE_TYPES = [
   {
     icon: Landmark,
     title: "Examens nationaux",
-    text: "CEPD, BEPC, BAC — sujets officiels archivés par année, accessibles à l'unité ou via Pro.",
+    text: "CEPD, BEPC, BAC et concours — sujets officiels accessibles avec l'abonnement Pro (1 000 FCFA / 6 mois).",
     free: false,
   },
   {
@@ -152,18 +152,18 @@ const VALIDATION_STEPS = [
   "Tu soumets des photos nettes de l'épreuve (pages complètes, sans reflet).",
   "Un PDF d'aperçu est créé automatiquement.",
   "Un gestionnaire vérifie la lisibilité et les métadonnées (matière, année, niveau…).",
-  "La détection de doublons signale les similarités : le gestionnaire compare et garde la meilleure version.",
+  "Tant qu'aucune version n'est validée, les similarités sont signalées. Dès qu'une épreuve est validée, les soumissions suivantes de la même épreuve sont refusées : seule la première est rémunérée.",
   "Une fois validée, l'épreuve est publiée et visible dans les archives.",
 ] as const;
 
 const GOVERNANCE = [
   {
     role: "Visiteur",
-    desc: "Consulte le catalogue, prévisualise et télécharge les épreuves gratuites.",
+    desc: "Consulte le catalogue et la première page des épreuves.",
   },
   {
     role: "Utilisateur",
-    desc: "Compte gratuit pour acheter des examens nationaux et suivre ses téléchargements.",
+    desc: "50 devoirs et compositions gratuits, puis l'abonnement Pro pour la suite, les examens officiels et les concours.",
   },
   {
     role: "Contributeur",
@@ -529,10 +529,12 @@ export function AboutValidation() {
 
 export function AboutPricing({ meta }: { meta?: PublicMeta }) {
   const pricing = meta?.pricing;
-  const prix = pricing?.prixExamenEffectif ?? pricing?.prixExamenNational ?? 100;
+  const quota = pricing?.freemium?.quota ?? 50;
   const epreuves = pricing?.epreuvesParRecompense ?? 50;
   const recompense = pricing?.montantRecompense ?? 1000;
   const minRetrait = pricing?.minRetrait ?? 2000;
+  const pro = pricing?.abonnementMontant ?? SUBSCRIPTION_PRICE;
+  const mois = pricing?.abonnementDureeMois ?? SUBSCRIPTION_DURATION_MONTHS;
 
   return (
     <section className="px-4 py-14 sm:px-6 sm:py-18">
@@ -540,18 +542,17 @@ export function AboutPricing({ meta }: { meta?: PublicMeta }) {
         <ScrollReveal className="mx-auto mb-10 max-w-2xl text-center">
           <h2 className="font-display text-2xl font-bold sm:text-3xl">Tarifs & récompenses</h2>
           <p className="mt-2 text-muted-foreground">
-            Transparence totale : tu sais exactement ce qui est gratuit, ce qui se paie à l&apos;unité,
-            et ce que couvre l&apos;abonnement Pro.
+            {quota} épreuves gratuites par compte, puis l&apos;abonnement Pro. Les examens officiels et les concours sont Pro dès la première épreuve.
           </p>
         </ScrollReveal>
 
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <ScrollReveal offsetY={35}>
             <div className="card-elevated h-full border-primary/20 p-6">
-              <Badge className="bg-secondary text-secondary-foreground">0 FCFA</Badge>
+              <Badge className="bg-secondary text-secondary-foreground">{quota} / compte</Badge>
               <h3 className="mt-4 font-display text-lg font-bold">Devoirs & compositions</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Téléchargement illimité après prévisualisation. Aucun compte requis pour parcourir.
+                Consultation et téléchargement gratuits jusqu&apos;à {quota} épreuves. Le catalogue reste visible sans compte.
               </p>
             </div>
           </ScrollReveal>
@@ -560,11 +561,11 @@ export function AboutPricing({ meta }: { meta?: PublicMeta }) {
             <div className="card-elevated h-full p-6">
               <Badge variant="outline">
                 <CreditCard className="mr-1 size-3" />
-                {formatFcfa(prix)}
+                Pro obligatoire
               </Badge>
-              <h3 className="mt-4 font-display text-lg font-bold">À l&apos;unité</h3>
+              <h3 className="mt-4 font-display text-lg font-bold">Examens & concours</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Examens nationaux et contenus payants — paiement unique via Flooz ou T-Money, accès immédiat.
+                CEPD, BEPC, BAC, concours et corrigés : l&apos;abonnement Pro est requis dès la première épreuve.
               </p>
             </div>
           </ScrollReveal>
@@ -578,9 +579,9 @@ export function AboutPricing({ meta }: { meta?: PublicMeta }) {
               <h3 className="mt-4 font-display text-lg font-bold">Abonnement Pro</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 <strong className="text-foreground">
-                  {formatFcfa(SUBSCRIPTION_PRICE)} / {SUBSCRIPTION_DURATION_MONTHS} mois
+                  {formatFcfa(pro)} / {mois} mois
                 </strong>{" "}
-                — accès illimité aux épreuves payantes. Un micropaiement pensé pour les familles.
+                via Flooz ou T-Money. Accès illimité, y compris au-delà du quota gratuit.
               </p>
               <Button asChild variant="link" className="mt-3 h-auto p-0">
                 <Link to="/account/abonnement">Découvrir Pro</Link>
@@ -597,7 +598,7 @@ export function AboutPricing({ meta }: { meta?: PublicMeta }) {
               <h3 className="mt-4 font-display text-lg font-bold">Récompenses</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 <strong className="text-foreground">{epreuves} épreuves validées</strong> ={" "}
-                <strong className="text-foreground">{formatFcfa(recompense)}</strong> sur ton portefeuille.
+                <strong className="text-foreground">{formatFcfa(recompense)}</strong>. Seule la première soumission validée compte.
                 Retrait dès <strong className="text-foreground">{formatFcfa(minRetrait)}</strong>.
               </p>
               <Button asChild variant="link" className="mt-3 h-auto p-0">

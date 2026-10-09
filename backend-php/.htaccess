@@ -35,6 +35,8 @@ RewriteRule ^ai/judge$ ai.php?action=judge [QSA,L]
 RewriteRule ^ai/pack$ ai.php?action=pack [QSA,L]
 RewriteRule ^soumissions/?$ soumissions.php [QSA,L]
 
+RewriteRule ^webhooks/paiement$ webhooks-paiement.php [QSA,L]
+
 RewriteRule ^paiements/initier$ payments.php?action=initier [QSA,L]
 RewriteRule ^paiements/confirmer$ payments.php?action=confirmer [QSA,L]
 RewriteRule ^paiements/acces/([a-f0-9-]+)$ payments.php?action=acces&epreuve_id=$1 [QSA,L]

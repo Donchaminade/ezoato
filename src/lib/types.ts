@@ -71,7 +71,9 @@ export interface Epreuve {
   valideLe?: string;
   statut: StatutEpreuve;
   requiresPayment?: boolean;
-  prixFcfa?: number;
+  requiresPro?: boolean;
+  accessTier?: "pro" | "quota";
+  prixFcfa?: number | null;
   epreuveParentId?: string;
   epreuveParent?: { id: string; titre: string };
   corrigeType?: CorrigeTypeSummary;
@@ -89,13 +91,44 @@ export interface CorrigeTypeSummary {
   telechargements: number;
 }
 
+export interface FreemiumBucket {
+  used: number;
+  limit: number;
+  remaining?: number;
+  label: string;
+}
+
+export interface FreemiumUsage {
+  mode: "shared" | "separate";
+  limit: number;
+  used: number;
+  remaining: number;
+  label: string;
+  buckets?: {
+    devoir: FreemiumBucket;
+    composition: FreemiumBucket;
+  } | null;
+}
+
 export interface PaymentAccess {
   requiresPayment: boolean;
+  requiresPro?: boolean;
   hasAccess: boolean;
   montant: number;
   devise?: string;
   expiresAt?: string | null;
   hasSubscription?: boolean;
+  accessMode?: "pro" | "quota";
+  reason?: string;
+  message?: string | null;
+  quota?: {
+    mode: string;
+    bucket: string;
+    used: number;
+    limit: number;
+    label: string;
+    usage?: FreemiumUsage;
+  };
 }
 
 export interface SubscriptionStatus {
@@ -106,6 +139,7 @@ export interface SubscriptionStatus {
   joursRestants: number;
   montant: number;
   dureeMois: number;
+  freemium?: FreemiumUsage;
 }
 
 export interface AdminAbonnement {
@@ -143,6 +177,9 @@ export interface PaymentInit {
     ussd: string;
   };
   alreadyPaid?: boolean;
+  simulated?: boolean;
+  provider?: string;
+  redirectUrl?: string | null;
 }
 
 export interface AdminStats {
@@ -530,6 +567,14 @@ export interface PublicPricing {
   epreuvesParRecompense: number;
   montantRecompense: number;
   minRetrait: number;
+  abonnementMontant?: number;
+  abonnementDureeMois?: number;
+  freemium?: {
+    quotaMode: "shared" | "separate";
+    quota: number;
+    quotaDevoir: number;
+    quotaComposition: number;
+  };
 }
 
 export interface PlatformSettings {

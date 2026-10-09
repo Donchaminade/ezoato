@@ -117,7 +117,7 @@ export function AdminAbonnementsTab() {
           <div>
             <h2 className="text-lg font-semibold">Abonnements</h2>
             <p className="text-sm text-muted-foreground">
-              {formatFcfa(SUBSCRIPTION_PRICE)} / {SUBSCRIPTION_DURATION_MONTHS} mois — accès illimité aux épreuves payantes
+              {formatFcfa(SUBSCRIPTION_PRICE)} / {SUBSCRIPTION_DURATION_MONTHS} mois — Pro : examens officiels, concours et au-delà du quota gratuit
             </p>
           </div>
         </div>

@@ -65,8 +65,8 @@ class _RevisionScreenState extends ConsumerState<RevisionScreen> {
     final matiere = widget.matiere ?? epreuve?.matiere;
     final access = accessAsync?.value;
     final lockedPaper = access != null &&
-        access.requiresPayment &&
-        !access.hasAccess;
+        !access.hasAccess &&
+        (access.requiresPayment || access.reason == 'quota_exceeded');
 
     return EzoaDetailScreen(
       title: 'Réviser avec l\'IA',

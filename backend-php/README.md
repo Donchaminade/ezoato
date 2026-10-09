@@ -82,6 +82,17 @@ cd backend-php\cron
 
 Voir aussi le commentaire en tête de `cron/abonnement_rappels.php` (crontab Linux).
 
+## Freemium et paiement Pro
+
+Voir `docs/freemium-paiement.md`.
+
+- 50 devoirs et compositions gratuits par compte (`EZOATO_FREEMIUM_QUOTA`, mode `shared` par défaut).
+- Examens officiels (CEPD, BEPC, BAC), concours et corrigés : Pro dès la première épreuve.
+- Pro : 1 000 FCFA / 6 mois, Flooz ou T-Money. Fournisseur simulé tant qu'aucune clé n'est définie.
+- Webhook : `POST /webhooks/paiement`.
+- Migration idempotente : `migration-freemium-paiement.sql` (les abonnements Pro déjà actifs ne sont pas modifiés).
+- Tests : `php tests/test-freemium-paiement.php`.
+
 ## Sécurité
 - Toujours valider les inputs (type, longueur, MIME des images)
 - Rate-limit côté serveur web (mod_evasive / nginx) + limiteur applicatif sur `/ai/*`

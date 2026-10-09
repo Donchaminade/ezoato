@@ -178,8 +178,9 @@ export const api = {
     return http(`/epreuves/${id}`);
   },
 
-  async checkPaymentAccess(epreuveId: string): Promise<PaymentAccess> {
-    return http(`/paiements/acces/${epreuveId}`);
+  async checkPaymentAccess(epreuveId: string, consume = true): Promise<PaymentAccess> {
+    const q = consume ? "" : "?consume=0";
+    return http(`/paiements/acces/${epreuveId}${q}`);
   },
 
   async initierPaiement(epreuveId: string, methode: "flooz" | "tmoney", telephone: string): Promise<PaymentInit> {

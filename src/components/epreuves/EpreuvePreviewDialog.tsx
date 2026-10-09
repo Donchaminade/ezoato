@@ -7,7 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { AuthenticatedImage } from "@/components/admin/AuthenticatedMedia";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { formatFcfa, getPrixFcfa, requiresPayment } from "@/lib/pricing";
+import { isProTier } from "@/lib/pricing";
 import type { Epreuve } from "@/lib/types";
 import { resolveMediaUrl } from "@/lib/utils";
 
@@ -75,20 +75,19 @@ function EpreuveDocumentPreview({ epreuve }: { epreuve: Epreuve }) {
   );
 }
 
-function PreviewPaywall({ epreuve }: { epreuve: Epreuve }) {
+function PreviewPaywall({ epreuve, message }: { epreuve: Epreuve; message?: string | null }) {
   const { user } = useAuth();
-  const prix = getPrixFcfa(epreuve);
 
   return (
     <div className="grid min-h-[280px] place-items-center rounded-lg border border-dashed border-border bg-muted/40 p-8 text-center">
       <Lock className="size-10 text-muted-foreground opacity-70" />
       <p className="mt-3 font-medium">Aperçu verrouillé</p>
       <p className="mt-2 text-sm text-muted-foreground">
-        Payez {formatFcfa(prix)} pour débloquer l&apos;aperçu ({epreuve.pages} pages).
+        {message ?? "L'abonnement Pro est nécessaire pour consulter cette épreuve."}
       </p>
       <Button asChild className="mt-4">
-        <Link to="/epreuves/$id" params={{ id: epreuve.id }}>
-          {user ? "Voir la fiche et payer" : "Se connecter pour payer"}
+        <Link to={user ? "/account/abonnement" : "/auth/login"}>
+          {user ? "Passer en Pro" : "Se connecter"}
         </Link>
       </Button>
     </div>
@@ -105,15 +104,15 @@ export function EpreuvePreviewDialog({
   onOpenChange: (v: boolean) => void;
 }) {
   const { user } = useAuth();
-  const isPaid = epreuve ? requiresPayment(epreuve) : false;
+  const isPaid = epreuve ? isProTier(epreuve) : false;
 
   const { data: access } = useQuery({
     queryKey: ["payment-access", epreuve?.id],
     queryFn: () => api.checkPaymentAccess(epreuve!.id),
-    enabled: open && !!user && !!epreuve && isPaid,
+    enabled: open && !!user && !!epreuve,
   });
 
-  const locked = isPaid && !access?.hasAccess;
+  const locked = user ? (access ? !access.hasAccess : isPaid) : isPaid;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -132,7 +131,12 @@ export function EpreuvePreviewDialog({
               <div><dt className="text-muted-foreground">Lieu</dt><dd className="font-medium">{epreuve.etablissement ?? epreuve.examen ?? "—"}</dd></div>
             </dl>
             {locked ? (
-              <PreviewPaywall epreuve={epreuve} />
+              <PreviewPaywall epreuve={epreuve} message={access?.message} />
+            ) : !user ? (
+              <PreviewPaywall
+                epreuve={epreuve}
+                message="Connecte-toi pour consulter cette épreuve. Le quota gratuit est de 50 épreuves par compte."
+              />
             ) : epreuve.thumbnailUrl ? (
               <EpreuveDocumentPreview epreuve={epreuve} />
             ) : (

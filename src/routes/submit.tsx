@@ -221,8 +221,8 @@ function SubmitPage() {
           : "Soumission envoyée. Un PDF A4 a été généré pour validation.",
       );
       nav({ to: "/account/soumissions" });
-    } catch {
-      toast.error("Échec de la soumission.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec de la soumission.");
     } finally {
       setSubmitting(false);
     }
@@ -370,7 +370,7 @@ function SubmitPage() {
                       </SelectContent>
                     </Select>
                   </FormField>
-                  <FormField label="Type">
+                  <FormField label="Type" className="sm:col-span-2">
                     <Select
                       value={type}
                       onValueChange={(v) => {
@@ -387,12 +387,19 @@ function SubmitPage() {
                         <SelectItem value="examen">Examen national</SelectItem>
                       </SelectContent>
                     </Select>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {type === "devoir"
+                        ? "Un devoir est propre à un établissement : le champ est obligatoire, et le doublon inclut cette école."
+                        : type === "composition"
+                          ? "Une composition vient de l'inspection : elle est identique sur tout le territoire, sans établissement. Seule la première soumission validée est rémunérée — envoie-la vite."
+                          : "Examen officiel (CEPD, BEPC, BAC) : pas d'établissement. L'accès lecteur demande l'abonnement Pro."}
+                    </p>
                   </FormField>
                   {type !== "examen" && (
                     <>
                       {type === "devoir" && (
-                        <FormField label="Établissement" className="sm:col-span-2">
-                          <Input list="submit-etablissements" className={formInputClass} value={etablissement} onChange={(e) => setEtablissement(e.target.value)} required />
+                        <FormField label="Établissement (obligatoire)" className="sm:col-span-2">
+                          <Input list="submit-etablissements" className={formInputClass} value={etablissement} onChange={(e) => setEtablissement(e.target.value)} required placeholder="École où le devoir a été donné" />
                           {etablissementSuggestions.length > 0 && (
                             <datalist id="submit-etablissements">
                               {etablissementSuggestions.map((e) => <option key={e} value={e} />)}

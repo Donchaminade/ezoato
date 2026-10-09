@@ -651,7 +651,7 @@ function EpreuvesTab({ isAdmin }: { isAdmin: boolean }) {
               <TableCell>{e.matiere}</TableCell>
               <TableCell className="capitalize">
                 {e.type}{e.examen ? ` · ${e.examen}` : ""}
-                {e.requiresPayment && <Badge variant="outline" className="ml-1 text-xs">100F</Badge>}
+                {e.requiresPayment && <Badge variant="outline" className="ml-1 text-xs">Pro</Badge>}
               </TableCell>
               <TableCell>
                 {e.hasCorrigeType ? (

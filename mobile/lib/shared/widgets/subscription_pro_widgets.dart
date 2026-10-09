@@ -125,7 +125,7 @@ class SubscriptionProUpgradeBanner extends StatelessWidget {
                     if (!compact) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'Toutes les épreuves payantes, sans payer à chaque fois.',
+                        'Examens officiels, concours, et au-delà des 50 épreuves gratuites.',
                         style: EzoaTypography.bodySmall(context).copyWith(
                           color: pal.textFaint,
                           fontSize: 12,
@@ -240,33 +240,17 @@ class SubscriptionProStatusBadge extends StatelessWidget {
 class SubscriptionProPaywallActions extends StatelessWidget {
   const SubscriptionProPaywallActions({
     super.key,
-    required this.montant,
     required this.onSubscribe,
-    required this.onPayExam,
   });
 
-  final int montant;
   final VoidCallback onSubscribe;
-  final VoidCallback onPayExam;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        EzoaButton(
-          label: 'Passer en abonnement Pro — $kSubscriptionPriceFcfa FCFA / $kSubscriptionDurationMonths mois',
-          icon: LucideIcons.crown,
-          onPressed: onSubscribe,
-        ),
-        const SizedBox(height: 10),
-        EzoaButton(
-          label: 'Payer cette épreuve — $montant FCFA',
-          variant: EzoaButtonVariant.outline,
-          icon: LucideIcons.smartphone,
-          onPressed: onPayExam,
-        ),
-      ],
+    return EzoaButton(
+      label: 'Passer en abonnement Pro — $kSubscriptionPriceFcfa FCFA / $kSubscriptionDurationMonths mois',
+      icon: LucideIcons.crown,
+      onPressed: onSubscribe,
     );
   }
 }

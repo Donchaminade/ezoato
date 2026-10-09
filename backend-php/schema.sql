@@ -36,6 +36,7 @@ CREATE TABLE epreuves (
   meta_niveau   JSON NULL,
   etablissement_id INT NULL,
   ville         VARCHAR(80) NOT NULL,
+  dedup_key     CHAR(64) NULL,
   pdf_path      VARCHAR(255) NOT NULL,
   pages         SMALLINT NOT NULL DEFAULT 0,
   taille_ko     INT NOT NULL DEFAULT 0,
@@ -46,7 +47,7 @@ CREATE TABLE epreuves (
   statut        ENUM('en_attente','validee','rejetee','archivee') NOT NULL DEFAULT 'validee',
   epreuve_parent_id CHAR(36) NULL,
   INDEX (matiere), INDEX (niveau), INDEX (classe), INDEX (annee),
-  INDEX (type), INDEX (ville), INDEX (statut), INDEX (epreuve_parent_id),
+  INDEX (type), INDEX (ville), INDEX (statut), INDEX (dedup_key), INDEX (epreuve_parent_id),
   FOREIGN KEY (etablissement_id) REFERENCES etablissements(id),
   FOREIGN KEY (soumis_par) REFERENCES users(id),
   FOREIGN KEY (epreuve_parent_id) REFERENCES epreuves(id) ON DELETE CASCADE
@@ -65,6 +66,7 @@ CREATE TABLE soumissions (
   meta_niveau   JSON NULL,
   etablissement_id INT NULL,
   ville         VARCHAR(80) NOT NULL,
+  dedup_key     CHAR(64) NULL,
   images_json   JSON NOT NULL,
   pdf_preview_path VARCHAR(255) NOT NULL,
   soumis_par    CHAR(36) NOT NULL,
@@ -73,6 +75,8 @@ CREATE TABLE soumissions (
   motif_rejet   VARCHAR(500) NULL,
   doublons_json JSON NULL,
   epreuve_id    CHAR(36) NULL,
+  recompense_eligible TINYINT(1) NOT NULL DEFAULT 1,
+  INDEX (dedup_key),
   FOREIGN KEY (etablissement_id) REFERENCES etablissements(id),
   FOREIGN KEY (soumis_par) REFERENCES users(id)
 ) ENGINE=InnoDB;
@@ -87,7 +91,7 @@ CREATE TABLE telechargements (
   UNIQUE KEY uq_user_epreuve (user_id, epreuve_id)
 ) ENGINE=InnoDB;
 
--- Paiements Mobile Money pour examens nationaux (100 FCFA)
+-- Paiements Mobile Money historiques (achat unitaire, conservé pour les accès déjà confirmés)
 CREATE TABLE paiements (
   id            CHAR(36) PRIMARY KEY,
   user_id       CHAR(36) NOT NULL,
@@ -112,6 +116,8 @@ CREATE TABLE abonnements (
   methode     ENUM('flooz','tmoney') NULL,
   telephone   VARCHAR(20) NULL,
   reference   VARCHAR(32) NULL UNIQUE,
+  provider    VARCHAR(32) NULL,
+  provider_ref VARCHAR(128) NULL,
   date_debut  DATETIME NULL,
   date_fin    DATETIME NULL,
   statut      ENUM('en_attente','actif','expire','annule') NOT NULL DEFAULT 'en_attente',
@@ -251,6 +257,37 @@ CREATE TABLE ai_sessions (
   INDEX idx_ai_sess_user (user_id),
   INDEX idx_ai_sess_epreuve (epreuve_id),
   INDEX idx_ai_sess_updated (updated_at)
+) ENGINE=InnoDB;
+
+CREATE TABLE acces_gratuits (
+  id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id       CHAR(36) NOT NULL,
+  epreuve_id    CHAR(36) NOT NULL,
+  categorie     ENUM('devoir','composition','partage') NOT NULL DEFAULT 'partage',
+  premier_acces DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_acces_user_epreuve (user_id, epreuve_id),
+  INDEX idx_acces_user_cat (user_id, categorie),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (epreuve_id) REFERENCES epreuves(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE epreuve_dedup_verrous (
+  dedup_key     CHAR(64) PRIMARY KEY,
+  epreuve_id    CHAR(36) NOT NULL,
+  soumission_id CHAR(36) NOT NULL,
+  cree_le       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE paiement_evenements (
+  id                CHAR(36) PRIMARY KEY,
+  provider          VARCHAR(32) NOT NULL,
+  provider_event_id VARCHAR(160) NOT NULL,
+  reference         VARCHAR(64) NOT NULL,
+  abonnement_id     CHAR(36) NULL,
+  payload           JSON NULL,
+  cree_le           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_provider_event (provider, provider_event_id),
+  INDEX idx_paiement_evt_ref (reference)
 ) ENGINE=InnoDB;
 
 CREATE TABLE ai_rate_limits (
