@@ -42,6 +42,7 @@ if ($route === 'register') {
   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) fail('Email invalide');
   if (strlen($telephone) < 8 || strlen($telephone) > 12) fail('Numéro de téléphone invalide');
   if (strlen($pwd) < 8) fail('Mot de passe trop court (8+ caractères)');
+  auth_throttle_consume('register:' . auth_client_ip(), 20, 3600);
   $id = uuid();
   try {
     if (users_has_profil_type()) {
@@ -57,7 +58,10 @@ if ($route === 'register') {
     if (str_contains($msg, 'telephone')) fail('Numéro de téléphone déjà utilisé', 409);
     fail('Inscription impossible', 409);
   }
-  $token = jwt_encode(['sub'=>$id,'exp'=>time()+86400*30]);
+  $token = issue_auth_token([
+    'id' => $id,
+    'session_version' => 0,
+  ]);
   json_out(['token'=>$token,'user'=>map_auth_user([
     'id' => $id,
     'nom' => $nom,
@@ -76,9 +80,12 @@ if ($route === 'login') {
   $identifier = trim($in['identifier'] ?? $in['email'] ?? '');
   $pwd = $in['password'] ?? '';
   if ($identifier === '' || $pwd === '') fail('Identifiants invalides', 401);
+  $bucket = 'login:' . auth_client_ip() . ':' . strtolower($identifier);
+  auth_throttle_consume($bucket, 8, 900);
 
   $userCols = 'id, nom, email, telephone, role, ville, classe, etablissement, password_hash';
-  if (users_has_profil_type()) $userCols = 'id, nom, email, telephone, role, ville, classe, etablissement, profil_type, password_hash';
+  if (column_exists('users', 'session_version')) $userCols .= ', session_version';
+  if (users_has_profil_type()) $userCols = str_replace('password_hash', 'profil_type, password_hash', $userCols);
   if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
     $stmt = db()->prepare("SELECT $userCols FROM users WHERE email = ?");
     $stmt->execute([strtolower($identifier)]);
@@ -90,8 +97,12 @@ if ($route === 'login') {
   }
   $u = $stmt->fetch();
   if (!$u || !password_verify($pwd, $u['password_hash'])) fail('Identifiants invalides', 401);
+  if (compte_test_interdit((string)$u['email'])) {
+    fail('Compte de test désactivé sur cet environnement', 403);
+  }
+  auth_throttle_reset($bucket);
   unset($u['password_hash']);
-  $token = jwt_encode(['sub'=>$u['id'],'exp'=>time()+86400*30]);
+  $token = issue_auth_token($u);
   json_out(['token'=>$token,'user'=>map_auth_user($u)]);
 }
 
@@ -104,6 +115,7 @@ if ($route === 'forgot-password') {
   $in = json_input();
   $email = strtolower(trim($in['email'] ?? ''));
   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) fail('Email invalide');
+  auth_throttle_consume('forgot:' . auth_client_ip(), 10, 3600);
 
   $generic = 'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.';
   $out = ['message' => $generic, 'ok' => true];
@@ -183,6 +195,7 @@ if ($route === 'reset-password') {
 
   $hash = password_hash($pwd, PASSWORD_BCRYPT);
   $db->prepare('UPDATE users SET password_hash = ? WHERE id = ?')->execute([$hash, $row['user_id']]);
+  bump_session_version((string)$row['user_id']);
   $db->prepare('UPDATE password_reset_tokens SET used_at = NOW() WHERE id = ?')->execute([$row['token_id']]);
   $db->prepare('DELETE FROM password_reset_tokens WHERE user_id = ? AND id <> ?')->execute([$row['user_id'], $row['token_id']]);
 

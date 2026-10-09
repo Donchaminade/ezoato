@@ -48,6 +48,11 @@ if ($action === 'confirmer') {
   }
   if ($pay['statut'] !== 'en_attente') fail('Paiement non modifiable');
 
+  $fournisseur = paiement_fournisseur();
+  if (!$fournisseur->estSimule() || !confirmation_client_peut_activer(true, false)) {
+    fail('La confirmation doit venir de l\'opérateur de paiement.', 403);
+  }
+
   db()->prepare("UPDATE paiements SET statut='confirme', confirme_le=NOW() WHERE id=?")
       ->execute([$pay['id']]);
 

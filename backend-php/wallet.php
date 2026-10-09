@@ -54,21 +54,39 @@ if ($action === 'retrait') {
   if (!in_array($methode, ['flooz', 'tmoney'], true)) fail('Méthode invalide');
   if (strlen($telephone) < 8) fail('Numéro invalide');
 
-  $w = get_or_create_wallet($user['id']);
-  if ((int)$w['solde'] < $montant) fail('Solde insuffisant');
+  $pdo = db();
+  $pdo->beginTransaction();
+  try {
+    get_or_create_wallet($user['id']);
+    $lock = $pdo->prepare('SELECT solde FROM portefeuilles WHERE user_id=? FOR UPDATE');
+    $lock->execute([$user['id']]);
+    $solde = $lock->fetchColumn();
+    if ($solde === false || (int)$solde < $montant) {
+      $pdo->rollBack();
+      fail('Solde insuffisant');
+    }
 
-  $pending = db()->prepare("SELECT 1 FROM retraits WHERE user_id=? AND statut='en_attente' LIMIT 1");
-  $pending->execute([$user['id']]);
-  if ($pending->fetchColumn()) fail('Un retrait est déjà en cours de traitement');
+    $pending = $pdo->prepare("SELECT 1 FROM retraits WHERE user_id=? AND statut='en_attente' LIMIT 1");
+    $pending->execute([$user['id']]);
+    if ($pending->fetchColumn()) {
+      $pdo->rollBack();
+      fail('Un retrait est déjà en cours de traitement');
+    }
 
-  $id = uuid();
-  if (!debit_wallet($user['id'], $montant, 'Demande de retrait', "retrait-{$id}")) {
-    fail('Solde insuffisant');
+    $id = uuid();
+    if (!debit_wallet($user['id'], $montant, 'Demande de retrait', "retrait-{$id}")) {
+      $pdo->rollBack();
+      fail('Solde insuffisant');
+    }
+
+    $pdo->prepare("INSERT INTO retraits (id,user_id,montant,methode,telephone,statut)
+      VALUES (?,?,?,?,?,'en_attente')")
+      ->execute([$id, $user['id'], $montant, $methode, $telephone]);
+    $pdo->commit();
+  } catch (Throwable $e) {
+    if ($pdo->inTransaction()) $pdo->rollBack();
+    throw $e;
   }
-
-  db()->prepare("INSERT INTO retraits (id,user_id,montant,methode,telephone,statut)
-    VALUES (?,?,?,?,?,'en_attente')")
-    ->execute([$id, $user['id'], $montant, $methode, $telephone]);
 
   dispatch_notification_event('retrait_demande', [
     'nom' => $user['nom'] ?? 'Contributeur',

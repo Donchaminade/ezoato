@@ -8,6 +8,7 @@ CREATE TABLE users (
   nom          VARCHAR(120) NOT NULL,
   email        VARCHAR(190) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
+  session_version INT NOT NULL DEFAULT 0,
   role         ENUM('utilisateur','gestionnaire','admin') NOT NULL DEFAULT 'utilisateur',
   ville        VARCHAR(80) NULL,
   classe       VARCHAR(40) NULL,

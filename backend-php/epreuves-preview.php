@@ -28,19 +28,22 @@ if ($consultation) {
   refuser_si_acces_interdit($eval);
 }
 
+$cache = $consultation ? 'private, no-store' : 'public, max-age=3600';
+
 if ($full) {
-  $pdfPath = $ep['pdf_path'];
-  if (!is_file($pdfPath)) fail('Fichier PDF introuvable', 404);
+  $pdfPath = (string)$ep['pdf_path'];
+  if (!fichier_dans_uploads($pdfPath, (string)cfg()['uploads_dir'])) fail('Fichier PDF introuvable', 404);
   header('Content-Type: application/pdf');
   header('Content-Disposition: inline; filename="apercu.pdf"');
   header('Content-Length: ' . filesize($pdfPath));
-  header('Cache-Control: public, max-age=3600');
+  header('Cache-Control: ' . $cache);
+  header('X-Content-Type-Options: nosniff');
   readfile($pdfPath);
   exit;
 }
 
 $imagePath = epreuve_preview_image_path($ep, $page);
-if (!$imagePath) fail('Aperçu image indisponible', 404);
+if (!$imagePath || !fichier_dans_uploads($imagePath, (string)cfg()['uploads_dir'])) fail('Aperçu image indisponible', 404);
 
 $mime = match (strtolower(pathinfo($imagePath, PATHINFO_EXTENSION))) {
   'png' => 'image/png',
@@ -49,6 +52,7 @@ $mime = match (strtolower(pathinfo($imagePath, PATHINFO_EXTENSION))) {
 };
 header('Content-Type: ' . $mime);
 header('Content-Length: ' . filesize($imagePath));
-header('Cache-Control: public, max-age=86400');
+header('Cache-Control: ' . $cache);
+header('X-Content-Type-Options: nosniff');
 readfile($imagePath);
 exit;

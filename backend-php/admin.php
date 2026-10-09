@@ -95,8 +95,12 @@ if ($action === 'approuver_retrait') {
   $stmt->execute([$id]);
   $r = $stmt->fetch();
   if (!$r) fail('Retrait introuvable', 404);
-  db()->prepare("UPDATE retraits SET statut='paye', traite_le=NOW(), traite_par=? WHERE id=?")
-      ->execute([$admin['id'], $id]);
+  if (!retrait_approuve_par_tiers((string)$admin['id'], (string)$r['user_id'])) {
+    fail('Tu ne peux pas approuver ton propre retrait', 403);
+  }
+  $upd = db()->prepare("UPDATE retraits SET statut='paye', traite_le=NOW(), traite_par=? WHERE id=? AND statut='en_attente'");
+  $upd->execute([$admin['id'], $id]);
+  if ($upd->rowCount() !== 1) fail('Retrait introuvable', 404);
   dispatch_notification_event('retrait_approuve', [
     'montant' => number_format((int)$r['montant'], 0, ',', ' '),
     'nom' => $r['user_nom'],
@@ -113,9 +117,22 @@ if ($action === 'rejeter_retrait') {
   $stmt->execute([$id]);
   $r = $stmt->fetch();
   if (!$r) fail('Retrait introuvable', 404);
-  credit_wallet($r['user_id'], (int)$r['montant'], 'Remboursement retrait rejeté', "refund-{$id}");
-  db()->prepare("UPDATE retraits SET statut='rejete', motif_rejet=?, traite_le=NOW() WHERE id=?")
-      ->execute([$motif, $id]);
+  $pdo = db();
+  $pdo->beginTransaction();
+  try {
+    $upd = $pdo->prepare("UPDATE retraits SET statut='rejete', motif_rejet=?, traite_le=NOW() WHERE id=? AND statut='en_attente'");
+    $upd->execute([$motif, $id]);
+    if ($upd->rowCount() !== 1) {
+      $pdo->rollBack();
+      fail('Retrait introuvable', 404);
+    }
+    get_or_create_wallet((string)$r['user_id']);
+    credit_wallet((string)$r['user_id'], (int)$r['montant'], 'Remboursement retrait rejeté', "refund-{$id}");
+    $pdo->commit();
+  } catch (Throwable $e) {
+    if ($pdo->inTransaction()) $pdo->rollBack();
+    throw $e;
+  }
   $uNom = db()->prepare('SELECT nom FROM users WHERE id = ?');
   $uNom->execute([$r['user_id']]);
   dispatch_notification_event('retrait_rejete', [
@@ -361,6 +378,9 @@ if ($action === 'modifier_user') {
   if ($pwd !== '') {
     $sets[] = 'password_hash=?';
     $params[] = password_hash($pwd, PASSWORD_BCRYPT);
+    if (column_exists('users', 'session_version')) {
+      $sets[] = 'session_version=COALESCE(session_version,0)+1';
+    }
   }
   $params[] = $id;
 
@@ -411,6 +431,7 @@ if ($action === 'reset_user_password') {
   $tempPwd = generate_temp_password();
   db()->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
       ->execute([password_hash($tempPwd, PASSWORD_BCRYPT), $id]);
+  bump_session_version($id);
 
   log_admin_action(
     $admin['id'],
@@ -628,7 +649,7 @@ if ($action === 'preview') {
   $stmt = db()->prepare("SELECT pdf_preview_path FROM soumissions WHERE id=?");
   $stmt->execute([$id]);
   $path = $stmt->fetchColumn();
-  if (!$path || !is_file($path)) fail('PDF introuvable', 404);
+  if (!$path || !fichier_dans_uploads((string)$path, (string)$cfg['uploads_dir'])) fail('PDF introuvable', 404);
   header('Content-Type: application/pdf');
   header('Content-Disposition: inline; filename="preview.pdf"');
   readfile($path);
@@ -649,7 +670,7 @@ if ($action === 'soumission_image') {
   foreach ($images ?: [] as $img) {
     if (basename((string)$img) === $file) { $path = $img; break; }
   }
-  if (!$path || !is_file($path)) fail('Image introuvable', 404);
+  if (!$path || !fichier_dans_uploads((string)$path, (string)$cfg['uploads_dir'])) fail('Image introuvable', 404);
   $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
   $mime = match ($ext) {
     'jpg', 'jpeg' => 'image/jpeg',
@@ -1255,6 +1276,10 @@ if ($action === 'valider') {
     fail($published['message'] ?? message_doublon_epreuve(), 409);
   }
   $newId = $published['epreuve_id'];
+  if (!soumission_recompense_pour_validateur((string)$user['id'], (string)$sub['soumis_par'])
+      && column_exists('soumissions', 'recompense_eligible')) {
+    db()->prepare('UPDATE soumissions SET recompense_eligible=0 WHERE id=?')->execute([$id]);
+  }
   $reward = reward_contributor($sub['soumis_par']);
   $authorNom = db()->prepare('SELECT nom FROM users WHERE id = ?');
   $authorNom->execute([$sub['soumis_par']]);
@@ -1405,7 +1430,7 @@ if ($action === 'notifier_abonnes') {
   $titre = trim($body['titre'] ?? '');
   $message = trim($body['message'] ?? $body['corps'] ?? '');
   $type = trim($body['type'] ?? 'info');
-  $url = trim($body['url'] ?? '/account/notifications') ?: '/account/notifications';
+  $url = url_interne_sure(trim($body['url'] ?? '')) ?? '/account/notifications';
 
   if ($titre === '' || $message === '') fail('titre et message requis');
 

@@ -34,9 +34,14 @@ if ($action === 'subscribe') {
     }
     if ($ab['statut'] !== 'en_attente') fail('Paiement non modifiable');
 
-    $paye = $fournisseur->estSimule();
+    $paye = false;
     $eventId = 'simulated:' . $reference . ':client';
-    if (!$fournisseur->estSimule()) {
+    if ($fournisseur->estSimule()) {
+      if (!confirmation_client_peut_activer(true, false)) {
+        fail('Paiement non confirmé par l\'opérateur', 402);
+      }
+      $paye = true;
+    } else {
       $providerRef = column_exists('abonnements', 'provider_ref') ? ($ab['provider_ref'] ?? null) : null;
       try {
         $statut = $fournisseur->consulterStatut($reference, $providerRef ? (string)$providerRef : null);
