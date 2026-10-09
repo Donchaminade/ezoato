@@ -4,10 +4,16 @@ declare(strict_types=1);
 require __DIR__ . '/helpers.php';
 require __DIR__ . '/lib/storage-paths.php';
 require __DIR__ . '/lib/image-pdf.php';
+require_once __DIR__ . '/lib/corrections/bootstrap.php';
 
 cors();
 $user = require_user();
 $cfg  = require __DIR__ . '/config.php';
+
+$attestationErreur = correction_attestation_requise($_POST['attestation_enonce'] ?? null);
+if ($attestationErreur) {
+  fail($attestationErreur);
+}
 
 $payload = validate_soumission_payload($_POST);
 $niveau = $payload['niveau'];
@@ -152,6 +158,11 @@ if ($hasDedupCol) {
 }
 $enCourse = compter_soumissions_en_course($dedupKey, $id);
 
+$scanCorrige = correction_detecter_corrige(implode("\n", array_filter([
+  $titre, $matiere, $etab ?? '', correction_extrait_texte_fichier($pdfPath),
+])));
+correction_enregistrer_signalement_soumission($id, $scanCorrige, true);
+
 dispatch_notification_event('soumission_recue', [
   'nom' => $user['nom'] ?? 'Contributeur',
   'titre' => $titre,
@@ -164,6 +175,8 @@ json_out([
   'tailleKo' => $tailleKo,
   'doublonsPotentiels' => $doublons,
   'similairesCount' => count($doublons),
+  'signalementCorrige' => $scanCorrige['signale'],
+  'signalementMotif' => $scanCorrige['motif'],
   'storagePath' => "soumissions/$annee/" . type_folder($type) . "/$id",
   'avertissementCourse' => $enCourse > 0
     ? "D'autres soumissions de cette épreuve sont déjà en attente. Seule la première validée par l'admin sera rémunérée."

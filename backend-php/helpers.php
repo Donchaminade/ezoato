@@ -1013,6 +1013,9 @@ function map_soumission(array $row): array {
     'motifRejet' => $row['motif_rejet'] ?? null,
     'doublonsPotentiels' => $doublons ?: null,
     'similairesCount' => count($doublons),
+    'signalementCorrige' => !empty($row['signalement_corrige']),
+    'signalementMotif' => $row['signalement_motif'] ?? null,
+    'attestationEnonce' => !empty($row['attestation_enonce']),
   ];
 }
 

@@ -18,6 +18,9 @@ import {
   UserCircle,
   Bell,
   Crown,
+  PenLine,
+  ShieldCheck,
+  ListChecks,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
 
@@ -34,7 +37,8 @@ export type AdminSection =
   | "users"
   | "settings"
   | "notifications"
-  | "abonnements";
+  | "abonnements"
+  | "corrections";
 
 export type UserSection =
   | "overview"
@@ -44,7 +48,10 @@ export type UserSection =
   | "portefeuille"
   | "abonnement"
   | "profil"
-  | "submit";
+  | "submit"
+  | "corrections"
+  | "correcteur"
+  | "validateur";
 
 export type DashboardNavItem = {
   id: string;
@@ -123,6 +130,13 @@ export function getAdminNavGroups(isAdmin: boolean, badges?: {
           to: "/admin",
           search: section("retraits"),
           badge: badges?.retraits,
+        },
+        {
+          id: "corrections",
+          label: "Demandes de correction",
+          shortLabel: "Corrections",
+          icon: ListChecks,
+          to: "/admin/corrections",
         },
       ],
     },
@@ -222,6 +236,9 @@ export const USER_DASHBOARD_PATHS = {
   abonnement: "/account/abonnement",
   profil: "/account/profil",
   submit: "/submit",
+  corrections: "/corrections",
+  correcteur: "/corrections/correcteur",
+  validateur: "/corrections/validateur",
 } as const satisfies Record<UserSection, string>;
 
 /** Déduit la section active depuis l'URL (source de vérité). */
@@ -232,13 +249,21 @@ export function resolveUserActiveSection(pathname: string, explicit?: UserSectio
   if (pathname.startsWith("/account/portefeuille") || pathname === "/contributor") return "portefeuille";
   if (pathname.startsWith("/account/abonnement")) return "abonnement";
   if (pathname.startsWith("/account/profil")) return "profil";
+  if (pathname.startsWith("/corrections/correcteur") || pathname.startsWith("/corrections/candidature")) {
+    return "correcteur";
+  }
+  if (pathname.startsWith("/corrections/validateur")) return "validateur";
+  if (pathname.startsWith("/corrections")) return "corrections";
   if (pathname === "/submit") return "submit";
   if (pathname === "/account" || pathname === "/account/") return "overview";
   return explicit ?? "overview";
 }
 
 export function isContributorDashboard(pathname: string): boolean {
-  return pathname.startsWith("/account") || pathname === "/contributor" || pathname === "/submit";
+  return pathname.startsWith("/account")
+    || pathname === "/contributor"
+    || pathname === "/submit"
+    || pathname.startsWith("/corrections");
 }
 
 /** Contributeur : une seule section active (par id), sans matching par préfixe d'URL. */
@@ -270,6 +295,9 @@ export function userSectionLabel(section: UserSection): string {
     abonnement: "Abonnement Pro",
     profil: "Mon profil",
     submit: "Soumettre une épreuve",
+    corrections: "Demandes de correction",
+    correcteur: "Espace correcteur",
+    validateur: "Espace validateur",
   };
   return labels[section];
 }
@@ -345,6 +373,27 @@ export function getUserNavGroups(badges?: {
           icon: Upload,
           to: "/submit",
         },
+        {
+          id: "corrections",
+          label: "Demander une correction",
+          shortLabel: "Correction",
+          icon: PenLine,
+          to: "/corrections",
+        },
+        {
+          id: "correcteur",
+          label: "Espace correcteur",
+          shortLabel: "Correcteur",
+          icon: PenLine,
+          to: "/corrections/correcteur",
+        },
+        {
+          id: "validateur",
+          label: "Espace validateur",
+          shortLabel: "Valider",
+          icon: ShieldCheck,
+          to: "/corrections/validateur",
+        },
       ],
     },
   ];
@@ -370,6 +419,7 @@ export function adminSectionLabel(section: AdminSection): string {
     notifications: "Notifications",
     abonnements: "Abonnements",
     settings: "Paramètres",
+    corrections: "Demandes de correction",
   };
   return labels[section];
 }

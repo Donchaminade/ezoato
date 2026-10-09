@@ -339,6 +339,17 @@ class _EpreuveDetailScreenState extends ConsumerState<EpreuveDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  EzoaScrollReveal(
+                    child: EzoaButton(
+                      label: 'Demander une correction',
+                      variant: EzoaButtonVariant.outline,
+                      onPressed: () => context.push(
+                        '/corrections/nouvelle?epreuve=${widget.id}',
+                      ),
+                      icon: LucideIcons.pencil,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                 ],
                 if (isOnline)
                   EzoaScrollReveal(

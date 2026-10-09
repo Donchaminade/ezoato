@@ -20,6 +20,7 @@ class AccountMenuScreen extends ConsumerWidget {
   static const _accountSection = <_MenuEntry>[
     ('Profil', 'Informations & sécurité', '/account/profile', LucideIcons.user),
     ('Mes soumissions', 'Suivi de vos épreuves soumises', '/account/soumissions', LucideIcons.clipboardList),
+    ('Demandes de correction', 'Suivi et nouvelles demandes', '/corrections', LucideIcons.pencil),
     ('Portefeuille & gains', 'Solde, récompenses et retraits', '/account/portefeuille', LucideIcons.wallet),
   ];
 

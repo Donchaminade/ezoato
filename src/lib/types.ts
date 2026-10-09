@@ -382,6 +382,9 @@ export interface Soumission {
   motifRejet?: string;
   doublonsPotentiels?: string[];
   similairesCount?: number;
+  signalementCorrige?: boolean;
+  signalementMotif?: string | null;
+  attestationEnonce?: boolean;
 }
 
 export interface SimilarEpreuveMatch {

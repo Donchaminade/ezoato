@@ -279,6 +279,18 @@ function EpreuveDetail() {
                   </div>
                 )}
 
+                <div className="mb-4 rounded-xl border border-border bg-card p-5">
+                  <h3 className="font-display text-lg font-semibold">Besoin d'un coup de main ?</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Décris les exercices qui te bloquent. L'aide reste commentée : la réponse directe n'est pas le point de départ.
+                  </p>
+                  <Button asChild className="mt-4" variant="outline">
+                    <a href={`/corrections/nouvelle?epreuve=${encodeURIComponent(data.id)}`}>
+                      Demander une correction
+                    </a>
+                  </Button>
+                </div>
+
                 <RevisionWorkspace
                   epreuveId={data.id}
                   epreuveTitle={data.titre}
