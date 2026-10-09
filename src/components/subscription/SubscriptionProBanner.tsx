@@ -60,7 +60,7 @@ export function SubscriptionProUpgradeBanner({
           </p>
           {!compact && (
             <p className="mt-1 text-xs text-muted-foreground">
-              Toutes les épreuves payantes, sans payer à chaque fois.
+              Examens officiels, concours, corrigés, et la suite au-delà des 50 épreuves gratuites.
             </p>
           )}
         </div>

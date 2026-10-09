@@ -244,16 +244,16 @@ sections Achats / Gratuits conservées avec RefreshIndicator.
 
 ## Paiement Flooz/TMoney
 
-Le détail d'une épreuve payante affiche le prix (`GET /paiements/acces/{id}`) et un
-bouton « Payer avec Flooz / T-Money » :
+L'accès Pro se souscrit depuis l'écran Abonnement (1 000 FCFA / 6 mois) :
 
-1. Choix de la méthode (`flooz` / `tmoney`) + numéro de téléphone
-2. `POST /paiements/initier` → référence + instructions USSD affichées étape par étape
-3. L'utilisateur paie sur son téléphone puis appuie sur « J'ai payé — Confirmer »
-4. `POST /paiements/confirmer` → accès débloqué, téléchargement disponible
+1. Choix Flooz ou T-Money + numéro de téléphone
+2. `POST /account/abonnement/subscribe` → référence, fournisseur (`simulated`, `paygate` ou `fedapay`) et éventuelle `redirectUrl`
+3. Sans clé d'opérateur, le bouton est libellé « Confirmer (simulation) » et active le Pro tout de suite
+4. Avec un vrai fournisseur, l'app ouvre la page de paiement puis « J'ai payé — vérifier » interroge le statut ; le webhook `POST /webhooks/paiement` active aussi le Pro, de façon idempotente
 
-> Le backend simule la confirmation (pas d'API opérateur). Le retrait contributeur
-> (`POST /wallet/retrait`) suit le même choix Flooz/TMoney depuis le portefeuille.
+Le détail d'une épreuve Pro ou au-delà du quota affiche le paywall abonnement (plus d'achat à l'unité). Le compteur « X/50 épreuves gratuites » vient de `GET /paiements/acces/{id}` et du statut d'abonnement.
+
+> Le fournisseur simulé reste le défaut tant qu'aucune clé n'est configurée, en dev comme en prod. Le retrait contributeur (`POST /wallet/retrait`) suit le même choix Flooz/TMoney depuis le portefeuille. Barème : 1 000 FCFA pour 50 épreuves validées, retrait dès 2 000 FCFA. Un devoir exige l'établissement ; une composition collège/lycée n'en a pas.
 
 ## Soumission d'épreuve
 

@@ -4,10 +4,16 @@ declare(strict_types=1);
 require __DIR__ . '/helpers.php';
 require __DIR__ . '/lib/storage-paths.php';
 require __DIR__ . '/lib/image-pdf.php';
+require_once __DIR__ . '/lib/corrections/bootstrap.php';
 
 cors();
 $user = require_user();
 $cfg  = require __DIR__ . '/config.php';
+
+$attestationErreur = correction_attestation_requise($_POST['attestation_enonce'] ?? null);
+if ($attestationErreur) {
+  fail($attestationErreur);
+}
 
 $payload = validate_soumission_payload($_POST);
 $niveau = $payload['niveau'];
@@ -21,6 +27,33 @@ $examen = $payload['examen'];
 $ville = $payload['ville'];
 $etab = $payload['etablissement'];
 $metaNiveau = $payload['meta_niveau'];
+
+$dedupKey = epreuve_dedup_key([
+  'niveau' => $niveau,
+  'type' => $type,
+  'matiere' => $matiere,
+  'classe' => $classe,
+  'annee' => $annee,
+  'periode' => $periode,
+  'examen' => $examen,
+  'etablissement' => $etab,
+  'meta_niveau' => $metaNiveau,
+]);
+$doublonValide = trouver_doublon_valide([
+  'dedup_key' => $dedupKey,
+  'niveau' => $niveau,
+  'type' => $type,
+  'matiere' => $matiere,
+  'classe' => $classe,
+  'annee' => $annee,
+  'periode' => $periode,
+  'examen' => $examen,
+  'etablissement' => $etab,
+  'meta_niveau' => $metaNiveau,
+]);
+if ($doublonValide) {
+  fail(message_doublon_epreuve(), 409);
+}
 
 $pdfFile = $_FILES['pdf'] ?? null;
 $hasPdf = $pdfFile && ($pdfFile['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK;
@@ -101,15 +134,34 @@ if ($etab) {
 
 $metaJson = $metaNiveau ? json_encode($metaNiveau, JSON_UNESCAPED_UNICODE) : null;
 
-db()->prepare("INSERT INTO soumissions
-  (id,titre,matiere,niveau,classe,annee,type,periode,examen,meta_niveau,etablissement_id,ville,
-   images_json,pdf_preview_path,soumis_par,statut,doublons_json)
-  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
-  ->execute([
-    $id, $titre, $matiere, $niveau, $classe, $annee, $type, $periode, $examen, $metaJson,
-    $etabId, $ville, json_encode($savedPaths), $pdfPath, $user['id'], 'en_attente',
-    $doublons ? json_encode($doublons) : null,
-  ]);
+$hasDedupCol = column_exists('soumissions', 'dedup_key');
+if ($hasDedupCol) {
+  db()->prepare("INSERT INTO soumissions
+    (id,titre,matiere,niveau,classe,annee,type,periode,examen,meta_niveau,etablissement_id,ville,dedup_key,
+     images_json,pdf_preview_path,soumis_par,statut,doublons_json)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+    ->execute([
+      $id, $titre, $matiere, $niveau, $classe, $annee, $type, $periode, $examen, $metaJson,
+      $etabId, $ville, $dedupKey, json_encode($savedPaths), $pdfPath, $user['id'], 'en_attente',
+      $doublons ? json_encode($doublons) : null,
+    ]);
+} else {
+  db()->prepare("INSERT INTO soumissions
+    (id,titre,matiere,niveau,classe,annee,type,periode,examen,meta_niveau,etablissement_id,ville,
+     images_json,pdf_preview_path,soumis_par,statut,doublons_json)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+    ->execute([
+      $id, $titre, $matiere, $niveau, $classe, $annee, $type, $periode, $examen, $metaJson,
+      $etabId, $ville, json_encode($savedPaths), $pdfPath, $user['id'], 'en_attente',
+      $doublons ? json_encode($doublons) : null,
+    ]);
+}
+$enCourse = compter_soumissions_en_course($dedupKey, $id);
+
+$scanCorrige = correction_detecter_corrige(implode("\n", array_filter([
+  $titre, $matiere, $etab ?? '', correction_extrait_texte_fichier($pdfPath),
+])));
+correction_enregistrer_signalement_soumission($id, $scanCorrige, true);
 
 dispatch_notification_event('soumission_recue', [
   'nom' => $user['nom'] ?? 'Contributeur',
@@ -123,5 +175,10 @@ json_out([
   'tailleKo' => $tailleKo,
   'doublonsPotentiels' => $doublons,
   'similairesCount' => count($doublons),
+  'signalementCorrige' => $scanCorrige['signale'],
+  'signalementMotif' => $scanCorrige['motif'],
   'storagePath' => "soumissions/$annee/" . type_folder($type) . "/$id",
+  'avertissementCourse' => $enCourse > 0
+    ? "D'autres soumissions de cette épreuve sont déjà en attente. Seule la première validée par l'admin sera rémunérée."
+    : null,
 ]);

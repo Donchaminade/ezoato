@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/config/subscription_constants.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/ezoa_theme.dart';
+import '../../../core/utils/external_links.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
 import '../data/subscription_providers.dart';
@@ -81,7 +82,7 @@ class AbonnementScreen extends ConsumerWidget {
                     ] else if (s.expire) ...[
                       Text(
                         'Votre abonnement a expiré. Renouvelez (${s.montant} FCFA / ${s.dureeMois} mois) '
-                        'pour retrouver l\'accès illimité aux épreuves payantes.',
+                        'pour les examens officiels, les concours et la suite au-delà des 50 épreuves gratuites.',
                         style: EzoaTypography.bodySmall(context).copyWith(
                           color: EzoaColors.of(context).error,
                         ),
@@ -95,10 +96,17 @@ class AbonnementScreen extends ConsumerWidget {
                       ],
                     ] else ...[
                       Text(
-                        'Accédez à toutes les épreuves payantes (examens nationaux et corrigés types) '
-                        'sans payer à chaque fois.',
+                        '50 devoirs et compositions sont gratuits. Au-delà, et dès la première épreuve '
+                        'pour le CEPD, le BEPC, le BAC, les concours et les corrigés, passe en Pro.',
                         style: EzoaTypography.bodySmall(context),
                       ),
+                      if (s.freemiumDisplay != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          s.freemiumDisplay!,
+                          style: EzoaTypography.titleSmall(context),
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       _InfoRow(
                         label: 'Tarif',
@@ -192,7 +200,7 @@ class _CommentCaMarche extends StatelessWidget {
     final steps = [
       (
         'Accès Pro',
-        'Toutes les épreuves payantes (examens nationaux et corrigés types) '
+        'Examens officiels, concours, corrigés, et la suite après les 50 épreuves gratuites, '
             'pendant $dureeMois mois.',
       ),
       (
@@ -202,8 +210,7 @@ class _CommentCaMarche extends StatelessWidget {
       ),
       (
         'Activation',
-        'Payez par Flooz ou T-Money, puis confirmez : '
-            'l’accès Pro s’active immédiatement.',
+        'Payez par Flooz ou T-Money. L\'accès Pro s\'active une fois le paiement vérifié.',
       ),
       (
         'À la fin',
@@ -390,7 +397,7 @@ class _SubscriptionPaymentSheetState extends ConsumerState<SubscriptionPaymentSh
                 const SizedBox(height: 8),
                 if (init == null)
                   Text(
-                    'Accès illimité à toutes les épreuves payantes pendant $kSubscriptionDurationMonths mois.',
+                    'Pro pendant $kSubscriptionDurationMonths mois : examens officiels, concours, et au-delà des 50 épreuves gratuites.',
                     style: EzoaTypography.bodySmall(context),
                   ),
                 const SizedBox(height: 16),
@@ -438,8 +445,26 @@ class _SubscriptionPaymentSheetState extends ConsumerState<SubscriptionPaymentSh
                       ),
                     ),
                   const SizedBox(height: 16),
+                  if (init.redirectUrl != null && init.redirectUrl!.isNotEmpty) ...[
+                    EzoaButton(
+                      label: 'Ouvrir la page de paiement',
+                      variant: EzoaButtonVariant.outline,
+                      onPressed: () => openExternalUrl(init.redirectUrl!),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  if (init.simulated)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Text(
+                        'Paiement simulé : aucune somme n\'est débitée tant qu\'un opérateur n\'est pas configuré.',
+                        style: EzoaTypography.bodySmall(context),
+                      ),
+                    ),
                   EzoaButton(
-                    label: 'J\'ai payé — confirmer',
+                    label: init.simulated
+                        ? 'Confirmer (simulation)'
+                        : 'J\'ai payé — vérifier',
                     loading: _loading,
                     onPressed: _loading ? null : _confirmer,
                   ),

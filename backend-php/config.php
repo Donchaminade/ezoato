@@ -27,11 +27,24 @@ return [
     /** Durée d'accès après paiement confirmé (aperçu, téléchargement) */
     'access_months' => 6,
   ],
-  /** Abonnement plateforme — accès à toutes les épreuves payantes */
+  /** Abonnement plateforme — 1 000 FCFA / 6 mois (Flooz ou T-Money) */
   'abonnement' => [
     'montant' => 1000, // SUBSCRIPTION_PRICE FCFA
     'duree_mois' => 6, // SUBSCRIPTION_DURATION_MONTHS
     'expiration_minutes' => 15,
+  ],
+  /**
+   * Freemium — lu à l'exécution via les variables d'environnement
+   * (EZOATO_FREEMIUM_QUOTA, EZOATO_FREEMIUM_QUOTA_MODE, …).
+   * Défaut : quota commun de 50 pour devoirs et compositions.
+   * Quotas séparés : EZOATO_FREEMIUM_QUOTA_MODE=separate
+   *   et EZOATO_FREEMIUM_QUOTA_DEVOIR / EZOATO_FREEMIUM_QUOTA_COMPOSITION.
+   * Le fournisseur de paiement est simulé tant que PAYGATE_AUTH_TOKEN
+   * ou FEDAPAY_SECRET_KEY n'est pas défini. Voir .env.example.
+   */
+  'freemium' => [
+    'quota' => 50,
+    'mode' => 'shared',
   ],
   'contributeur' => [
     'epreuves_par_recompense' => 50,

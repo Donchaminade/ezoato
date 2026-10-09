@@ -65,6 +65,9 @@ function ai_deps_from_db(array $user): array
     'requiresPayment' => static function (?array $row): bool {
       return is_array($row) && requires_payment($row);
     },
+    'searchCatalog' => static function (array $filters): array {
+      return ai_guide_search_sql(db(), $filters);
+    },
     'hasPremium' => static function (string $userId) use ($user): bool {
       if ($userId === ($user['id'] ?? '')) {
         return ai_user_is_premium($user);
@@ -122,6 +125,17 @@ try {
   if ($action === 'coach') {
     ai_require_json_post($method);
     json_out(ai_handle_coach($user, ai_json_input(), $deps));
+  }
+
+  if ($action === 'guide') {
+    if ($method !== 'POST') {
+      fail('Méthode non autorisée', 405);
+    }
+    $in = ai_request_body();
+    if (ai_is_multipart()) {
+      $deps['uploadedImage'] = $_FILES['image'] ?? $_FILES['photo'] ?? null;
+    }
+    json_out(ai_handle_guide($user, $in, $deps));
   }
 
   if ($action === 'judge') {

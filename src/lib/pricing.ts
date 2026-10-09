@@ -11,15 +11,44 @@ export const EPREUVES_PAR_RECOMPENSE = 50;
 export const MONTANT_RECOMPENSE = 1000;
 export const MIN_RETRAIT = 2000;
 
-export function requiresPayment(epreuve: Pick<Epreuve, "type" | "examen">): boolean {
+const EXAMENS_OFFICIELS = ["CEPD", "BEPC", "BAC1", "BAC2"] as const;
+
+/** Pro dès la première épreuve : examens officiels, concours, corrigés. */
+export function isProTier(
+  epreuve: Pick<Epreuve, "type" | "examen"> & {
+    niveau?: Epreuve["niveau"];
+    accessTier?: Epreuve["accessTier"];
+    requiresPro?: boolean;
+  },
+): boolean {
+  if (epreuve.accessTier === "quota") return false;
+  if (epreuve.accessTier === "pro" || epreuve.requiresPro) return true;
   if (epreuve.type === "corrige") return true;
-  return epreuve.type === "examen" && !!epreuve.examen;
+  if (epreuve.niveau === "concours") return true;
+  return (
+    epreuve.type === "examen" &&
+    !!epreuve.examen &&
+    (EXAMENS_OFFICIELS as readonly string[]).includes(epreuve.examen)
+  );
 }
 
-export function getPrixFcfa(epreuve: Pick<Epreuve, "type" | "examen" | "prixFcfa">): number {
+export function requiresPayment(
+  epreuve: Pick<Epreuve, "type" | "examen"> & {
+    niveau?: Epreuve["niveau"];
+    accessTier?: Epreuve["accessTier"];
+    requiresPro?: boolean;
+  },
+): boolean {
+  return isProTier(epreuve);
+}
+
+export function getPrixFcfa(epreuve: Pick<Epreuve, "type" | "examen" | "prixFcfa"> & {
+  niveau?: Epreuve["niveau"];
+  accessTier?: Epreuve["accessTier"];
+  requiresPro?: boolean;
+}): number {
+  if (isProTier(epreuve)) return 0;
   if (epreuve.prixFcfa != null) return epreuve.prixFcfa;
-  if (epreuve.type === "corrige") return PRIX_CORRIGE_TYPE;
-  if (requiresPayment(epreuve)) return PRIX_EXAMEN_NATIONAL;
   return 0;
 }
 

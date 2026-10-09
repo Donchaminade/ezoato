@@ -172,6 +172,9 @@ function validate_soumission_payload(array $in): array {
       if ($type === 'devoir' && !$etablissement) {
         fail('Établissement requis pour un devoir');
       }
+      if ($type === 'composition') {
+        $etablissement = null;
+      }
       $periodesOk = $niveau === 'lycee' ? ['S1', 'S2'] : ['T1', 'T2', 'T3'];
       if (!in_array($periode, $periodesOk, true)) {
         fail('Période invalide pour ce niveau');

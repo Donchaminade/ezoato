@@ -38,7 +38,7 @@ function AbonnementContent() {
   return (
     <UserDashboardShell
       title="Abonnement Pro"
-      subtitle={`${formatFcfa(SUBSCRIPTION_PRICE)} / ${SUBSCRIPTION_DURATION_MONTHS} mois — accès illimité`}
+      subtitle={`${formatFcfa(SUBSCRIPTION_PRICE)} / ${SUBSCRIPTION_DURATION_MONTHS} mois — examens officiels, concours et au-delà des 50 gratuites`}
       activeSection="abonnement"
       onRefresh={() => refetch()}
     >

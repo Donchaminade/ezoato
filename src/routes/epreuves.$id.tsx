@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
-  Download, ArrowLeft, FileText, Lock, CreditCard, Loader2,
+  Download, ArrowLeft, FileText, Lock, Loader2,
   MapPin, Calendar, Building2, Share2, Eye, CheckCircle2, ClipboardCheck, Crown,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,18 +11,15 @@ import { PageHeroBadge } from "@/components/layout/PageHeroBadge";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  AuthenticatedImage,
-  AuthenticatedPdf,
-  PORTRAIT_PREVIEW_FRAME,
-} from "@/components/admin/AuthenticatedMedia";
+import { AuthenticatedPdf } from "@/components/admin/AuthenticatedMedia";
 import { RevisionWorkspace } from "@/components/ai/RevisionWorkspace";
-import { PaymentDialog } from "@/components/payments/PaymentDialog";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { shareEpreuve } from "@/lib/epreuve-share";
-import { formatFcfa, getPrixFcfa, requiresPayment, typeLabel } from "@/lib/pricing";
+import { isProTier, typeLabel } from "@/lib/pricing";
 import { subscriptionProCtaLabel } from "@/components/subscription/SubscriptionProBanner";
+import { FreemiumQuotaNote } from "@/components/subscription/FreemiumQuotaNote";
+import { EpreuveReader } from "@/components/epreuves/EpreuveReader";
 
 export const Route = createFileRoute("/epreuves/$id")({
   head: () => ({
@@ -35,8 +32,6 @@ function EpreuveDetail() {
   const { id } = Route.useParams();
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [payOpen, setPayOpen] = useState(false);
-  const [payCorrigeOpen, setPayCorrigeOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadingCorrige, setDownloadingCorrige] = useState(false);
 
@@ -48,21 +43,26 @@ function EpreuveDetail() {
   const corrigeId = data?.corrigeType?.id;
   const isCorrigePage = data?.type === "corrige";
 
-  const { data: access, refetch: refetchAccess } = useQuery({
+  const { data: access } = useQuery({
     queryKey: ["payment-access", id],
     queryFn: () => api.checkPaymentAccess(id),
-    enabled: !!user && !!data && requiresPayment(data),
+    enabled: !!user && !!data,
   });
 
-  const { data: corrigeAccess, refetch: refetchCorrigeAccess } = useQuery({
+  const { data: corrigeAccess } = useQuery({
     queryKey: ["payment-access", corrigeId],
     queryFn: () => api.checkPaymentAccess(corrigeId!),
     enabled: !!user && !!corrigeId,
   });
 
-  const isPaid = data ? requiresPayment(data) : false;
-  const hasAccess = !isPaid || access?.hasAccess;
+  const isPaid = data ? isProTier(data) : false;
+  const hasAccess = !user ? !isPaid : access ? access.hasAccess : !isPaid;
   const corrigeHasAccess = corrigeAccess?.hasAccess ?? false;
+  const quotaLabel = access?.quota?.usage?.label ?? access?.quota?.label;
+  const lockMessage = access?.message
+    ?? (isPaid
+      ? "Les examens officiels et les concours demandent l'abonnement Pro dès la première épreuve."
+      : "Ton quota d'épreuves gratuites est atteint. Passe en Pro pour continuer.");
 
   async function handleDownload(epreuveId: string, setLoading: (v: boolean) => void) {
     setLoading(true);
@@ -139,9 +139,11 @@ function EpreuveDetail() {
             <div className="flex flex-wrap items-center gap-2">
               {data.examen && <Badge variant="outline">{data.examen}</Badge>}
               {isPaid ? (
-                <Badge variant="secondary"><Lock className="size-3" /> {formatFcfa(getPrixFcfa(data))}</Badge>
+                <Badge variant="secondary"><Lock className="size-3" /> Pro</Badge>
               ) : (
-                <Badge className="border-0 bg-success/15 text-success">Gratuit</Badge>
+                <Badge className="border-0 bg-success/15 text-success">
+                  {quotaLabel && user && !access?.hasSubscription ? `${quotaLabel} épreuves gratuites` : "Quota gratuit"}
+                </Badge>
               )}
             </div>
             <div className="mt-4 flex flex-wrap gap-3">
@@ -153,23 +155,24 @@ function EpreuveDetail() {
                   <Link to="/auth/login">Se connecter pour télécharger</Link>
                 </Button>
               ) : hasAccess ? (
-                <Button size="lg" onClick={() => handleDownload(data.id, setDownloading)} disabled={downloading}>
-                  {downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-                  Télécharger le PDF
-                </Button>
-              ) : (
                 <>
-                  <Button size="lg" asChild>
-                    <Link to="/account/abonnement">
-                      <Crown className="size-4" />
-                      {subscriptionProCtaLabel()}
-                    </Link>
+                  <Button size="lg" asChild variant="default">
+                    <a href="#visionneuse">
+                      <Eye className="size-4" /> Lire l&apos;épreuve
+                    </a>
                   </Button>
-                  <Button size="lg" variant="outline" onClick={() => setPayOpen(true)}>
-                    <CreditCard className="size-4" />
-                    Payer {formatFcfa(getPrixFcfa(data))} et télécharger
+                  <Button size="lg" variant="outline" onClick={() => handleDownload(data.id, setDownloading)} disabled={downloading}>
+                    {downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+                    Télécharger le PDF
                   </Button>
                 </>
+              ) : (
+                <Button size="lg" asChild>
+                  <Link to="/account/abonnement">
+                    <Crown className="size-4" />
+                    {subscriptionProCtaLabel()}
+                  </Link>
+                </Button>
               )}
               <Button size="lg" variant="outline" onClick={handleShare}>
                 <Share2 className="size-4" /> Partager
@@ -185,40 +188,29 @@ function EpreuveDetail() {
                     <Eye className="size-5" /> Aperçu
                   </h2>
                   <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
-                    {isPaid && !hasAccess ? (
+                    {!hasAccess ? (
                       <div className="grid min-h-[320px] place-items-center bg-muted/30 p-8 text-center text-muted-foreground">
                         <Lock className="mx-auto size-12 text-gold opacity-80" />
                         <p className="mt-4 font-medium text-foreground">Aperçu verrouillé</p>
-                        <p className="mt-2 text-sm">
-                          Cette épreuve compte {data.pages} pages. Payez {formatFcfa(getPrixFcfa(data))} pour débloquer
-                          l&apos;aperçu et le téléchargement (accès 6 mois).
-                        </p>
+                        <p className="mt-2 text-sm">{lockMessage}</p>
+                        {quotaLabel && user && !access?.hasSubscription && (
+                          <p className="mt-2 text-sm font-semibold text-foreground">{quotaLabel} épreuves gratuites</p>
+                        )}
                         {user ? (
-                          <div className="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                            <Button asChild>
-                              <Link to="/account/abonnement">
-                                <Crown className="size-4" />
-                                Passer en abonnement Pro
-                              </Link>
-                            </Button>
-                            <Button variant="outline" onClick={() => setPayOpen(true)}>
-                              <CreditCard className="size-4" />
-                              Débloquer — {formatFcfa(getPrixFcfa(data))}
-                            </Button>
-                          </div>
+                          <Button asChild className="mt-5">
+                            <Link to="/account/abonnement">
+                              <Crown className="size-4" />
+                              Passer en abonnement Pro
+                            </Link>
+                          </Button>
                         ) : (
                           <Button asChild className="mt-5">
-                            <Link to="/auth/login">Se connecter pour payer</Link>
+                            <Link to="/auth/login">Se connecter pour continuer</Link>
                           </Button>
                         )}
                       </div>
-                    ) : data.thumbnailUrl ? (
-                      <AuthenticatedImage
-                        url={data.thumbnailUrl}
-                        alt={`Aperçu — ${data.titre}`}
-                        className={PORTRAIT_PREVIEW_FRAME}
-                        imgClassName="absolute inset-0 h-full w-full object-contain"
-                      />
+                    ) : user && hasAccess && data.thumbnailUrl ? (
+                      <EpreuveReader epreuve={data} />
                     ) : user && hasAccess && data.pdfPreviewUrl ? (
                       <AuthenticatedPdf url={data.pdfPreviewUrl} />
                     ) : (
@@ -242,12 +234,11 @@ function EpreuveDetail() {
                           Corrigé type disponible
                         </h2>
                         <p className="mt-2 text-sm text-muted-foreground">
-                          {data.corrigeType.pages} pages · Accès 6 mois après achat ·{" "}
-                          {formatFcfa(data.corrigeType.prixFcfa)}
+                          {data.corrigeType.pages} pages · Inclus dans l&apos;abonnement Pro
                         </p>
                       </div>
                       <Badge variant="outline" className="border-primary/40">
-                        <Lock className="size-3" /> {formatFcfa(data.corrigeType.prixFcfa)}
+                        <Lock className="size-3" /> Pro
                       </Badge>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-3">
@@ -266,9 +257,11 @@ function EpreuveDetail() {
                           </Button>
                         </>
                       ) : (
-                        <Button onClick={() => setPayCorrigeOpen(true)}>
-                          <CreditCard className="size-4" />
-                          Acheter le corrigé — {formatFcfa(data.corrigeType.prixFcfa)}
+                        <Button asChild>
+                          <Link to="/account/abonnement">
+                            <Crown className="size-4" />
+                            Débloquer avec Pro
+                          </Link>
                         </Button>
                       )}
                       <Button asChild variant="ghost">
@@ -285,6 +278,18 @@ function EpreuveDetail() {
                     )}
                   </div>
                 )}
+
+                <div className="mb-4 rounded-xl border border-border bg-card p-5">
+                  <h3 className="font-display text-lg font-semibold">Besoin d'un coup de main ?</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Décris les exercices qui te bloquent. L'aide reste commentée : la réponse directe n'est pas le point de départ.
+                  </p>
+                  <Button asChild className="mt-4" variant="outline">
+                    <a href={`/corrections/nouvelle?epreuve=${encodeURIComponent(data.id)}`}>
+                      Demander une correction
+                    </a>
+                  </Button>
+                </div>
 
                 <RevisionWorkspace
                   epreuveId={data.id}
@@ -316,19 +321,20 @@ function EpreuveDetail() {
                   </div>
                 )}
 
-                {isPaid && !hasAccess && user && (
+                {user && access?.quota && !access.hasSubscription && (
+                  <FreemiumQuotaNote
+                    label={access.quota.usage?.mode === "separate" ? access.quota.usage.label : `${access.quota.label} épreuves gratuites`}
+                  />
+                )}
+
+                {!hasAccess && user && (
                   <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5 text-sm">
-                    <p className="font-semibold">Contenu payant</p>
-                    <p className="mt-1 text-muted-foreground">
-                      Paiement unique de {formatFcfa(getPrixFcfa(data))} via Flooz ou T-Money, ou abonnement Pro pour tout débloquer.
-                    </p>
+                    <p className="font-semibold">{isPaid ? "Abonnement Pro requis" : "Quota gratuit atteint"}</p>
+                    <p className="mt-1 text-muted-foreground">{lockMessage}</p>
                     <Button className="mt-3 w-full" size="sm" asChild>
                       <Link to="/account/abonnement">
                         <Crown className="size-4" /> {subscriptionProCtaLabel()}
                       </Link>
-                    </Button>
-                    <Button className="mt-2 w-full" size="sm" variant="outline" onClick={() => setPayOpen(true)}>
-                      <CreditCard className="size-4" /> Payer cette épreuve
                     </Button>
                   </div>
                 )}
@@ -355,26 +361,6 @@ function EpreuveDetail() {
         </>
       )}
 
-      {data && (
-        <>
-          <PaymentDialog epreuve={data} open={payOpen} onOpenChange={setPayOpen} onSuccess={() => { refetchAccess(); setPayOpen(false); }} />
-          {data.corrigeType && (
-            <PaymentDialog
-              epreuve={{
-                ...data,
-                id: data.corrigeType.id,
-                titre: data.corrigeType.titre,
-                type: "corrige",
-                prixFcfa: data.corrigeType.prixFcfa,
-                requiresPayment: true,
-              }}
-              open={payCorrigeOpen}
-              onOpenChange={setPayCorrigeOpen}
-              onSuccess={() => { refetchCorrigeAccess(); setPayCorrigeOpen(false); }}
-            />
-          )}
-        </>
-      )}
     </PublicLayout>
   );
 }

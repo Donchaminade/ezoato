@@ -12,9 +12,11 @@ import {
   formatFcfa,
   MIN_RETRAIT,
   MONTANT_RECOMPENSE,
-  PRIX_CORRIGE_TYPE,
-  PRIX_EXAMEN_NATIONAL,
 } from "@/lib/pricing";
+import {
+  SUBSCRIPTION_DURATION_MONTHS,
+  SUBSCRIPTION_PRICE,
+} from "@/lib/subscription-constants";
 
 const LAST_UPDATED = "10 juin 2026";
 
@@ -188,9 +190,9 @@ function ConditionsPage() {
               </p>
               <LegalList
                 items={[
-                  `Examen national : ${formatFcfa(PRIX_EXAMEN_NATIONAL)} par téléchargement`,
-                  `Corrigé type : ${formatFcfa(PRIX_CORRIGE_TYPE)} par téléchargement`,
-                  "Devoirs et compositions : gratuits sauf mention contraire",
+                  "Devoirs et compositions : 50 consultations ou téléchargements gratuits par compte, puis abonnement Pro",
+                  `Examens officiels (CEPD, BEPC, BAC), concours et corrigés : abonnement Pro dès la première épreuve (${formatFcfa(SUBSCRIPTION_PRICE)} / ${SUBSCRIPTION_DURATION_MONTHS} mois)`,
+                  "Paiement via Flooz ou T-Money. Les achats unitaires antérieurs déjà confirmés restent valables jusqu'à leur échéance.",
                 ]}
               />
               <p>
@@ -215,7 +217,9 @@ function ConditionsPage() {
                 <strong className="text-foreground">
                   {EPREUVES_PAR_RECOMPENSE} épreuves validées = {formatFcfa(MONTANT_RECOMPENSE)}
                 </strong>
-                , avec un seuil minimum de retrait de {formatFcfa(MIN_RETRAIT)}.
+                , avec un seuil minimum de retrait de {formatFcfa(MIN_RETRAIT)}. Seule la
+                première soumission validée d&apos;une même épreuve est rémunérée ; les suivantes
+                sont refusées comme doublons.
               </p>
               <p>
                 Les récompenses ne constituent pas un salaire ni un contrat de travail.{" "}

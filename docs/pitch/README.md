@@ -68,6 +68,8 @@ Avant d’envoyer le pack :
 | SAM (marché accessible) | ~370 k (Togo × accès digital) |
 | SOM (marché obtenable) | 3–8 k abonnés Pro (18–24 mois) |
 | Prix Pro | 1 000 FCFA / 6 mois (~2 000 FCFA / an) |
+| Freemium | 50 devoirs et compositions gratuits, puis Pro |
+| Contributeurs | 1 000 FCFA pour 50 épreuves validées, retrait dès 2 000 FCFA |
 | Ask | **25 M FCFA** (ticket seed / pré-amorçage ; ≈ ~38 k USD) |
 
 Détail, fourchettes et **URLs sources** : [`SPEAKER-NOTES.md`](./SPEAKER-NOTES.md).

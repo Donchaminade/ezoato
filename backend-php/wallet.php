@@ -6,7 +6,7 @@ cors();
 
 $action = $_GET['action'] ?? '';
 $user = require_user();
-$cfg = cfg()['contributeur'];
+$cfg = contributeur_bareme();
 
 if ($action === 'portefeuille') {
   $w = get_or_create_wallet($user['id']);

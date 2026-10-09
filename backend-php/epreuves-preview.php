@@ -18,12 +18,14 @@ if (!$ep) fail('Introuvable', 404);
 $full = isset($_GET['full']) && $_GET['full'] !== '0' && $_GET['full'] !== '';
 $page = max(1, min(20, (int)($_GET['page'] ?? 1)));
 
-if (requires_payment($ep)) {
+$tier = epreuve_access_tier($ep);
+$lire = isset($_GET['lire']) && $_GET['lire'] !== '0' && $_GET['lire'] !== '';
+$consultation = visionneuse_requiert_acces($tier, $page, $full, $lire);
+if ($consultation) {
   $user = current_user();
   if (!$user) fail('Connexion requise', 401);
-  if (!user_has_access($user['id'], $id)) {
-    fail('Paiement requis pour l\'aperçu', 402);
-  }
+  $eval = evaluer_acces_epreuve($user['id'], $ep, true);
+  refuser_si_acces_interdit($eval);
 }
 
 if ($full) {

@@ -15,6 +15,7 @@ import { Route as ReviserRouteImport } from './routes/reviser'
 import { Route as PartenariatRouteImport } from './routes/partenariat'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DocsRouteImport } from './routes/docs'
+import { Route as CorrectionsRouteImport } from './routes/corrections'
 import { Route as ContributorRouteImport } from './routes/contributor'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConditionsRouteImport } from './routes/conditions'
@@ -23,12 +24,19 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CorrectionsIndexRouteImport } from './routes/corrections.index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as EpreuvesIdRouteImport } from './routes/epreuves.$id'
+import { Route as CorrectionsValidateurRouteImport } from './routes/corrections.validateur'
+import { Route as CorrectionsNouvelleRouteImport } from './routes/corrections.nouvelle'
+import { Route as CorrectionsCorrecteurRouteImport } from './routes/corrections.correcteur'
+import { Route as CorrectionsCandidatureRouteImport } from './routes/corrections.candidature'
+import { Route as CorrectionsIdRouteImport } from './routes/corrections.$id'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
+import { Route as AdminCorrectionsRouteImport } from './routes/admin_.corrections'
 import { Route as AccountSoumissionsRouteImport } from './routes/account.soumissions'
 import { Route as AccountProfilRouteImport } from './routes/account.profil'
 import { Route as AccountPortefeuilleRouteImport } from './routes/account.portefeuille'
@@ -65,6 +73,11 @@ const FaqRoute = FaqRouteImport.update({
 const DocsRoute = DocsRouteImport.update({
   id: '/docs',
   path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorrectionsRoute = CorrectionsRouteImport.update({
+  id: '/corrections',
+  path: '/corrections',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContributorRoute = ContributorRouteImport.update({
@@ -107,6 +120,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CorrectionsIndexRoute = CorrectionsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
 const AccountIndexRoute = AccountIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -116,6 +134,31 @@ const EpreuvesIdRoute = EpreuvesIdRouteImport.update({
   id: '/epreuves/$id',
   path: '/epreuves/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CorrectionsValidateurRoute = CorrectionsValidateurRouteImport.update({
+  id: '/validateur',
+  path: '/validateur',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsNouvelleRoute = CorrectionsNouvelleRouteImport.update({
+  id: '/nouvelle',
+  path: '/nouvelle',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsCorrecteurRoute = CorrectionsCorrecteurRouteImport.update({
+  id: '/correcteur',
+  path: '/correcteur',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsCandidatureRoute = CorrectionsCandidatureRouteImport.update({
+  id: '/candidature',
+  path: '/candidature',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsIdRoute = CorrectionsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CorrectionsRoute,
 } as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -136,6 +179,11 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
   getParentRoute: () => AuthRoute,
+} as any)
+const AdminCorrectionsRoute = AdminCorrectionsRouteImport.update({
+  id: '/admin_/corrections',
+  path: '/admin/corrections',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AccountSoumissionsRoute = AccountSoumissionsRouteImport.update({
   id: '/soumissions',
@@ -182,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/conditions': typeof ConditionsRoute
   '/contact': typeof ContactRoute
   '/contributor': typeof ContributorRoute
+  '/corrections': typeof CorrectionsRouteWithChildren
   '/docs': typeof DocsRoute
   '/faq': typeof FaqRoute
   '/partenariat': typeof PartenariatRoute
@@ -194,12 +243,19 @@ export interface FileRoutesByFullPath {
   '/account/portefeuille': typeof AccountPortefeuilleRoute
   '/account/profil': typeof AccountProfilRoute
   '/account/soumissions': typeof AccountSoumissionsRoute
+  '/admin/corrections': typeof AdminCorrectionsRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/corrections/$id': typeof CorrectionsIdRoute
+  '/corrections/candidature': typeof CorrectionsCandidatureRoute
+  '/corrections/correcteur': typeof CorrectionsCorrecteurRoute
+  '/corrections/nouvelle': typeof CorrectionsNouvelleRoute
+  '/corrections/validateur': typeof CorrectionsValidateurRoute
   '/epreuves/$id': typeof EpreuvesIdRoute
   '/account/': typeof AccountIndexRoute
+  '/corrections/': typeof CorrectionsIndexRoute
   '/account/soumissions/$id': typeof AccountSoumissionsIdRoute
 }
 export interface FileRoutesByTo {
@@ -222,12 +278,19 @@ export interface FileRoutesByTo {
   '/account/portefeuille': typeof AccountPortefeuilleRoute
   '/account/profil': typeof AccountProfilRoute
   '/account/soumissions': typeof AccountSoumissionsRoute
+  '/admin/corrections': typeof AdminCorrectionsRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/corrections/$id': typeof CorrectionsIdRoute
+  '/corrections/candidature': typeof CorrectionsCandidatureRoute
+  '/corrections/correcteur': typeof CorrectionsCorrecteurRoute
+  '/corrections/nouvelle': typeof CorrectionsNouvelleRoute
+  '/corrections/validateur': typeof CorrectionsValidateurRoute
   '/epreuves/$id': typeof EpreuvesIdRoute
   '/account': typeof AccountIndexRoute
+  '/corrections': typeof CorrectionsIndexRoute
   '/account/soumissions/$id': typeof AccountSoumissionsIdRoute
 }
 export interface FileRoutesById {
@@ -240,6 +303,7 @@ export interface FileRoutesById {
   '/conditions': typeof ConditionsRoute
   '/contact': typeof ContactRoute
   '/contributor': typeof ContributorRoute
+  '/corrections': typeof CorrectionsRouteWithChildren
   '/docs': typeof DocsRoute
   '/faq': typeof FaqRoute
   '/partenariat': typeof PartenariatRoute
@@ -252,12 +316,19 @@ export interface FileRoutesById {
   '/account/portefeuille': typeof AccountPortefeuilleRoute
   '/account/profil': typeof AccountProfilRoute
   '/account/soumissions': typeof AccountSoumissionsRoute
+  '/admin_/corrections': typeof AdminCorrectionsRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/corrections/$id': typeof CorrectionsIdRoute
+  '/corrections/candidature': typeof CorrectionsCandidatureRoute
+  '/corrections/correcteur': typeof CorrectionsCorrecteurRoute
+  '/corrections/nouvelle': typeof CorrectionsNouvelleRoute
+  '/corrections/validateur': typeof CorrectionsValidateurRoute
   '/epreuves/$id': typeof EpreuvesIdRoute
   '/account/': typeof AccountIndexRoute
+  '/corrections/': typeof CorrectionsIndexRoute
   '/account/soumissions_/$id': typeof AccountSoumissionsIdRoute
 }
 export interface FileRouteTypes {
@@ -271,6 +342,7 @@ export interface FileRouteTypes {
     | '/conditions'
     | '/contact'
     | '/contributor'
+    | '/corrections'
     | '/docs'
     | '/faq'
     | '/partenariat'
@@ -283,12 +355,19 @@ export interface FileRouteTypes {
     | '/account/portefeuille'
     | '/account/profil'
     | '/account/soumissions'
+    | '/admin/corrections'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
     | '/auth/reset-password'
+    | '/corrections/$id'
+    | '/corrections/candidature'
+    | '/corrections/correcteur'
+    | '/corrections/nouvelle'
+    | '/corrections/validateur'
     | '/epreuves/$id'
     | '/account/'
+    | '/corrections/'
     | '/account/soumissions/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -311,12 +390,19 @@ export interface FileRouteTypes {
     | '/account/portefeuille'
     | '/account/profil'
     | '/account/soumissions'
+    | '/admin/corrections'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
     | '/auth/reset-password'
+    | '/corrections/$id'
+    | '/corrections/candidature'
+    | '/corrections/correcteur'
+    | '/corrections/nouvelle'
+    | '/corrections/validateur'
     | '/epreuves/$id'
     | '/account'
+    | '/corrections'
     | '/account/soumissions/$id'
   id:
     | '__root__'
@@ -328,6 +414,7 @@ export interface FileRouteTypes {
     | '/conditions'
     | '/contact'
     | '/contributor'
+    | '/corrections'
     | '/docs'
     | '/faq'
     | '/partenariat'
@@ -340,12 +427,19 @@ export interface FileRouteTypes {
     | '/account/portefeuille'
     | '/account/profil'
     | '/account/soumissions'
+    | '/admin_/corrections'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
     | '/auth/reset-password'
+    | '/corrections/$id'
+    | '/corrections/candidature'
+    | '/corrections/correcteur'
+    | '/corrections/nouvelle'
+    | '/corrections/validateur'
     | '/epreuves/$id'
     | '/account/'
+    | '/corrections/'
     | '/account/soumissions_/$id'
   fileRoutesById: FileRoutesById
 }
@@ -358,12 +452,14 @@ export interface RootRouteChildren {
   ConditionsRoute: typeof ConditionsRoute
   ContactRoute: typeof ContactRoute
   ContributorRoute: typeof ContributorRoute
+  CorrectionsRoute: typeof CorrectionsRouteWithChildren
   DocsRoute: typeof DocsRoute
   FaqRoute: typeof FaqRoute
   PartenariatRoute: typeof PartenariatRoute
   ReviserRoute: typeof ReviserRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubmitRoute: typeof SubmitRoute
+  AdminCorrectionsRoute: typeof AdminCorrectionsRoute
   EpreuvesIdRoute: typeof EpreuvesIdRoute
 }
 
@@ -409,6 +505,13 @@ declare module '@tanstack/react-router' {
       path: '/docs'
       fullPath: '/docs'
       preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/corrections': {
+      id: '/corrections'
+      path: '/corrections'
+      fullPath: '/corrections'
+      preLoaderRoute: typeof CorrectionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contributor': {
@@ -467,6 +570,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/corrections/': {
+      id: '/corrections/'
+      path: '/'
+      fullPath: '/corrections/'
+      preLoaderRoute: typeof CorrectionsIndexRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
     '/account/': {
       id: '/account/'
       path: '/'
@@ -480,6 +590,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/epreuves/$id'
       preLoaderRoute: typeof EpreuvesIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/corrections/validateur': {
+      id: '/corrections/validateur'
+      path: '/validateur'
+      fullPath: '/corrections/validateur'
+      preLoaderRoute: typeof CorrectionsValidateurRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/nouvelle': {
+      id: '/corrections/nouvelle'
+      path: '/nouvelle'
+      fullPath: '/corrections/nouvelle'
+      preLoaderRoute: typeof CorrectionsNouvelleRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/correcteur': {
+      id: '/corrections/correcteur'
+      path: '/correcteur'
+      fullPath: '/corrections/correcteur'
+      preLoaderRoute: typeof CorrectionsCorrecteurRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/candidature': {
+      id: '/corrections/candidature'
+      path: '/candidature'
+      fullPath: '/corrections/candidature'
+      preLoaderRoute: typeof CorrectionsCandidatureRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/$id': {
+      id: '/corrections/$id'
+      path: '/$id'
+      fullPath: '/corrections/$id'
+      preLoaderRoute: typeof CorrectionsIdRouteImport
+      parentRoute: typeof CorrectionsRoute
     }
     '/auth/reset-password': {
       id: '/auth/reset-password'
@@ -508,6 +653,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/forgot-password'
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/admin_/corrections': {
+      id: '/admin_/corrections'
+      path: '/admin/corrections'
+      fullPath: '/admin/corrections'
+      preLoaderRoute: typeof AdminCorrectionsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/account/soumissions': {
       id: '/account/soumissions'
@@ -602,6 +754,28 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface CorrectionsRouteChildren {
+  CorrectionsIdRoute: typeof CorrectionsIdRoute
+  CorrectionsCandidatureRoute: typeof CorrectionsCandidatureRoute
+  CorrectionsCorrecteurRoute: typeof CorrectionsCorrecteurRoute
+  CorrectionsNouvelleRoute: typeof CorrectionsNouvelleRoute
+  CorrectionsValidateurRoute: typeof CorrectionsValidateurRoute
+  CorrectionsIndexRoute: typeof CorrectionsIndexRoute
+}
+
+const CorrectionsRouteChildren: CorrectionsRouteChildren = {
+  CorrectionsIdRoute: CorrectionsIdRoute,
+  CorrectionsCandidatureRoute: CorrectionsCandidatureRoute,
+  CorrectionsCorrecteurRoute: CorrectionsCorrecteurRoute,
+  CorrectionsNouvelleRoute: CorrectionsNouvelleRoute,
+  CorrectionsValidateurRoute: CorrectionsValidateurRoute,
+  CorrectionsIndexRoute: CorrectionsIndexRoute,
+}
+
+const CorrectionsRouteWithChildren = CorrectionsRoute._addFileChildren(
+  CorrectionsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -611,12 +785,14 @@ const rootRouteChildren: RootRouteChildren = {
   ConditionsRoute: ConditionsRoute,
   ContactRoute: ContactRoute,
   ContributorRoute: ContributorRoute,
+  CorrectionsRoute: CorrectionsRouteWithChildren,
   DocsRoute: DocsRoute,
   FaqRoute: FaqRoute,
   PartenariatRoute: PartenariatRoute,
   ReviserRoute: ReviserRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubmitRoute: SubmitRoute,
+  AdminCorrectionsRoute: AdminCorrectionsRoute,
   EpreuvesIdRoute: EpreuvesIdRoute,
 }
 export const routeTree = rootRouteImport

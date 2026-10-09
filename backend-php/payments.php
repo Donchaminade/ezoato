@@ -12,84 +12,21 @@ if ($action === 'acces') {
   $epreuveId = $_GET['epreuve_id'] ?? '';
   if (!$epreuveId) fail('epreuve_id requis');
 
-  $stmt = db()->prepare("SELECT * FROM epreuves WHERE id=? AND statut='validee'");
+  $stmt = db()->prepare("SELECT e.*, et.nom AS etablissement FROM epreuves e
+    LEFT JOIN etablissements et ON et.id = e.etablissement_id
+    WHERE e.id=? AND e.statut='validee'");
   $stmt->execute([$epreuveId]);
   $ep = $stmt->fetch();
   if (!$ep) fail('Épreuve introuvable', 404);
 
-  $montant = prix_epreuve($ep);
-  if (!requires_payment($ep)) {
-    json_out(['requiresPayment' => false, 'hasAccess' => true, 'montant' => 0]);
-  }
-
-  $hasAccess = user_has_access($user['id'], $epreuveId);
-  $subscribed = user_has_active_subscription($user['id']);
-  json_out([
-    'requiresPayment' => true,
-    'hasAccess' => $hasAccess,
-    'hasSubscription' => $subscribed,
-    'expiresAt' => $hasAccess ? user_access_expires_at($user['id'], $epreuveId) : null,
-    'montant' => $montant,
-    'devise' => $cfg['paiement']['devise'],
-  ]);
+  $consume = !isset($_GET['consume']) || ($_GET['consume'] !== '0' && $_GET['consume'] !== 'false');
+  json_out(reponse_acces_api(evaluer_acces_epreuve($user['id'], $ep, $consume)));
 }
 
 $user = require_user();
 
 if ($action === 'initier') {
-  $body = json_input();
-  $epreuveId = trim($body['epreuveId'] ?? '');
-  $methode = $body['methode'] ?? '';
-  $telephone = preg_replace('/\D/', '', $body['telephone'] ?? '');
-
-  if (!$epreuveId) fail('epreuveId requis');
-  if (!in_array($methode, ['flooz', 'tmoney'], true)) fail('Méthode invalide');
-  if (strlen($telephone) < 8) fail('Numéro de téléphone invalide');
-
-  $stmt = db()->prepare("SELECT * FROM epreuves WHERE id=? AND statut='validee'");
-  $stmt->execute([$epreuveId]);
-  $ep = $stmt->fetch();
-  if (!$ep) fail('Épreuve introuvable', 404);
-  if (!requires_payment($ep)) fail('Cette épreuve est gratuite');
-
-  $montant = prix_epreuve($ep);
-
-  if (user_has_access($user['id'], $epreuveId)) {
-    json_out([
-      'alreadyPaid' => true,
-      'hasAccess' => true,
-      'expiresAt' => user_access_expires_at($user['id'], $epreuveId),
-    ]);
-  }
-
-  $pending = db()->prepare("SELECT id, reference, statut FROM paiements
-    WHERE user_id=? AND epreuve_id=? AND statut='en_attente'
-    AND cree_le > DATE_SUB(NOW(), INTERVAL ? MINUTE) LIMIT 1");
-  $pending->execute([$user['id'], $epreuveId, $cfg['paiement']['expiration_minutes']]);
-  $existing = $pending->fetch();
-  if ($existing) {
-    json_out([
-      'id' => $existing['id'],
-      'reference' => $existing['reference'],
-      'montant' => $montant,
-      'methode' => $methode,
-      'instructions' => build_mobile_money_instructions($methode, $existing['reference'], $montant),
-    ]);
-  }
-
-  $id = uuid();
-  $ref = payment_reference();
-  db()->prepare("INSERT INTO paiements (id,user_id,epreuve_id,montant,methode,telephone,reference,statut)
-    VALUES (?,?,?,?,?,?,?,'en_attente')")
-    ->execute([$id, $user['id'], $epreuveId, $montant, $methode, $telephone, $ref]);
-
-  json_out([
-    'id' => $id,
-    'reference' => $ref,
-    'montant' => $montant,
-    'methode' => $methode,
-    'instructions' => build_mobile_money_instructions($methode, $ref, $montant),
-  ]);
+  fail('Le paiement à l\'unité n\'est plus proposé. Passe à l\'abonnement Pro (1 000 FCFA / 6 mois) pour les examens officiels, les concours, ou au-delà du quota gratuit.', 402);
 }
 
 if ($action === 'confirmer') {

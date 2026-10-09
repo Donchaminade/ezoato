@@ -60,7 +60,7 @@ const STEPS = [
   {
     icon: Download,
     title: "Télécharge",
-    text: "Devoirs gratuits, examens à l'unité ou abonnement Pro — via Flooz ou T-Money.",
+    text: "50 devoirs et compositions offerts, puis l'abonnement Pro (1 000 FCFA / 6 mois) via Flooz ou T-Money. Examens officiels et concours : Pro dès la première épreuve.",
   },
 ] as const;
 
@@ -304,13 +304,11 @@ export function HomeFeatures() {
 
 export function HomePricing({ meta }: { meta?: PublicMeta }) {
   const pricing = meta?.pricing;
-  const prix = pricing?.prixExamenEffectif ?? pricing?.prixExamenNational ?? 100;
-  const prixBarre =
-    pricing?.promo?.active && pricing.prixExamenEffectif < pricing.prixExamenNational
-      ? pricing.prixExamenNational
-      : null;
+  const quota = pricing?.freemium?.quota ?? 50;
   const epreuves = pricing?.epreuvesParRecompense ?? 50;
   const recompense = pricing?.montantRecompense ?? 1000;
+  const pro = pricing?.abonnementMontant ?? SUBSCRIPTION_PRICE;
+  const mois = pricing?.abonnementDureeMois ?? SUBSCRIPTION_DURATION_MONTHS;
 
   return (
     <section className="px-4 py-16 sm:px-6 sm:py-20">
@@ -318,27 +316,29 @@ export function HomePricing({ meta }: { meta?: PublicMeta }) {
         <ScrollReveal className="mx-auto mb-10 max-w-2xl text-center">
           <h2 className="font-display text-2xl font-bold sm:text-3xl">Tarifs transparents</h2>
           <p className="mt-2 text-muted-foreground">
-            La majorité du contenu est gratuite. Les examens nationaux financent la plateforme.
+            {quota} devoirs et compositions offerts par compte. Les examens officiels et les concours passent par l&apos;abonnement Pro.
           </p>
         </ScrollReveal>
 
         <div className="grid gap-5 md:grid-cols-2">
           <ScrollReveal offsetY={35}>
             <div className="card-elevated h-full border-primary/20 p-6 sm:p-8">
-              <Badge className="bg-secondary text-secondary-foreground">Gratuit</Badge>
+              <Badge className="bg-secondary text-secondary-foreground">{quota} gratuites</Badge>
               <h3 className="mt-4 font-display text-xl font-bold">Devoirs & compositions</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Télécharge sans limite les devoirs et compositions validés par la communauté.
+                Chaque compte gratuit consulte ou télécharge {quota} épreuves. Le compteur s&apos;affiche sous la forme {`0/${quota}`} épreuves gratuites.
               </p>
               <ul className="mt-5 space-y-2 text-sm">
-                {["Aperçu avant téléchargement", "PDF prêt à imprimer", "Toutes les matières"].map(
-                  (item) => (
-                    <li key={item} className="flex items-center gap-2">
-                      <span className="size-1.5 rounded-full bg-primary" />
-                      {item}
-                    </li>
-                  ),
-                )}
+                {[
+                  "Aperçu de la première page sans consommer le quota",
+                  "PDF prêt à imprimer",
+                  "Au-delà du quota, l'abonnement Pro",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-2">
+                    <span className="size-1.5 rounded-full bg-primary" />
+                    {item}
+                  </li>
+                ))}
               </ul>
               <Button asChild className="mt-6 w-full sm:w-auto !text-white">
                 <Link to="/docs">
@@ -352,27 +352,18 @@ export function HomePricing({ meta }: { meta?: PublicMeta }) {
 
           <ScrollReveal delay={0.1} offsetY={35}>
             <div className="card-elevated h-full p-6 sm:p-8">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline">À partir de {prix.toLocaleString("fr-FR")} FCFA</Badge>
-                {prixBarre != null && (
-                  <Badge variant="secondary" className="line-through opacity-70">
-                    {prixBarre.toLocaleString("fr-FR")} FCFA
-                  </Badge>
-                )}
-                {pricing?.promo?.active && pricing.promo.label && (
-                  <Badge className="bg-primary/15 text-primary">{pricing.promo.label}</Badge>
-                )}
-              </div>
-              <h3 className="mt-4 font-display text-xl font-bold">Examens & Pro</h3>
+              <Badge variant="outline">
+                {pro.toLocaleString("fr-FR")} FCFA / {mois} mois
+              </Badge>
+              <h3 className="mt-4 font-display text-xl font-bold">Abonnement Pro</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                CEPD, BEPC, BAC et concours — à l&apos;unité ou en abonnement Pro (
-                {SUBSCRIPTION_PRICE.toLocaleString("fr-FR")}&nbsp;FCFA / {SUBSCRIPTION_DURATION_MONTHS}&nbsp;mois).
+                CEPD, BEPC, BAC, concours et corrigés : Pro dès la première épreuve. Paiement Flooz ou T-Money.
               </p>
               <ul className="mt-5 space-y-2 text-sm">
                 {[
-                  `À l'unité dès ${prix} FCFA via Flooz ou T-Money`,
-                  "Pro : accès illimité aux épreuves payantes",
-                  `Contribue : ${epreuves} validées = ${recompense.toLocaleString("fr-FR")} FCFA`,
+                  "Accès illimité pendant 6 mois, y compris au-delà du quota",
+                  `Contribue : ${epreuves} épreuves validées = ${recompense.toLocaleString("fr-FR")} FCFA`,
+                  "Retrait contributeur dès 2 000 FCFA",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2">
                     <span className="size-1.5 rounded-full bg-accent" />
@@ -381,9 +372,9 @@ export function HomePricing({ meta }: { meta?: PublicMeta }) {
                 ))}
               </ul>
               <Button asChild variant="outline" className="mt-6 w-full sm:w-auto">
-                <Link to="/contributor">
+                <Link to="/account/abonnement">
                   <span className="inline-flex items-center justify-center gap-2">
-                    Devenir contributeur
+                    Passer en Pro
                   </span>
                 </Link>
               </Button>

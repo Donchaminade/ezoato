@@ -43,7 +43,7 @@ const REGISTER_FEATURES = [
   {
     icon: Gift,
     title: "100 % gratuit",
-    text: "Crée ton compte sans frais et accède aux devoirs gratuits.",
+    text: "Compte gratuit : 50 devoirs et compositions, puis l'abonnement Pro.",
   },
   {
     icon: Upload,

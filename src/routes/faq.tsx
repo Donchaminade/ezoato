@@ -48,7 +48,7 @@ function FaqPage() {
         title="Foire aux questions"
         description={
           meta
-            ? `Devoirs gratuits · Examens à ${meta.pricing.prixExamenNational} FCFA · ${meta.pricing.epreuvesParRecompense} validées = ${meta.pricing.montantRecompense.toLocaleString("fr-FR")} FCFA`
+            ? `50 épreuves gratuites · Pro ${meta.pricing.abonnementMontant ?? 1000} FCFA / ${meta.pricing.abonnementDureeMois ?? 6} mois · ${meta.pricing.epreuvesParRecompense} validées = ${meta.pricing.montantRecompense.toLocaleString("fr-FR")} FCFA`
             : EZOA_BRAND.tagline
         }
         primaryImage="hero"

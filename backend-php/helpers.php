@@ -557,6 +557,20 @@ function json_out($data, int $code = 200): void {
 
 function fail(string $msg, int $code = 400): void { json_out(['error' => $msg], $code); }
 
+function column_exists(string $table, string $column): bool {
+  if (!preg_match('/^[a-z_][a-z0-9_]*$/', $table)) return false;
+  if (!preg_match('/^[a-z_][a-z0-9_]*$/', $column)) return false;
+  $pdo = db();
+  $schema = $pdo->query('SELECT DATABASE()')->fetchColumn();
+  if (!is_string($schema) || $schema === '') return false;
+  $stmt = $pdo->prepare(
+    'SELECT COUNT(*) FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?'
+  );
+  $stmt->execute([$schema, $table, $column]);
+  return (int)$stmt->fetchColumn() > 0;
+}
+
 function table_exists(string $table): bool {
   if (!preg_match('/^[a-z_][a-z0-9_]*$/', $table)) return false;
   $pdo = db();
@@ -739,8 +753,12 @@ function map_epreuve(array $row): array {
   if (epreuve_preview_image_path($row, 1)) {
     $mapped['thumbnailUrl'] = $base . '/epreuves/' . $row['id'] . '/preview';
   }
-  $mapped['requiresPayment'] = requires_payment($row);
-  $mapped['prixFcfa'] = prix_epreuve($row);
+  $tier = epreuve_access_tier($row);
+  $mapped['categorieContenu'] = epreuve_categorie_contenu($row);
+  $mapped['accessTier'] = $tier;
+  $mapped['requiresPro'] = $tier === 'pro';
+  $mapped['requiresPayment'] = $tier === 'pro';
+  $mapped['prixFcfa'] = $tier === 'pro' ? null : 0;
   return $mapped;
 }
 
@@ -886,6 +904,7 @@ function pricing_public(): array {
     'minRetrait' => (int)$s['min_retrait'],
     'abonnementMontant' => subscription_price(),
     'abonnementDureeMois' => subscription_duration_months(),
+    'freemium' => freemium_public_config(),
   ];
 }
 
@@ -923,22 +942,12 @@ function public_stats(): array {
 }
 
 function prix_epreuve(array $epreuve): int {
-  $s = load_platform_settings();
-  $type = $epreuve['type'] ?? '';
-  if ($type === 'corrige') {
-    $base = (int)$s['prix_corrige_type'];
-    return effective_price($base, $s, 'corrige');
-  }
-  if (requires_payment($epreuve)) {
-    $base = (int)$s['prix_examen_national'];
-    return effective_price($base, $s, 'examen');
-  }
+  if (epreuve_access_tier($epreuve) === 'pro') return subscription_price();
   return 0;
 }
 
 function requires_payment(array $epreuve): bool {
-  if (($epreuve['type'] ?? '') === 'corrige') return true;
-  return ($epreuve['type'] ?? '') === 'examen' && !empty($epreuve['examen']);
+  return epreuve_access_tier($epreuve) === 'pro';
 }
 
 function get_corrige_type(string $parentId): ?array {
@@ -1004,6 +1013,9 @@ function map_soumission(array $row): array {
     'motifRejet' => $row['motif_rejet'] ?? null,
     'doublonsPotentiels' => $doublons ?: null,
     'similairesCount' => count($doublons),
+    'signalementCorrige' => !empty($row['signalement_corrige']),
+    'signalementMotif' => $row['signalement_motif'] ?? null,
+    'attestationEnonce' => !empty($row['attestation_enonce']),
   ];
 }
 
@@ -1057,6 +1069,7 @@ function map_subscription_status(string $userId): array {
     'joursRestants' => 0,
     'montant' => subscription_price(),
     'dureeMois' => subscription_duration_months(),
+    'freemium' => freemium_usage_public($userId),
   ];
   if (!$ab) {
     if (!table_exists('abonnements')) return $base;
@@ -1089,6 +1102,16 @@ function map_subscription_status(string $userId): array {
     'joursRestants' => $jours,
     'montant' => (int)$ab['montant'],
     'dureeMois' => subscription_duration_months(),
+    'freemium' => $base['freemium'],
+  ];
+}
+
+function contributeur_bareme(): array {
+  $s = load_platform_settings();
+  return [
+    'epreuves_par_recompense' => max(1, (int)$s['epreuves_par_recompense']),
+    'montant_recompense' => max(0, (int)$s['montant_recompense']),
+    'min_retrait' => max(0, (int)$s['min_retrait']),
   ];
 }
 
@@ -1162,7 +1185,7 @@ function get_or_create_wallet(string $userId): array {
 }
 
 function map_wallet(array $w): array {
-  $cfg = cfg()['contributeur'];
+  $cfg = contributeur_bareme();
   $parPalier = (int)$cfg['epreuves_par_recompense'];
   $validees = (int)$w['epreuves_validees'];
   $prochainPalier = ($w['paliers_verses'] + 1) * $parPalier;
@@ -1199,11 +1222,15 @@ function debit_wallet(string $userId, int $montant, string $description, ?string
 }
 
 function reward_contributor(string $userId): array {
-  $cfg = cfg()['contributeur'];
+  $cfg = contributeur_bareme();
   $parPalier = (int)$cfg['epreuves_par_recompense'];
   $montantPalier = (int)$cfg['montant_recompense'];
 
-  $stmt = db()->prepare("SELECT COUNT(*) FROM soumissions WHERE soumis_par=? AND statut='validee'");
+  if (column_exists('soumissions', 'recompense_eligible')) {
+    $stmt = db()->prepare("SELECT COUNT(*) FROM soumissions WHERE soumis_par=? AND statut='validee' AND recompense_eligible=1");
+  } else {
+    $stmt = db()->prepare("SELECT COUNT(*) FROM soumissions WHERE soumis_par=? AND statut='validee'");
+  }
   $stmt->execute([$userId]);
   $count = (int)$stmt->fetchColumn();
 
@@ -1211,16 +1238,14 @@ function reward_contributor(string $userId): array {
   db()->prepare('UPDATE portefeuilles SET epreuves_validees = ? WHERE user_id = ?')
       ->execute([$count, $userId]);
 
-  $paliersDus = intdiv($count, $parPalier);
-  $paliersVerses = (int)$wallet['paliers_verses'];
-  $nouveauxPaliers = $paliersDus - $paliersVerses;
-  $credite = 0;
+  $calc = calculer_recompense_palier($count, (int)$wallet['paliers_verses'], $parPalier, $montantPalier);
+  $credite = (int)$calc['credite'];
 
-  if ($nouveauxPaliers > 0) {
-    $credite = $nouveauxPaliers * $montantPalier;
-    credit_wallet($userId, $credite, "Récompense : {$nouveauxPaliers}×{$parPalier} épreuves validées", "reward-{$count}");
+  if ($calc['nouveauxPaliers'] > 0) {
+    $n = (int)$calc['nouveauxPaliers'];
+    credit_wallet($userId, $credite, "Récompense : {$n}×{$parPalier} épreuves validées", "reward-{$count}");
     db()->prepare('UPDATE portefeuilles SET paliers_verses = ? WHERE user_id = ?')
-        ->execute([$paliersDus, $userId]);
+        ->execute([(int)$calc['paliersDus'], $userId]);
   }
 
   return ['credite' => $credite, 'epreuvesValidees' => $count];
@@ -1251,3 +1276,7 @@ function map_soumission_detail(array $row, bool $forOwner = false): array {
 require_once __DIR__ . '/lib/niveau-soumission.php';
 require_once __DIR__ . '/lib/notifications.php';
 require_once __DIR__ . '/lib/abonnement-rappels.php';
+require_once __DIR__ . '/lib/freemium.php';
+require_once __DIR__ . '/lib/acces-epreuve.php';
+require_once __DIR__ . '/lib/dedup-epreuve.php';
+require_once __DIR__ . '/lib/paiement-fournisseur.php';

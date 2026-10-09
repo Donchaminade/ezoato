@@ -360,6 +360,11 @@ function SoumissionsTab() {
                       </Badge>
                     </button>
                   ) : null}
+                  {s.signalementCorrige ? (
+                    <Badge variant="destructive" className="mt-1">
+                      <AlertTriangle className="size-3" /> Ressemble à un corrigé
+                    </Badge>
+                  ) : null}
                 </TableCell>
                 <TableCell>{s.matiere}</TableCell>
                 <TableCell>
@@ -386,6 +391,11 @@ function SoumissionsTab() {
               <div className="space-y-4">
                 <div>
                   <h2 className="font-display text-xl font-bold">{active.titre}</h2>
+                  {active.signalementCorrige && (
+                    <p className="mt-2 text-sm text-destructive">
+                      {active.signalementMotif || "Ce dépôt ressemble à un corrigé. À toi de décider s'il peut être publié comme énoncé."}
+                    </p>
+                  )}
                   <p className="text-sm text-muted-foreground capitalize">
                     {niveauBadgeLabel(active.niveau)} · {active.type} · {active.matiere} · {active.classe} · {active.annee}
                   {active.examen ? ` · ${active.examen}` : ""}
@@ -651,7 +661,7 @@ function EpreuvesTab({ isAdmin }: { isAdmin: boolean }) {
               <TableCell>{e.matiere}</TableCell>
               <TableCell className="capitalize">
                 {e.type}{e.examen ? ` · ${e.examen}` : ""}
-                {e.requiresPayment && <Badge variant="outline" className="ml-1 text-xs">100F</Badge>}
+                {e.requiresPayment && <Badge variant="outline" className="ml-1 text-xs">Pro</Badge>}
               </TableCell>
               <TableCell>
                 {e.hasCorrigeType ? (

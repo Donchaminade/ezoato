@@ -36,13 +36,13 @@ class EpreuvePreviewCard extends ConsumerWidget {
     super.key,
     required this.epreuve,
     this.locked = false,
-    this.montant,
+    this.message,
     this.onUnlock,
   });
 
   final Epreuve epreuve;
   final bool locked;
-  final int? montant;
+  final String? message;
   final VoidCallback? onUnlock;
 
   @override
@@ -50,7 +50,7 @@ class EpreuvePreviewCard extends ConsumerWidget {
     if (locked) {
       return EpreuvePreviewPaywall(
         pages: epreuve.pages,
-        montant: montant ?? epreuve.prixFcfa ?? 0,
+        message: message,
         onUnlock: onUnlock,
       );
     }
@@ -106,12 +106,12 @@ class EpreuvePreviewPaywall extends StatelessWidget {
   const EpreuvePreviewPaywall({
     super.key,
     required this.pages,
-    required this.montant,
+    this.message,
     this.onUnlock,
   });
 
   final int pages;
-  final int montant;
+  final String? message;
   final VoidCallback? onUnlock;
 
   @override
@@ -146,16 +146,17 @@ class EpreuvePreviewPaywall extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            pages > 1
-                ? 'Cette épreuve compte $pages pages. Payez $montant FCFA pour débloquer l\'aperçu, les captures d\'écran et le téléchargement.'
-                : 'Payez $montant FCFA pour débloquer l\'aperçu et le téléchargement.',
+            message ??
+                (pages > 1
+                    ? 'Cette épreuve compte $pages pages. L\'abonnement Pro (1 000 FCFA / 6 mois) débloque l\'aperçu et le téléchargement.'
+                    : 'L\'abonnement Pro (1 000 FCFA / 6 mois) débloque l\'aperçu et le téléchargement.'),
             style: EzoaTypography.bodySmall(context),
           ),
           if (onUnlock != null) ...[
             const SizedBox(height: 16),
             EzoaButton(
-              label: 'Débloquer — $montant FCFA',
-              icon: LucideIcons.creditCard,
+              label: 'Passer en Pro',
+              icon: LucideIcons.crown,
               onPressed: onUnlock,
             ),
           ],
@@ -185,6 +186,7 @@ class EpreuvePreviewViewer extends StatefulWidget {
 
 class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
   int _page = 1;
+  bool _paperDark = false;
 
   @override
   Widget build(BuildContext context) {
@@ -205,7 +207,6 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
             padding: const EdgeInsets.all(20),
             child: EpreuvePreviewPaywall(
               pages: widget.epreuve.pages,
-              montant: widget.epreuve.prixFcfa ?? 0,
               onUnlock: widget.onUnlock,
             ),
           ),
@@ -218,7 +219,7 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
 
     return SecureScreenScope(
       child: Scaffold(
-        backgroundColor: pal.background,
+        backgroundColor: _paperDark ? const Color(0xFF121816) : pal.background,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -228,10 +229,20 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Text(
-            'Aperçu',
+            'Lire l\'épreuve',
             style: EzoaTypography.titleMedium(context).copyWith(fontSize: 16),
           ),
           centerTitle: true,
+          actions: [
+            IconButton(
+              tooltip: _paperDark ? 'Mode clair' : 'Mode sombre',
+              onPressed: () => setState(() => _paperDark = !_paperDark),
+              icon: Icon(
+                _paperDark ? LucideIcons.sun : LucideIcons.moon,
+                color: pal.text,
+              ),
+            ),
+          ],
         ),
         body: Column(
           children: [
@@ -240,7 +251,8 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
                 itemCount: pageCount,
                 onPageChanged: (i) => setState(() => _page = i + 1),
                 itemBuilder: (context, index) => _PreviewPage(
-                  url: epreuvePreviewPageUrl(widget.epreuve.id, index + 1),
+                  url: epreuvePreviewPageUrl(widget.epreuve.id, index + 1, lire: true),
+                  paperDark: _paperDark,
                 ),
               ),
             ),
@@ -272,9 +284,10 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
 }
 
 class _PreviewPage extends ConsumerStatefulWidget {
-  const _PreviewPage({required this.url});
+  const _PreviewPage({required this.url, this.paperDark = false});
 
   final String url;
+  final bool paperDark;
 
   @override
   ConsumerState<_PreviewPage> createState() => _PreviewPageState();
@@ -315,7 +328,7 @@ class _PreviewPageState extends ConsumerState<_PreviewPage> {
       );
     }
 
-    return InteractiveViewer(
+    final image = InteractiveViewer(
       maxScale: 5,
       child: Center(
         child: CachedNetworkImage(
@@ -343,6 +356,16 @@ class _PreviewPageState extends ConsumerState<_PreviewPage> {
           ),
         ),
       ),
+    );
+    if (!widget.paperDark) return image;
+    return ColorFiltered(
+      colorFilter: const ColorFilter.matrix(<double>[
+        -1, 0, 0, 0, 255,
+        0, -1, 0, 0, 255,
+        0, 0, -1, 0, 255,
+        0, 0, 0, 1, 0,
+      ]),
+      child: image,
     );
   }
 }

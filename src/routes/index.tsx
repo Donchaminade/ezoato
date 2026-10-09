@@ -29,7 +29,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "EZOA-TO — Archives scolaires du Togo" },
-      { name: "description", content: "Archives des devoirs, compositions et examens antérieurs des établissements et examens nationaux du Togo. Devoirs gratuits, examens nationaux à 100 FCFA." },
+      { name: "description", content: "Archives des devoirs, compositions, examens nationaux et concours du Togo. 50 épreuves gratuites par compte, puis l'abonnement Pro à 1 000 FCFA pour 6 mois." },
       { property: "og:title", content: "EZOA-TO — Archives scolaires du Togo" },
       { property: "og:description", content: "Devoirs, compositions et examens antérieurs des établissements togolais." },
     ],

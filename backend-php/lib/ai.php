@@ -108,7 +108,7 @@ function ai_require_premium(array $user, array $deps = []): void
 /** @return list<string> */
 function ai_allowed_modes(): array
 {
-  return ['redaction', 'calcul', 'quiz'];
+  return ['guide', 'redaction', 'calcul', 'quiz'];
 }
 
 function ai_normalize_mode(?string $mode, ?string $matiere = null): string
@@ -1639,3 +1639,4 @@ function ai_client_error_code(Throwable $e): int
 }
 
 require_once __DIR__ . '/ai-flows.php';
+require_once __DIR__ . '/ai-guide.php';

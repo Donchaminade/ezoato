@@ -44,6 +44,9 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
   String? _concours;
   String _sessionConcours = '${DateTime.now().year}';
 
+  /// L'élève atteste déposer un énoncé, jamais le corrigé.
+  bool _attesteEnonce = false;
+
   /// PDF importé tel quel (chemin « Importer PDF »).
   String? _importedPdfPath;
 
@@ -100,7 +103,8 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
   }
 
   bool get _formValid {
-    if (_niveau == null ||
+    if (!_attesteEnonce ||
+        _niveau == null ||
         (_importedPdfPath == null && _scannedPages.isEmpty)) {
       return false;
     }
@@ -140,6 +144,7 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
         'niveau': _niveau!,
         'annee': '$_annee',
         'ville': _ville ?? (_niveau == 'concours' ? 'Togo' : ''),
+        'attestation_enonce': '1',
       };
       if (_niveau == 'college' || _niveau == 'lycee') {
         fields.addAll({
@@ -204,6 +209,7 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
         _scannedPages = [];
         _step = 1;
         _niveau = null;
+        _attesteEnonce = false;
       });
     } catch (e) {
       setState(() => _error = '$e');
@@ -455,9 +461,19 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
                               : const ['T1', 'T2', 'T3'],
                           onChanged: (v) => setState(() => _periode = v),
                         ),
+                        if (_type == 'devoir' || _type == 'composition')
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              _type == 'devoir'
+                                  ? 'Un devoir est propre à un établissement : le champ est obligatoire. Seule la première soumission validée de cette épreuve, pour cet établissement, est rémunérée.'
+                                  : 'Une composition vient de l\'inspection et vaut pour tout le territoire : pas d\'établissement. Envoie-la vite, seule la première validée est rémunérée.',
+                              style: EzoaTypography.bodySmall(context),
+                            ),
+                          ),
                         if (_type == 'devoir')
                           EzoaTextField(
-                            label: 'Établissement',
+                            label: 'Établissement (obligatoire)',
                             controller: _etablissementController,
                             prefixIcon: LucideIcons.school,
                             onChanged: (_) => setState(() {}),
@@ -490,10 +506,17 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
                         onChanged: (v) => setState(() => _matiere = v),
                       ),
                       EzoaTextField(
-                        label: 'Université',
+                        label: 'Université (obligatoire)',
                         controller: _universiteController,
                         prefixIcon: LucideIcons.school,
                         onChanged: (_) => setState(() {}),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          'La déduplication d\'une épreuve universitaire inclut l\'université. Seule la première soumission validée est rémunérée.',
+                          style: EzoaTypography.bodySmall(context),
+                        ),
                       ),
                       EzoaSearchablePicker(
                         label: 'Ville',
@@ -635,6 +658,18 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _attesteEnonce,
+              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: (value) =>
+                  setState(() => _attesteEnonce = value ?? false),
+              title: Text(
+                'Je dépose uniquement l\'énoncé. Le corrigé de l\'épreuve n\'est pas dans ce fichier.',
+                style: EzoaTypography.bodySmall(context),
+              ),
+            ),
+            const SizedBox(height: 12),
             if (_error != null) ...[
               Text(
                 _error!,

@@ -68,6 +68,7 @@ function SubmitPage() {
   const [nomEpreuve, setNomEpreuve] = useState("");
   const [organisme, setOrganisme] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [attesteEnonce, setAttesteEnonce] = useState(false);
 
   const { data: meta } = useQuery({
     queryKey: ["meta"],
@@ -132,6 +133,9 @@ function SubmitPage() {
     if (files.length === 0) return toast.error("Ajoute au moins une image ou un fichier PDF.");
     if (files.some(isPdfFile) && files.length > 1) {
       return toast.error("Un seul fichier PDF à la fois.");
+    }
+    if (!attesteEnonce) {
+      return toast.error("Coche l'attestation : seul un énoncé, sans corrigé, peut être envoyé.");
     }
 
     if (niveau === "college" || niveau === "lycee") {
@@ -214,6 +218,7 @@ function SubmitPage() {
       } else {
         imageFiles.forEach((f) => fd.append("images[]", f));
       }
+      fd.append("attestation_enonce", "1");
       await api.submitEpreuve(fd);
       toast.success(
         pdfFile
@@ -221,8 +226,8 @@ function SubmitPage() {
           : "Soumission envoyée. Un PDF A4 a été généré pour validation.",
       );
       nav({ to: "/account/soumissions" });
-    } catch {
-      toast.error("Échec de la soumission.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec de la soumission.");
     } finally {
       setSubmitting(false);
     }
@@ -370,7 +375,7 @@ function SubmitPage() {
                       </SelectContent>
                     </Select>
                   </FormField>
-                  <FormField label="Type">
+                  <FormField label="Type" className="sm:col-span-2">
                     <Select
                       value={type}
                       onValueChange={(v) => {
@@ -387,12 +392,19 @@ function SubmitPage() {
                         <SelectItem value="examen">Examen national</SelectItem>
                       </SelectContent>
                     </Select>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {type === "devoir"
+                        ? "Un devoir est propre à un établissement : le champ est obligatoire, et le doublon inclut cette école."
+                        : type === "composition"
+                          ? "Une composition vient de l'inspection : elle est identique sur tout le territoire, sans établissement. Seule la première soumission validée est rémunérée — envoie-la vite."
+                          : "Examen officiel (CEPD, BEPC, BAC) : pas d'établissement. L'accès lecteur demande l'abonnement Pro."}
+                    </p>
                   </FormField>
                   {type !== "examen" && (
                     <>
                       {type === "devoir" && (
-                        <FormField label="Établissement" className="sm:col-span-2">
-                          <Input list="submit-etablissements" className={formInputClass} value={etablissement} onChange={(e) => setEtablissement(e.target.value)} required />
+                        <FormField label="Établissement (obligatoire)" className="sm:col-span-2">
+                          <Input list="submit-etablissements" className={formInputClass} value={etablissement} onChange={(e) => setEtablissement(e.target.value)} required placeholder="École où le devoir a été donné" />
                           {etablissementSuggestions.length > 0 && (
                             <datalist id="submit-etablissements">
                               {etablissementSuggestions.map((e) => <option key={e} value={e} />)}
@@ -528,7 +540,21 @@ function SubmitPage() {
               </FormField>
             </div>
 
-            <Button type="submit" size="lg" className="h-12 w-full rounded-xl text-base" disabled={submitting}>
+            <label className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-4 text-sm leading-relaxed">
+              <input
+                type="checkbox"
+                className="mt-1 size-4 accent-primary"
+                checked={attesteEnonce}
+                onChange={(e) => setAttesteEnonce(e.target.checked)}
+                required
+              />
+              <span>
+                J'atteste que ce fichier est un énoncé seul. Je n'envoie pas une épreuve complète accompagnée de son corrigé.
+                Si le contenu ressemble à un corrigé, l'administration est alertée et décide.
+              </span>
+            </label>
+
+            <Button type="submit" size="lg" className="h-12 w-full rounded-xl text-base" disabled={submitting || !attesteEnonce}>
               {submitting
                 ? pdfFile ? "Envoi du PDF…" : "Conversion en PDF…"
                 : pdfFile

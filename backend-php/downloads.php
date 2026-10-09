@@ -16,10 +16,8 @@ $stmt->execute([$id]);
 $ep = $stmt->fetch();
 if (!$ep) fail('Introuvable', 404);
 
-if (requires_payment($ep) && !user_has_access($user['id'], $id)) {
-  $prix = prix_epreuve($ep);
-  fail("Paiement requis pour télécharger ({$prix} FCFA)", 402);
-}
+$eval = evaluer_acces_epreuve($user['id'], $ep, true);
+refuser_si_acces_interdit($eval);
 
 $pdfPath = $ep['pdf_path'];
 if (!is_file($pdfPath)) fail('Fichier PDF introuvable', 404);

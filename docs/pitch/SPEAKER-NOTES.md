@@ -72,7 +72,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 | Couche | Chiffre slide | Logique |
 |--------|---------------|---------|
-| **TAM** (marché total adressable) | ~10 M élèves | Secondaire Afrique de l’Ouest francophone (éducation digitale / annales) |
+| **TAM** (marché total adressable) | ~10 M élèves | Secondaire Afrique de l’Ouest francophone (éducation digitale / sujets d'examens) |
 | **SAM** (marché accessible) | ~370 k | Élèves secondaire Togo × accès smartphone / internet |
 | **SOM** (marché obtenable) | 3–8 k | Abonnés Pro payants à 18–24 mois |
 
@@ -99,7 +99,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 ### TAM — méthodologie
 
-- Marché adressable : élèves du **secondaire en Afrique de l’Ouest francophone** (UEMOA + pays proches) pour contenus digitaux d’examens / annales.
+- Marché adressable : élèves du **secondaire en Afrique de l’Ouest francophone** (UEMOA + pays proches) pour contenus digitaux d’examens / sujets d'examens.
 - Pas de total officiel unique UIS pour la zone ; estimation **8–12 M** d’élèves inscrits, point médian **~10 M**.
 - Ancrages :
   - Populations d’âge scolaire secondaire (UIS country profiles) très élevées (ex. Sénégal ~2,9 M âge scolaire secondaire ; Burkina ~3,8 M) — l’effectif *inscrit* est inférieur mais agrégé multi-pays reste multi-millions.  
@@ -138,10 +138,10 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 ## 6. Business model
 
-- Freemium : devoirs / compositions gratuits ; examens nationaux monétisés.
-- **Pro 1 000 FCFA / 6 mois** (~167 FCFA/mois) + achat à l’unité (~100–200 FCFA).
-- Contributeurs ~1 000 FCFA / soumission validée — croissance du catalogue alignée sur l’usage.
-- Mobile Money : Flooz / T-Money.
+- Freemium : 50 devoirs et compositions gratuits par compte (quota commun, configurable) ; au-delà, Pro.
+- Examens officiels (CEPD, BEPC, BAC), concours et corrigés : Pro dès la première épreuve.
+- **Pro 1 000 FCFA / 6 mois** (~167 FCFA/mois), payé via Flooz ou T-Money.
+- Contributeurs : **1 000 FCFA pour 50 épreuves validées** (seule la première soumission validée compte). Retrait dès **2 000 FCFA**.
 
 ### Justification prix 1 000 FCFA / 6 mois
 
@@ -152,7 +152,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
     https://education-au.org/139-survey-1/lms-platforms/422-eneza-education-cote-d-ivoire-ghana-kenya
   - **EduMali** (cours + mentorat BAC) : forfaits annuels sujets **65–85 k FCFA** — bien au-dessus ; EZOA se positionne archive / accès sujets, pas cours live.  
     https://liners.com/edumali
-  - Bibliothèques d’annales / packs révision Afrique de l’Est (ex. CBCEduKenya) : abonnements quelques dollars via M-Pesa — même logique micropaiement.  
+  - Bibliothèques de sujets d'examens / packs révision Afrique de l’Est (ex. CBCEduKenya) : abonnements quelques dollars via M-Pesa — même logique micropaiement.  
     https://cbcedukenya.com/membership
   - Tendance Afrique : monétisation via **mobile money + micropaiements** (IMARC e-learning Africa)  
     https://www.imarcgroup.com/africa-e-learning-market
@@ -174,7 +174,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 
 - Concurrent réel = **chaos informel** : WhatsApp, photocopies, Facebook, PDF dispersés.
 - Tableau slide : Fiabilité · Recherche · Hors ligne · Paiement · Validation — EZOA-TO en ligne mise en avant.
-- Apps francophones de révision (ex. Nomad Education, OkpaBac) = plutôt cours / quiz / annales multi-pays — **peu d’archive nationale togolaise + validation + Flooz/T-Money + contributeurs rémunérés**.  
+- Apps francophones de révision (ex. Nomad Education, OkpaBac) = plutôt cours / quiz / sujets d'examens multi-pays — **peu d’archive nationale togolaise + validation + Flooz/T-Money + contributeurs rémunérés**.  
   https://www.nomadeducation.fr/nos-engagements/afrique  
   https://okpabac.com/
 - Différenciateurs EZOA : focus Togo, validation humaine, Mobile Money local, offline, portefeuille contributeur.
@@ -255,7 +255,7 @@ Sur les slides, les abréviations sont développées ou glossées à la **premi�
 |----------|--------|
 | Prix Pro | **1 000 FCFA / 6 mois** |
 | ARPU annuel (si renouvellement) | **~2 000 FCFA / abonné / an** |
-| Achat à l’unité | 100–200 FCFA / examen (complément, non modélisé ici) |
+| Freemium | 50 épreuves gratuites, puis Pro (plus d’achat unitaire dans le modèle) |
 
 ### Hypothèses de projection (conservateur / médian / ambitieux)
 

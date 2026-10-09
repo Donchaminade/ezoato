@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Epreuve } from "@/lib/types";
-import { typeLabel, requiresPayment, formatFcfa, getPrixFcfa } from "@/lib/pricing";
+import { typeLabel, requiresPayment } from "@/lib/pricing";
 import { shareEpreuve } from "@/lib/epreuve-share";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -148,7 +148,7 @@ export function EpreuveCard({
           {requiresPayment(epreuve) && (
             <span className="inline-flex w-full items-center justify-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-700 sm:mr-auto sm:w-auto dark:text-amber-400">
               <Lock className="size-3" aria-hidden />
-              {formatFcfa(getPrixFcfa(epreuve))}
+              Pro
             </span>
           )}
           <Button

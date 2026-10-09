@@ -14,6 +14,7 @@ import {
 } from "@/lib/subscription-constants";
 import { formatSubscriptionDate, subscriptionPriceLabel } from "@/lib/subscription-utils";
 import { formatFcfa } from "@/lib/pricing";
+import { FreemiumQuotaNote } from "@/components/subscription/FreemiumQuotaNote";
 
 type Step = "idle" | "phone" | "instructions" | "confirming";
 
@@ -79,7 +80,7 @@ export function SubscriptionPanel({ status }: { status: SubscriptionStatus }) {
     <div className="space-y-6">
       <DashboardSectionCard
         title="Statut"
-        subtitle="Accès illimité aux épreuves payantes"
+        subtitle="Examens officiels, concours, corrigés, et la suite après les 50 épreuves gratuites"
       >
         <div className="flex items-start gap-4">
           <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-primary to-emerald-600 text-white">
@@ -114,9 +115,20 @@ export function SubscriptionPanel({ status }: { status: SubscriptionStatus }) {
             {!status.actif && (
               <p className="mt-2 text-sm text-muted-foreground">
                 {status.expire
-                  ? `Renouvelez (${priceLabel}) pour retrouver l'accès illimité aux épreuves payantes.`
-                  : "Accédez à toutes les épreuves payantes sans payer à chaque fois."}
+                  ? `Renouvelez (${priceLabel}) : examens officiels, concours, et la suite au-delà du quota gratuit.`
+                  : "50 épreuves gratuites (devoirs et compositions), puis Pro. Les examens officiels et les concours sont inclus dans Pro dès la première épreuve."}
               </p>
+            )}
+            {!status.actif && status.freemium && (
+              <div className="mt-3">
+                <FreemiumQuotaNote
+                  label={
+                    status.freemium.mode === "separate"
+                      ? status.freemium.label
+                      : `${status.freemium.label} épreuves gratuites`
+                  }
+                />
+              </div>
             )}
             {!status.actif && (
               <p className="mt-2 text-sm">
@@ -144,7 +156,7 @@ export function SubscriptionPanel({ status }: { status: SubscriptionStatus }) {
       {canSubscribe && step === "phone" && (
         <DashboardSectionCard title="Paiement Mobile Money" subtitle={`${formatFcfa(SUBSCRIPTION_PRICE)} / ${SUBSCRIPTION_DURATION_MONTHS} mois`}>
           <p className="text-sm text-muted-foreground">
-            Accès illimité à toutes les épreuves payantes pendant {SUBSCRIPTION_DURATION_MONTHS} mois.
+            1 000 FCFA pour {SUBSCRIPTION_DURATION_MONTHS} mois, via Flooz ou T-Money.
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             {(["flooz", "tmoney"] as const).map((m) => (
@@ -201,9 +213,19 @@ export function SubscriptionPanel({ status }: { status: SubscriptionStatus }) {
           <p className="mt-3 rounded-md bg-muted px-3 py-2 font-mono text-sm font-semibold">
             {payment.reference}
           </p>
+          {payment.simulated && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Aucune clé opérateur n&apos;est configurée : la confirmation est simulée (dev et prod).
+            </p>
+          )}
+          {payment.redirectUrl && (
+            <Button asChild variant="outline" className="mt-4 w-full">
+              <a href={payment.redirectUrl} target="_blank" rel="noreferrer">Ouvrir la page de paiement</a>
+            </Button>
+          )}
           <Button className="mt-4 w-full" onClick={handleConfirmer} disabled={loading}>
             {loading && <Loader2 className="size-4 animate-spin" />}
-            J&apos;ai payé — confirmer
+            {payment.simulated ? "Confirmer (simulation)" : "J'ai payé — vérifier"}
           </Button>
         </DashboardSectionCard>
       )}
