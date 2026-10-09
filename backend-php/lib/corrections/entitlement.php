@@ -18,6 +18,24 @@ function correction_eleve_est_pro(array $user): bool
   return user_has_active_subscription((string)$user['id']);
 }
 
+function correction_reglement_secret(): string
+{
+  if (function_exists('ezoa_env')) {
+    $v = ezoa_env('EZOATO_CORRECTIONS_REGLEMENT_SECRET');
+    return is_string($v) ? $v : '';
+  }
+  $g = getenv('EZOATO_CORRECTIONS_REGLEMENT_SECRET');
+  return ($g === false || $g === '') ? '' : (string)$g;
+}
+
+/** Même contrôle que l'en-tête X-Ezoato-Reglement (hash_equals). */
+function correction_reglement_header_valide(?string $given): bool
+{
+  $secret = correction_reglement_secret();
+  $given = (string)$given;
+  return $secret !== '' && $given !== '' && hash_equals($secret, $given);
+}
+
 function correction_periode_pro(array $user): string
 {
   $userId = (string)($user['id'] ?? '');

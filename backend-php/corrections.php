@@ -86,11 +86,32 @@ if ($action === 'qcm' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   json_out(correction_repondre_qcm($demande['reponse_ia'], (string)($in['questionId'] ?? ''), (int)$choice));
 }
 
+if ($action === 'payer' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+  require_once __DIR__ . '/lib/correction-encaissement.php';
+  $demande = correction_http_charger((string)($_GET['id'] ?? ''));
+  if ((string)$demande['eleve_id'] !== (string)$user['id']) {
+    fail('Demande introuvable', 404);
+  }
+  $reference = trim((string)($in['reference'] ?? ''));
+  if ($reference !== '') {
+    $res = correction_encaissement_confirmer($pdo, $user, (string)$demande['id'], $reference);
+    if (!$res['ok']) {
+      fail($res['error'] ?? 'Règlement impossible', (int)($res['code'] ?? 400));
+    }
+    json_out($res['demande']);
+  }
+  $methode = (string)($in['methode'] ?? '');
+  $telephone = (string)($in['telephone'] ?? '');
+  $res = correction_encaissement_initier($pdo, $user, $demande, $methode, $telephone);
+  if (!$res['ok']) {
+    fail($res['error'] ?? 'Paiement impossible', (int)($res['code'] ?? 400));
+  }
+  json_out($res['paiement']);
+}
+
 if ($action === 'confirmer_reglement' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   $ctx = correction_http_ctx($user);
-  $secret = (string)(getenv('EZOATO_CORRECTIONS_REGLEMENT_SECRET') ?: '');
-  $given = (string)($_SERVER['HTTP_X_EZOATO_REGLEMENT'] ?? '');
-  if ($secret !== '' && $given !== '' && hash_equals($secret, $given)) {
+  if (correction_reglement_header_valide((string)($_SERVER['HTTP_X_EZOATO_REGLEMENT'] ?? ''))) {
     $ctx['reglement_systeme'] = true;
   }
   $res = correction_service_confirmer_reglement(

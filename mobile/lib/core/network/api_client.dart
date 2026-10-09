@@ -820,6 +820,41 @@ class ApiClient {
     }
   }
 
+  Future<Map<String, dynamic>> initierPaiementCorrection({
+    required String demandeId,
+    required String methode,
+    required String telephone,
+  }) async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/corrections/demandes/$demandeId/payer',
+        data: {'methode': methode, 'telephone': telephone},
+      );
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return data;
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> confirmerPaiementCorrection({
+    required String demandeId,
+    required String reference,
+  }) async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/corrections/demandes/$demandeId/payer',
+        data: {'reference': reference},
+      );
+      final data = res.data;
+      if (data == null) throw ApiException('Réponse vide');
+      return data;
+    } on DioException catch (e) {
+      throw _wrap(e);
+    }
+  }
+
   Future<String> repondreQcmCorrection({
     required String demandeId,
     required String questionId,

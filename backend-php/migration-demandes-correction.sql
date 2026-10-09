@@ -174,6 +174,24 @@ SET @sql := IF(@col = 0,
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+CREATE TABLE IF NOT EXISTS correction_encaissements (
+  id                CHAR(36) PRIMARY KEY,
+  demande_id        CHAR(36) NOT NULL,
+  user_id           CHAR(36) NOT NULL,
+  reference         VARCHAR(40) NOT NULL,
+  provider          VARCHAR(20) NOT NULL,
+  provider_ref      VARCHAR(80) NULL,
+  provider_event_id VARCHAR(80) NULL,
+  methode           VARCHAR(20) NOT NULL,
+  telephone         VARCHAR(20) NOT NULL,
+  montant           INT NOT NULL,
+  statut            VARCHAR(20) NOT NULL,
+  created_at        DATETIME NOT NULL,
+  confirme_le       DATETIME NULL,
+  UNIQUE KEY uq_correction_enc_ref (reference),
+  KEY idx_correction_enc_demande (demande_id)
+) ENGINE=InnoDB;
+
 -- Modèles d'alerte. L'administration est notifiée directement par le module,
 -- même si ces règles sont inactives : le triage IA ne peut pas être réduit au silence.
 INSERT IGNORE INTO notification_rules

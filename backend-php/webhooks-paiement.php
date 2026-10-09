@@ -3,6 +3,7 @@
 declare(strict_types=1);
 require __DIR__ . '/helpers.php';
 require_once __DIR__ . '/lib/paiement-fournisseur.php';
+require_once __DIR__ . '/lib/correction-encaissement.php';
 
 $raw = file_get_contents('php://input') ?: '';
 $headers = function_exists('getallheaders') ? (getallheaders() ?: []) : [];
@@ -29,7 +30,16 @@ if (column_exists('abonnements', 'provider_ref') && $providerRef) {
 }
 $ab = $stmt->fetch();
 if (!$ab) {
-  json_out(['ok' => false, 'error' => 'Abonnement introuvable'], 404);
+  $corr = correction_encaissement_notifier(db(), $verif);
+  if ($corr === null) {
+    json_out(['ok' => false, 'error' => 'Paiement introuvable'], 404);
+  }
+  json_out([
+    'ok' => $corr['ok'],
+    'error' => $corr['error'],
+    'resultat' => $corr['resultat'] ?? null,
+    'duplicate' => !empty($corr['duplicate']),
+  ], $corr['ok'] ? 200 : (int)$corr['code']);
 }
 
 $evenement = [

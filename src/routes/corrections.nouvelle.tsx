@@ -88,7 +88,7 @@ function Formulaire() {
       <form onSubmit={envoyer} className="mx-auto max-w-2xl space-y-4">
         <p className="rounded-xl bg-muted/50 p-4 text-sm text-muted-foreground">
           {prix != null
-            ? `Hors quota Pro (${quota ?? 0} demande incluse par période), une demande coûte ${formatFcfa(prix)}. Le règlement Mobile Money sera confirmé par l'administration ou par le module de paiement.`
+            ? `Hors quota Pro (${quota ?? 0} demande incluse par période), une demande coûte ${formatFcfa(prix)}. Le règlement se fait ensuite par Flooz ou T-Money.`
             : "Chargement du tarif…"}
           {" "}
           Tu reçois une correction commentée et pédagogique, jamais publiée avec l'épreuve.

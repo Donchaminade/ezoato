@@ -85,7 +85,7 @@ Sans cette fonction, un guide local est utilisé. Dans les deux cas le filtre an
 
 `correction_eleve_est_pro()` s'appuie sur `user_has_active_subscription`. Admin et gestionnaire comptent comme Pro pour les essais. `correction_periode_pro()` suit `date_debut` de l'abonnement, sinon un créneau calendaire de `subscription_duration_months` (6).
 
-La collecte Mobile Money n'est pas dans ce module. Après paiement, le module freemium confirme le règlement par `POST /corrections/demandes/{id}/reglement` avec l'en-tête `X-Ezoato-Reglement` égal à `EZOATO_CORRECTIONS_REGLEMENT_SECRET` (`hash_equals`). L'administration peut aussi confirmer depuis l'écran de file.
+L'encaissement passe par `FournisseurPaiement` (le même que l'abonnement Pro). L'élève appelle `POST /corrections/demandes/{id}/payer` (Flooz ou T-Money, montant de la demande). La confirmation simulée, la vérification opérateur ou le webhook `POST /webhooks/paiement` présente `EZOATO_CORRECTIONS_REGLEMENT_SECRET` au contrôle `hash_equals` de `POST /corrections/demandes/{id}/reglement` (`X-Ezoato-Reglement`). Sans ce secret, le règlement système est refusé. L'administration peut aussi confirmer depuis l'écran de file.
 
 ## Installation
 
@@ -134,7 +134,7 @@ Non touchés : `payments.php`, `abonnements.php`, `src/lib/pricing.ts`, `lib/ai.
 
 ## Points ouverts
 
-- Encaissement Mobile Money de la demande : à brancher par la branche freemium via le secret de règlement.
+- Encaissement Mobile Money : branché sur `FournisseurPaiement`. Le secret `EZOATO_CORRECTIONS_REGLEMENT_SECRET` est obligatoire pour la confirmation système.
 - `GROQ_API_KEY` requis pour la transcription réelle.
 - Stockage local des uploads, éphémère sur Render.
 - `dev` est en retard sur `master` : la revue cible `master` pour ne pas embarquer les commits déjà sur `master` et absents de `dev`.

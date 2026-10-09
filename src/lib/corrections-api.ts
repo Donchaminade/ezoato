@@ -21,6 +21,17 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 
+export type PaiementCorrection = {
+  id: string;
+  reference: string;
+  montant: number;
+  methode: "flooz" | "tmoney";
+  provider?: string;
+  simulated?: boolean;
+  redirectUrl?: string | null;
+  instructions: { titre: string; etapes: string[]; ussd: string };
+};
+
 export type StatutDemande =
   | "en_attente_reglement"
   | "recue"
@@ -176,6 +187,16 @@ export const correctionsApi = {
     }),
   confirmerReglement: (id: string, reference: string) =>
     http<DemandeCorrection>(`/corrections/demandes/${id}/reglement`, {
+      method: "POST",
+      body: JSON.stringify({ reference }),
+    }),
+  initierPaiement: (id: string, methode: "flooz" | "tmoney", telephone: string) =>
+    http<PaiementCorrection>(`/corrections/demandes/${id}/payer`, {
+      method: "POST",
+      body: JSON.stringify({ methode, telephone }),
+    }),
+  confirmerPaiement: (id: string, reference: string) =>
+    http<DemandeCorrection>(`/corrections/demandes/${id}/payer`, {
       method: "POST",
       body: JSON.stringify({ reference }),
     }),

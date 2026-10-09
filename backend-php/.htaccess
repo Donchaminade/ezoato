@@ -117,6 +117,7 @@ RewriteRule ^admin/demandes-etablissement/([a-f0-9-]+)/lu$ admin.php?action=lu_e
 # Demandes de correction (module isolé)
 RewriteRule ^corrections/reglages-publics$ corrections.php?action=reglages_publics [QSA,L]
 RewriteRule ^corrections/mes-demandes$ corrections.php?action=mes_demandes [QSA,L]
+RewriteRule ^corrections/demandes/([a-f0-9-]+)/payer$ corrections.php?action=payer&id=$1 [QSA,L]
 RewriteRule ^corrections/demandes/([a-f0-9-]+)/qcm$ corrections.php?action=qcm&id=$1 [QSA,L]
 RewriteRule ^corrections/demandes/([a-f0-9-]+)/reglement$ corrections.php?action=confirmer_reglement&id=$1 [QSA,L]
 RewriteRule ^corrections/demandes/([a-f0-9-]+)/audio$ corrections.php?action=audio&id=$1 [QSA,L]

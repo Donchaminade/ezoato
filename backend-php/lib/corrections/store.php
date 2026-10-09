@@ -144,7 +144,7 @@ function correction_reglages_lire(PDO $pdo): array
   $row = $pdo->query('SELECT * FROM correction_reglages WHERE id = 1')->fetch();
   if (!$row) {
     $d = correction_reglages_defaut();
-    correction_reglages_ecrire($pdo, $d);
+    correction_reglages_ecrire_mysql($pdo, $d);
     return $d;
   }
   return correction_reglages_normaliser($row);

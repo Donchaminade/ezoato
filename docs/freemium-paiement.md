@@ -83,3 +83,7 @@ Les doublons déjà validés avant cette règle ne sont pas révoqués.
 `backend-php/migration-freemium-paiement.sql` est idempotente. Elle ajoute colonnes et tables (`acces_gratuits`, `epreuve_dedup_verrous`, `paiement_evenements`) sans modifier le statut des abonnements existants : un utilisateur Pro reste Pro.
 
 Tant que la table `acces_gratuits` n'existe pas, les épreuves sous quota restent ouvertes (comportement d'avant migration). Le palier Pro (examens officiels, concours, corrigés) est appliqué dès le déploiement du code.
+
+## Demandes de correction
+
+Le même fournisseur encaisse le prix unitaire d'une demande de correction (1 500 FCFA par défaut). `POST /corrections/demandes/{id}/payer` initie Flooz ou T-Money. Après vérification, le règlement appelle le module corrections avec le secret `EZOATO_CORRECTIONS_REGLEMENT_SECRET`. Le webhook `POST /webhooks/paiement` reconnaît aussi ces références. Sans secret, la confirmation système est refusée.

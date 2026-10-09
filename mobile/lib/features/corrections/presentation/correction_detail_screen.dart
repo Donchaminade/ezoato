@@ -23,6 +23,62 @@ class CorrectionDetailScreen extends ConsumerStatefulWidget {
 
 class _CorrectionDetailScreenState extends ConsumerState<CorrectionDetailScreen> {
   String? _feedback;
+  String _methode = 'flooz';
+  final _telephone = TextEditingController();
+  Map<String, dynamic>? _paiement;
+  bool _loading = false;
+
+  @override
+  void dispose() {
+    _telephone.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initier() async {
+    final tel = _telephone.text.replaceAll(RegExp(r'\D'), '');
+    if (tel.length < 8) {
+      setState(() => _feedback = 'Entrez un numéro valide');
+      return;
+    }
+    setState(() => _loading = true);
+    try {
+      final paiement = await ref.read(apiClientProvider).initierPaiementCorrection(
+            demandeId: widget.id,
+            methode: _methode,
+            telephone: tel,
+          );
+      if (!mounted) return;
+      setState(() {
+        _paiement = paiement;
+        _feedback = null;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _feedback = '$error');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _confirmer() async {
+    final reference = '${_paiement?['reference'] ?? ''}';
+    if (reference.isEmpty) return;
+    setState(() => _loading = true);
+    try {
+      await ref.read(apiClientProvider).confirmerPaiementCorrection(
+            demandeId: widget.id,
+            reference: reference,
+          );
+      if (!mounted) return;
+      setState(() => _paiement = null);
+      ref.invalidate(demandeCorrectionProvider(widget.id));
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _feedback = '$error');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   Future<void> _repondre(String questionId, int choix) async {
     try {
@@ -68,9 +124,49 @@ class _CorrectionDetailScreenState extends ConsumerState<CorrectionDetailScreen>
             if (item.statut == 'en_attente_reglement') ...[
               const SizedBox(height: 16),
               Text(
-                'Cette demande attend la confirmation du règlement${item.montant != null ? ' (${item.montant} FCFA)' : ''}.',
+                'Règlement ${item.montant ?? 1500} FCFA, Flooz ou T-Money.',
                 style: EzoaTypography.body(context),
               ),
+              const SizedBox(height: 8),
+              if (_paiement == null) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => setState(() => _methode = 'flooz'),
+                        child: Text(_methode == 'flooz' ? 'Flooz ✓' : 'Flooz'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => setState(() => _methode = 'tmoney'),
+                        child: Text(_methode == 'tmoney' ? 'T-Money ✓' : 'T-Money'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _telephone,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(labelText: 'Numéro Mobile Money'),
+                ),
+                const SizedBox(height: 8),
+                FilledButton(
+                  onPressed: _loading ? null : _initier,
+                  child: const Text('Continuer'),
+                ),
+              ] else ...[
+                Text('${_paiement!['instructions']?['titre'] ?? 'Paiement'}', style: EzoaTypography.titleSmall(context)),
+                const SizedBox(height: 4),
+                Text('${_paiement!['reference']}', style: EzoaTypography.bodySmall(context)),
+                const SizedBox(height: 8),
+                FilledButton(
+                  onPressed: _loading ? null : _confirmer,
+                  child: Text(_paiement!['simulated'] == true ? 'Confirmer (simulation)' : 'J\'ai payé — vérifier'),
+                ),
+              ],
             ],
             if ((item.blocageTexte ?? '').isNotEmpty) ...[
               const SizedBox(height: 16),
