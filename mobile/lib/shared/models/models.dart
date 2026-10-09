@@ -1014,6 +1014,7 @@ class SubscriptionStatus {
 /// Modes tuteur IA — parité web / `docs/ezoato-ai.md`.
 typedef AiMode = String;
 
+const AiMode kAiModeGuide = 'guide';
 const AiMode kAiModeRedaction = 'redaction';
 const AiMode kAiModeCalcul = 'calcul';
 const AiMode kAiModeQuiz = 'quiz';
@@ -1401,4 +1402,96 @@ class AiSessionStart {
   final AiProgress? progress;
   final bool officialGrade;
   final bool juryCorrection;
+}
+
+class AiGuideCandidate {
+  const AiGuideCandidate({
+    required this.id,
+    required this.titre,
+    this.matiere,
+    this.annee,
+    this.examen,
+    this.etablissement,
+    this.classe,
+    this.ville,
+  });
+
+  factory AiGuideCandidate.fromJson(Map<String, dynamic> json) {
+    return AiGuideCandidate(
+      id: json['id'] as String? ?? '',
+      titre: json['titre'] as String? ?? '',
+      matiere: json['matiere'] as String?,
+      annee: (json['annee'] as num?)?.toInt(),
+      examen: json['examen'] as String?,
+      etablissement: json['etablissement'] as String?,
+      classe: json['classe'] as String?,
+      ville: json['ville'] as String?,
+    );
+  }
+
+  final String id;
+  final String titre;
+  final String? matiere;
+  final int? annee;
+  final String? examen;
+  final String? etablissement;
+  final String? classe;
+  final String? ville;
+
+  String get line {
+    final bits = [examen, annee?.toString(), etablissement, matiere, classe]
+        .whereType<String>()
+        .where((s) => s.isNotEmpty)
+        .toList();
+    if (bits.isEmpty) return titre;
+    return '$titre — ${bits.join(', ')}';
+  }
+}
+
+class AiGuideTurn {
+  const AiGuideTurn({
+    required this.sessionId,
+    required this.phase,
+    required this.reply,
+    required this.disclaimer,
+    this.candidates = const [],
+    this.epreuve,
+    this.epreuveId,
+    this.exercise,
+    this.leakBlocked = false,
+    this.solvesExercise = false,
+    this.officialGrade = false,
+  });
+
+  factory AiGuideTurn.fromJson(Map<String, dynamic> json) {
+    final epreuve = json['epreuve'];
+    return AiGuideTurn(
+      sessionId: json['sessionId'] as String? ?? '',
+      phase: json['phase'] as String? ?? 'identify',
+      reply: json['reply'] as String? ?? '',
+      disclaimer: json['disclaimer'] as String? ?? '',
+      candidates: (json['candidates'] as List<dynamic>? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .map(AiGuideCandidate.fromJson)
+          .toList(),
+      epreuve: epreuve is Map<String, dynamic> ? AiGuideCandidate.fromJson(epreuve) : null,
+      epreuveId: json['epreuveId'] as String?,
+      exercise: json['exercise'] as String?,
+      leakBlocked: json['leakBlocked'] as bool? ?? false,
+      solvesExercise: json['solvesExercise'] as bool? ?? false,
+      officialGrade: json['officialGrade'] as bool? ?? false,
+    );
+  }
+
+  final String sessionId;
+  final String phase;
+  final String reply;
+  final String disclaimer;
+  final List<AiGuideCandidate> candidates;
+  final AiGuideCandidate? epreuve;
+  final String? epreuveId;
+  final String? exercise;
+  final bool leakBlocked;
+  final bool solvesExercise;
+  final bool officialGrade;
 }

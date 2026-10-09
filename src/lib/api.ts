@@ -5,6 +5,7 @@ import type {
   AiCoach,
   AiEntitlement,
   AiEssayFeedback,
+  AiGuideTurn,
   AiExplanation,
   AiHints,
   AiJudge,
@@ -727,12 +728,21 @@ export const api = {
     });
   },
 
+  async guideAiTurn(data: {
+    sessionId?: string;
+    message?: string;
+    epreuveId?: string;
+    candidateId?: string;
+  }): Promise<AiGuideTurn> {
+    return http("/ai/guide", { method: "POST", body: JSON.stringify(data) });
+  },
+
   async getAiEntitlement(): Promise<AiEntitlement> {
     return http("/ai/entitlement");
   },
 
   async startAiSession(data: {
-    mode?: "redaction" | "calcul" | "quiz";
+    mode?: "guide" | "redaction" | "calcul" | "quiz";
     epreuveId?: string;
     sourceText?: string;
     question?: string;

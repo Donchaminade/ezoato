@@ -239,7 +239,7 @@ CREATE TABLE favoris (
 CREATE TABLE ai_sessions (
   id            CHAR(36) PRIMARY KEY,
   user_id       CHAR(36) NOT NULL,
-  mode          ENUM('redaction','calcul','quiz') NOT NULL DEFAULT 'quiz',
+  mode          ENUM('guide','redaction','calcul','quiz') NOT NULL DEFAULT 'quiz',
   epreuve_id    CHAR(36) NULL,
   matiere       VARCHAR(80) NULL,
   payload       JSON NOT NULL,

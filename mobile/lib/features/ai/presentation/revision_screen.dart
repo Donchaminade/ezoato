@@ -11,6 +11,7 @@ import '../../../shared/widgets/ezoa_widgets.dart';
 import '../../../shared/widgets/subscription_pro_widgets.dart';
 import '../../account/data/subscription_providers.dart';
 import '../../epreuves/presentation/epreuve_detail_screen.dart';
+import 'guide_tutor_panel.dart';
 
 AiMode inferAiMode(String? matiere) {
   final m = (matiere ?? '').toLowerCase();
@@ -45,7 +46,7 @@ class _RevisionScreenState extends ConsumerState<RevisionScreen> {
   @override
   void initState() {
     super.initState();
-    _mode = inferAiMode(widget.matiere);
+    _mode = kAiModeGuide;
   }
 
   @override
@@ -96,10 +97,10 @@ class _RevisionScreenState extends ConsumerState<RevisionScreen> {
                 const SizedBox(height: 8),
                 Text(
                   title == null
-                      ? 'Rédaction, sciences ou QCM à partir d\'une épreuve. '
-                          'Ce n\'est pas la correction du jury.'
-                      : 'L\'IA s\'appuie sur cette épreuve ($matiere). '
-                          'Ce n\'est pas la correction officielle du jury.',
+                      ? 'Retrouve l\'épreuve dans le catalogue, confirme-la, '
+                          'puis avance une étape à la fois. Pas le corrigé.'
+                      : 'Tuteur guidé de « $title ». Tu confirmes l\'épreuve, '
+                          'puis on travaille sans la réponse finale.',
                   style: EzoaTypography.bodySmall(context),
                 ),
               ],
@@ -112,6 +113,12 @@ class _RevisionScreenState extends ConsumerState<RevisionScreen> {
             spacing: 8,
             runSpacing: 8,
             children: [
+              _ModeChip(
+                label: 'Tuteur guidé',
+                icon: LucideIcons.sparkles,
+                selected: _mode == kAiModeGuide,
+                onTap: () => setState(() => _mode = kAiModeGuide),
+              ),
               _ModeChip(
                 label: 'Rédaction',
                 icon: LucideIcons.pencil,
@@ -153,8 +160,8 @@ class _RevisionScreenState extends ConsumerState<RevisionScreen> {
                     _LockCard(
                       title: 'Fonctionnalité Pro',
                       body:
-                          'Les modes rédaction, sciences et QCM IA sont inclus dans '
-                          'l\'abonnement Pro (Flooz ou T-Money).',
+                          'Le tuteur guidé, comme la rédaction, les sciences et le QCM, '
+                          'est inclus dans l\'abonnement Pro (Flooz ou T-Money).',
                       cta: 'Voir l\'abonnement Pro',
                       icon: LucideIcons.crown,
                       onTap: () => context.push('/account/abonnement'),
@@ -170,6 +177,9 @@ class _RevisionScreenState extends ConsumerState<RevisionScreen> {
                   cta: 'Voir l\'accès',
                   onTap: () => context.push('/account/abonnement'),
                 );
+              }
+              if (_mode == kAiModeGuide) {
+                return GuideTutorPanel(epreuveId: widget.epreuveId);
               }
               if (_mode == kAiModeRedaction) {
                 return _EssayPanel(
@@ -210,8 +220,9 @@ class _DisclaimerBanner extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Garde-fou : ceci n\'est pas la correction officielle du jury. '
-              'Vérifie toujours avec ton enseignant. En sciences, tu travailles au brouillon.',
+              'Garde-fou : ce n\'est pas un correcteur et ce n\'est pas la correction du jury. '
+              'Le tuteur ne donne pas la réponse finale, même si tu insistes. '
+              'Vérifie avec ton enseignant.',
               style: EzoaTypography.bodySmall(context),
             ),
           ),
