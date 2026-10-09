@@ -189,7 +189,7 @@ if ($action === 'preview') {
   $stmt = db()->prepare('SELECT pdf_preview_path FROM soumissions WHERE id=? AND soumis_par=?');
   $stmt->execute([$id, $user['id']]);
   $path = $stmt->fetchColumn();
-  if (!$path || !is_file($path)) fail('PDF introuvable', 404);
+  if (!$path || !fichier_dans_uploads((string)$path, (string)cfg()['uploads_dir'])) fail('PDF introuvable', 404);
   header('Content-Type: application/pdf');
   header('Content-Disposition: inline; filename="preview.pdf"');
   readfile($path);
@@ -338,6 +338,9 @@ if ($action === 'profile') {
   if ($newPwd !== '') {
     $sets[] = 'password_hash=?';
     $params[] = password_hash($newPwd, PASSWORD_BCRYPT);
+    if (column_exists('users', 'session_version')) {
+      $sets[] = 'session_version=COALESCE(session_version,0)+1';
+    }
   }
   $params[] = $user['id'];
 

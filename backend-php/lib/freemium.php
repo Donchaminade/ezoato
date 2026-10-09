@@ -309,7 +309,11 @@ function appliquer_evenement_pro(array $etat, array $evenement, int $dureeMois):
 }
 
 function confirmation_client_peut_activer(bool $estSimule, bool $payeChezOperateur): bool {
-  if ($estSimule) return true;
+  if ($estSimule) {
+    return function_exists('simulation_paiement_cliente_autorisee')
+      ? simulation_paiement_cliente_autorisee()
+      : false;
+  }
   return $payeChezOperateur;
 }
 
