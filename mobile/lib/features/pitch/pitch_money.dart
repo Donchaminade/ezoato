@@ -106,7 +106,7 @@ class _ContributeScreenState extends State<ContributeScreen> {
         PKSectionTitle('Mes envois').reveal(5),
         const SizedBox(height: 12),
         _sub(context, 'BEPC · Maths 2023', 'Validé · +500 FCFA', Icons.check_circle_rounded, PK.accent(context), 6),
-        _sub(context, 'BAC II D · Philo 2024', 'En vérification par un enseignant', Icons.hourglass_top_rounded, const Color(0xFFB8860B), 7),
+        _sub(context, 'BAC II D · Philo 2024', 'En vérification par un enseignant', Icons.hourglass_top_rounded, const Color(0xFF8A6D00), 7),
         _sub(context, 'CEPD · Calcul 2022', 'Validé · +500 FCFA', Icons.check_circle_rounded, PK.accent(context), 8),
       ]),
     );
@@ -172,7 +172,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(28),
-                    gradient: const LinearGradient(colors: [PK.emerald, PK.emeraldDeep], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    color: PK.emerald,
                   ),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     const PKBadge('PRO', icon: Icons.bolt_rounded).badgePop(1),
@@ -254,7 +254,7 @@ class PayoutScreen extends StatelessWidget {
 }
 
 /// Écran de paiement façon DcGgytAzym7 : carte sombre, bouton « Payer »,
-/// anneaux concentriques violets qui pulsent avec le pourcentage, puis
+/// anneaux concentriques verts (charte) qui pulsent avec le pourcentage, puis
 /// passage au vert avec une coche et le montant.
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key, required this.title, required this.item, required this.amount, this.payout = false});
@@ -280,9 +280,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
     _prog = AnimationController(vsync: this, duration: const Duration(milliseconds: 2600));
     _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..repeat();
   }
-  static const _ops = [('Flooz', 'Moov Africa', Color(0xFF0066B3)), ('T-Money', 'Togocom', Color(0xFFFFCE00))];
-  static const _bg = Color(0xFF0B0B10);
-  static const _card = Color(0xFF16161D);
+  static const _ops = [('Flooz', 'Moov Africa', Color(0xFF006A4E)), ('T-Money', 'Togocom', Color(0xFFFFCE00))];
+  static const _bg = Color(0xFF081221);
+  static const _card = Color(0xFF101D2F);
 
   @override
   void dispose() {
@@ -347,7 +347,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: _card, borderRadius: BorderRadius.circular(18), border: Border.all(color: _op == i ? PK.violet : Colors.white10, width: _op == i ? 2 : 1)),
+                  decoration: BoxDecoration(color: _card, borderRadius: BorderRadius.circular(18), border: Border.all(color: _op == i ? PK.mint : Colors.white10, width: _op == i ? 2 : 1)),
                   child: Row(children: [
                     Container(
                       width: 46,
@@ -363,7 +363,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
                         Text('${_ops[i].$2} · +228 •• •• 42 17', style: PK.body(context, 12, color: Colors.white54)),
                       ]),
                     ),
-                    Icon(_op == i ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded, color: _op == i ? PK.violet : Colors.white38),
+                    Icon(_op == i ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded, color: _op == i ? PK.mint : Colors.white38),
                   ]),
                 ),
               ).reveal(1 + i, card: true),
@@ -395,7 +395,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
           semantics: widget.payout ? 'Retirer' : 'Payer',
           child: Container(
             height: 56,
-            decoration: BoxDecoration(color: PK.violet, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: PK.violet.withValues(alpha: 0.45), blurRadius: 24, offset: const Offset(0, 8))]),
+            decoration: BoxDecoration(color: PK.emerald, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: PK.emerald.withValues(alpha: 0.45), blurRadius: 24, offset: const Offset(0, 8))]),
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               const Icon(Icons.lock_rounded, color: Colors.white, size: 18),
               const SizedBox(width: 8),
@@ -419,7 +419,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
           builder: (_, __) {
             final p = _prog.value;
             final done = p > 0.97;
-            final color = Color.lerp(PK.violet, const Color(0xFF22C55E), ((p - 0.85) / 0.15).clamp(0, 1))!;
+            final color = Color.lerp(PK.mint, const Color(0xFF02A671), ((p - 0.85) / 0.15).clamp(0, 1))!;
             return Column(mainAxisSize: MainAxisSize.min, children: [
               SizedBox(
                 width: 260,
@@ -457,12 +457,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
             child: AnimatedBuilder(
               animation: _pulse,
               builder: (_, __) => CustomPaint(
-                painter: _RingsPainter(pulse: _pulse.value, progress: 1, color: const Color(0xFF22C55E), soft: true),
+                painter: _RingsPainter(pulse: _pulse.value, progress: 1, color: const Color(0xFF02A671), soft: true),
                 child: Center(
                   child: Container(
                     width: 76,
                     height: 76,
-                    decoration: BoxDecoration(color: const Color(0xFF22C55E), shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFF22C55E).withValues(alpha: 0.5), blurRadius: 30)]),
+                    decoration: BoxDecoration(color: const Color(0xFF02A671), shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFF02A671).withValues(alpha: 0.5), blurRadius: 30)]),
                     child: const Icon(Icons.check_rounded, color: Colors.white, size: 42),
                   ).animate().scaleXY(begin: 0.4, end: 1, duration: 500.ms, curve: Curves.easeOutBack),
                 ),
@@ -472,7 +472,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with TickerProviderStat
           const SizedBox(height: 16),
           Text(widget.payout ? 'Retrait envoyé !' : 'Paiement réussi', style: PK.display(context, 24, color: Colors.white)).reveal(1),
           const SizedBox(height: 6),
-          Text(fcfa(widget.amount), style: PK.display(context, 38, color: const Color(0xFF22C55E))).reveal(2),
+          Text(fcfa(widget.amount), style: PK.display(context, 38, color: const Color(0xFF02A671))).reveal(2),
           const SizedBox(height: 10),
           Text(
             widget.payout ? 'Tu vas recevoir un SMS ${_ops[_op].$1} de confirmation.' : 'Bienvenue dans EZOA-TO Pro 🎉\nCorrigés et tuteur illimité débloqués.',

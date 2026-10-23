@@ -31,20 +31,20 @@ if ($id) {
   json_out($mapped);
 }
 
-$where = ["statut = 'validee'", "type != 'corrige'"];
+$where = ["e.statut = 'validee'", "e.type != 'corrige'"];
 $args  = [];
 
 $bind = function(string $col, string $key) use (&$where, &$args) {
-  if (!empty($_GET[$key])) { $where[] = "$col = ?"; $args[] = $_GET[$key]; }
+  if (!empty($_GET[$key])) { $where[] = "e.$col = ?"; $args[] = $_GET[$key]; }
 };
 $bind('matiere','matiere'); $bind('niveau','niveau'); $bind('classe','classe');
 $bind('type','type'); $bind('ville','ville'); $bind('examen','examen');
 $bind('periode','periode');
-if (!empty($_GET['annee'])) { $where[] = 'annee = ?'; $args[] = (int)$_GET['annee']; }
+if (!empty($_GET['annee'])) { $where[] = 'e.annee = ?'; $args[] = (int)$_GET['annee']; }
 
 if (!empty($_GET['q'])) {
   $q = '%' . $_GET['q'] . '%';
-  $where[] = '(titre LIKE ? OR matiere LIKE ? OR ville LIKE ?)';
+  $where[] = '(e.titre LIKE ? OR e.matiere LIKE ? OR e.ville LIKE ?)';
   array_push($args, $q, $q, $q);
 }
 
@@ -54,7 +54,7 @@ $offset  = ($page - 1) * $perPage;
 
 $cond = implode(' AND ', $where);
 
-$stmtCount = db()->prepare("SELECT COUNT(*) FROM epreuves WHERE $cond");
+$stmtCount = db()->prepare("SELECT COUNT(*) FROM epreuves e WHERE $cond");
 $stmtCount->execute($args);
 $total = (int)$stmtCount->fetchColumn();
 

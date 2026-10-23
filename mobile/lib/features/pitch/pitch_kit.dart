@@ -14,26 +14,25 @@ import 'package:flutter_animate/flutter_animate.dart';
 /// cartes scale 0.95→1, badges 0.8→1, orbes floutés qui dérivent 15 s).
 class PK {
   static const emerald = Color(0xFF006A4E);
-  static const emeraldDeep = Color(0xFF003D2D);
-  static const mint = Color(0xFF34D399);
-  static const lime = Color(0xFFC8F169);
+  static const emeraldDeep = Color(0xFF004D38);
+  static const mint = Color(0xFF02A671);
+  static const lime = Color(0xFFFFCE00);
   static const gold = Color(0xFFFFCE00);
-  static const red = Color(0xFFE5484D);
-  static const violet = Color(0xFF7C3AED);
+  static const red = Color(0xFFD21034);
 
   static const fontDisplay = 'SpaceGrotesk';
   static const fontBody = 'Inter';
 
   static bool dark(BuildContext c) => Theme.of(c).brightness == Brightness.dark;
-  static Color bg(BuildContext c) => dark(c) ? const Color(0xFF0D1311) : const Color(0xFFF3F2EC);
-  static Color surface(BuildContext c) => dark(c) ? const Color(0xFF17201D) : Colors.white;
-  static Color surface2(BuildContext c) => dark(c) ? const Color(0xFF1F2A26) : const Color(0xFFEAE9E2);
-  static Color ink(BuildContext c) => dark(c) ? const Color(0xFFF4F5F2) : const Color(0xFF111614);
-  static Color muted(BuildContext c) => dark(c) ? const Color(0xFF9AA5A0) : const Color(0xFF6B7470);
+  static Color bg(BuildContext c) => dark(c) ? const Color(0xFF081221) : const Color(0xFFFCFCFA);
+  static Color surface(BuildContext c) => dark(c) ? const Color(0xFF101D2F) : Colors.white;
+  static Color surface2(BuildContext c) => dark(c) ? const Color(0xFF1C2A3C) : const Color(0xFFECF4EF);
+  static Color ink(BuildContext c) => dark(c) ? const Color(0xFFE0E5ED) : const Color(0xFF0B121A);
+  static Color muted(BuildContext c) => dark(c) ? const Color(0xFF8F99A8) : const Color(0xFF5B646F);
   static Color line(BuildContext c) => dark(c) ? const Color(0x1AFFFFFF) : const Color(0x14000000);
   static Color accent(BuildContext c) => dark(c) ? mint : emerald;
   /// Bloc « héros » : noir profond en clair, émeraude très sombre en sombre.
-  static Color hero(BuildContext c) => dark(c) ? const Color(0xFF0F2E24) : const Color(0xFF111614);
+  static Color hero(BuildContext c) => dark(c) ? const Color(0xFF004D38) : const Color(0xFF006A4E);
 
   static TextStyle display(BuildContext c, double size, {Color? color, FontWeight w = FontWeight.w700}) =>
       TextStyle(fontFamily: fontDisplay, fontSize: size, fontWeight: w, height: 1.05, letterSpacing: -0.5, color: color ?? ink(c));
@@ -91,8 +90,8 @@ class _PKBackgroundState extends State<PKBackground> with SingleTickerProviderSt
             builder: (_, __) {
               final t = reduce ? 0.0 : _c.value * 2 * math.pi;
               return Stack(children: [
-                _orb(-80 + 40 * math.sin(t), -60 + 30 * math.cos(t), 260, PK.mint.withValues(alpha: dark ? 0.18 : 0.22)),
-                _orb(null, 220 + 40 * math.cos(t), 220, PK.gold.withValues(alpha: dark ? 0.10 : 0.18), right: -70 + 30 * math.sin(t)),
+                _orb(-80 + 40 * math.sin(t), -60 + 30 * math.cos(t), 260, PK.mint.withValues(alpha: dark ? 0.10 : 0.12)),
+                _orb(null, 220 + 40 * math.cos(t), 220, PK.gold.withValues(alpha: dark ? 0.06 : 0.10), right: -70 + 30 * math.sin(t)),
               ]);
             },
           ),
@@ -156,7 +155,7 @@ class PKButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg) = switch (style) {
       PKButtonStyle.primary => (PK.emerald, Colors.white),
-      PKButtonStyle.gold => (PK.gold, const Color(0xFF111614)),
+      PKButtonStyle.gold => (PK.gold, const Color(0xFF0B121A)),
       PKButtonStyle.ghost => (PK.surface2(context), PK.ink(context)),
       PKButtonStyle.ink => (PK.ink(context), PK.bg(context)),
     };
@@ -233,7 +232,7 @@ class PKChip extends StatelessWidget {
 }
 
 class PKBadge extends StatelessWidget {
-  const PKBadge(this.label, {super.key, this.bg = PK.gold, this.fg = const Color(0xFF111614), this.icon});
+  const PKBadge(this.label, {super.key, this.bg = PK.gold, this.fg = const Color(0xFF0B121A), this.icon});
   final String label;
   final Color bg;
   final Color fg;

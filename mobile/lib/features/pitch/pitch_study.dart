@@ -115,7 +115,7 @@ class _SubjectScreenState extends State<SubjectScreen> {
                   color: PK.gold.withValues(alpha: 0.16),
                   onTap: () => Navigator.of(context).push(pkRoute(const PaywallScreen())),
                   child: Row(children: [
-                    const Icon(Icons.lock_rounded, color: Color(0xFFB8860B)),
+                    const Icon(Icons.lock_rounded, color: Color(0xFF8A6D00)),
                     const SizedBox(width: 12),
                     Expanded(child: Text('Le corrigé détaillé est réservé aux membres Pro', style: PK.body(context, 14, w: FontWeight.w600))),
                     const PKBadge('PRO'),
@@ -313,7 +313,7 @@ class _TutorScreenState extends State<TutorScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(color: PK.gold.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(14)),
             child: Row(children: [
-              const Icon(Icons.shield_moon_outlined, size: 16, color: Color(0xFFB8860B)),
+              const Icon(Icons.shield_moon_outlined, size: 16, color: Color(0xFF8A6D00)),
               const SizedBox(width: 8),
               Expanded(child: Text('Mode guide : indices et questions, jamais la solution toute faite.', style: PK.body(context, 12, w: FontWeight.w600))),
             ]),
@@ -408,7 +408,7 @@ class _Orb extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: 44,
         height: 44,
-        decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [PK.lime, PK.emerald], begin: Alignment.topLeft, end: Alignment.bottomRight)),
+        decoration: const BoxDecoration(shape: BoxShape.circle, color: PK.emerald),
         child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
       ).animate(onPlay: (c) => c.repeat(reverse: true)).scaleXY(begin: 1, end: 1.08, duration: 1400.ms, curve: Curves.easeInOut);
 }

@@ -14,12 +14,12 @@ class Exam {
 
 const exams = <Exam>[
   Exam('CEPD', 'CEPD', 'Primaire', Icons.backpack_rounded, Color(0xFFFFCE00), 1240),
-  Exam('BEPC', 'BEPC', 'Collège', Icons.menu_book_rounded, Color(0xFF34D399), 2860),
-  Exam('BAC1', 'BAC I', 'Lycée', Icons.science_rounded, Color(0xFF60A5FA), 1975),
-  Exam('BAC2', 'BAC II', 'Lycée', Icons.school_rounded, Color(0xFFF472B6), 3410),
-  Exam('DEV', 'Devoirs & compos', 'Tous niveaux', Icons.edit_note_rounded, Color(0xFFFB923C), 5120),
-  Exam('UNIV', 'Université', 'Supérieur', Icons.account_balance_rounded, Color(0xFFA78BFA), 890),
-  Exam('CONC', 'Concours', 'ENAM, ENI…', Icons.emoji_events_rounded, Color(0xFF2DD4BF), 430),
+  Exam('BEPC', 'BEPC', 'Collège', Icons.menu_book_rounded, Color(0xFF02A671), 2860),
+  Exam('BAC1', 'BAC I', 'Lycée', Icons.science_rounded, Color(0xFFFFCE00), 1975),
+  Exam('BAC2', 'BAC II', 'Lycée', Icons.school_rounded, Color(0xFF02A671), 3410),
+  Exam('DEV', 'Devoirs & compos', 'Tous niveaux', Icons.edit_note_rounded, Color(0xFFFFCE00), 5120),
+  Exam('UNIV', 'Université', 'Supérieur', Icons.account_balance_rounded, Color(0xFF02A671), 890),
+  Exam('CONC', 'Concours', 'ENAM, ENI…', Icons.emoji_events_rounded, Color(0xFFFFCE00), 430),
 ];
 
 class Exercise {

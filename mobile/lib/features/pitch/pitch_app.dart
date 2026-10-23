@@ -69,7 +69,7 @@ class _PitchOnboardingState extends State<PitchOnboarding> {
                           AspectRatio(
                             aspectRatio: 1.05,
                             child: Container(
-                              decoration: BoxDecoration(color: const Color(0xFFFAF8F2), borderRadius: BorderRadius.circular(32)),
+                              decoration: BoxDecoration(color: const Color(0xFFFCFCFA), borderRadius: BorderRadius.circular(32)),
                               clipBehavior: Clip.antiAlias,
                               child: Image.asset(s.$1, fit: BoxFit.cover),
                             ),
@@ -147,7 +147,7 @@ class _PKTabBar extends StatelessWidget {
   ];
   @override
   Widget build(BuildContext context) {
-    final barBg = PK.dark(context) ? const Color(0xFF1C2622) : const Color(0xFF111614);
+    final barBg = PK.dark(context) ? const Color(0xFF1C2A3C) : const Color(0xFF004D38);
     return SafeArea(
       minimum: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Container(
@@ -171,12 +171,12 @@ class _PKTabBar extends StatelessWidget {
                   height: double.infinity,
                   decoration: BoxDecoration(color: i == index ? PK.lime : Colors.transparent, borderRadius: BorderRadius.circular(999)),
                   child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(_items[i].$1, size: 21, color: i == index ? const Color(0xFF111614) : Colors.white70),
+                    Icon(_items[i].$1, size: 21, color: i == index ? const Color(0xFF0B121A) : Colors.white70),
                     if (i == index) ...[
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(_items[i].$2, maxLines: 1, overflow: TextOverflow.clip, softWrap: false,
-                            style: const TextStyle(fontFamily: PK.fontBody, fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF111614))),
+                            style: const TextStyle(fontFamily: PK.fontBody, fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0B121A))),
                       ),
                     ],
                   ]),
@@ -201,7 +201,7 @@ class PitchHome extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(PK.pad, 12, PK.pad, 120),
         children: [
           Row(children: [
-            const CircleAvatar(radius: 23, backgroundColor: PK.gold, child: Text('KA', style: TextStyle(fontFamily: PK.fontDisplay, fontWeight: FontWeight.w700, color: Color(0xFF111614)))),
+            const CircleAvatar(radius: 23, backgroundColor: PK.gold, child: Text('KA', style: TextStyle(fontFamily: PK.fontDisplay, fontWeight: FontWeight.w700, color: Color(0xFF0B121A)))),
             const SizedBox(width: 12),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -268,7 +268,7 @@ class PitchHome extends StatelessWidget {
           // Objectif de révision (barre épaisse).
           PKCard(
             child: Row(children: [
-              Container(width: 46, height: 46, decoration: BoxDecoration(color: PK.gold.withValues(alpha: 0.2), shape: BoxShape.circle), child: const Icon(Icons.flag_rounded, color: Color(0xFFB8860B))),
+              Container(width: 46, height: 46, decoration: BoxDecoration(color: PK.gold.withValues(alpha: 0.2), shape: BoxShape.circle), child: const Icon(Icons.flag_rounded, color: Color(0xFF8A6D00))),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -336,7 +336,7 @@ class PitchHome extends StatelessWidget {
         child: SizedBox(
           width: 70,
           child: Column(children: [
-            Container(width: 54, height: 54, decoration: const BoxDecoration(color: PK.lime, shape: BoxShape.circle), child: Icon(icon, color: const Color(0xFF111614))),
+            Container(width: 54, height: 54, decoration: const BoxDecoration(color: PK.lime, shape: BoxShape.circle), child: Icon(icon, color: const Color(0xFF0B121A))),
             const SizedBox(height: 8),
             Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: PK.body(context, 12, color: Colors.white, w: FontWeight.w600)),
           ]),
@@ -533,14 +533,14 @@ class PitchProfile extends ConsumerWidget {
         const SizedBox(height: 16),
         PKCard(
           child: Row(children: [
-            const CircleAvatar(radius: 30, backgroundColor: PK.gold, child: Text('KA', style: TextStyle(fontFamily: PK.fontDisplay, fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF111614)))),
+            const CircleAvatar(radius: 30, backgroundColor: PK.gold, child: Text('KA', style: TextStyle(fontFamily: PK.fontDisplay, fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF0B121A)))),
             const SizedBox(width: 14),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('Kossi Amegah', style: PK.display(context, 20)),
                 Text('3e · CEG Bè-Kpota, Lomé', style: PK.body(context, 13, color: PK.muted(context))),
                 const SizedBox(height: 6),
-                const PKBadge('Compte gratuit', bg: Color(0x2234D399), fg: PK.mint),
+                const PKBadge('Compte gratuit', bg: Color(0x2202A671), fg: PK.mint),
               ]),
             ),
           ]),
