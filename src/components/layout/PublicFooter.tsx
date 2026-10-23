@@ -41,8 +41,12 @@ export function PublicFooter() {
         <div>
           <h4 className="mb-3 text-sm font-semibold text-foreground">Légal</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/conditions" className="hover:text-foreground">Conditions d&apos;utilisation</Link></li>
-            <li><Link to="/conditions#donnees-personnelles" className="hover:text-foreground">Confidentialité</Link></li>
+            <li><Link to="/cgu" className="hover:text-foreground">Conditions d&apos;utilisation</Link></li>
+            <li><Link to="/confidentialite" className="hover:text-foreground">Confidentialité</Link></li>
+            <li><Link to="/mentions-legales" className="hover:text-foreground">Mentions légales</Link></li>
+            <li><Link to="/conditions-de-vente" className="hover:text-foreground">Conditions de vente</Link></li>
+            <li><Link to="/charte-contributeurs" className="hover:text-foreground">Charte contributeurs</Link></li>
+            <li><Link to="/cookies" className="hover:text-foreground">Cookies</Link></li>
             <li><Link to="/about" className="hover:text-foreground">À propos</Link></li>
             <li><Link to="/contact" className="hover:text-foreground">Contact</Link></li>
           </ul>

@@ -152,6 +152,12 @@ function LoginPage() {
         </div>
       </form>
 
+      <p className="mt-6 text-center text-xs text-muted-foreground">
+        En te connectant, tu acceptes les{" "}
+        <Link to="/cgu" className="underline hover:text-primary">CGU</Link> et la{" "}
+        <Link to="/confidentialite" className="underline hover:text-primary">politique de confidentialité</Link>.
+      </p>
+
       <p className="mt-8 flex items-center gap-2 text-xs text-muted-foreground lg:hidden">
         <ShieldCheck className="size-3.5 shrink-0 text-primary/70" />
         Zone sécurisée — Accès réservé aux membres EZOA-TO

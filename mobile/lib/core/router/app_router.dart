@@ -1,3 +1,4 @@
+import '../../features/legal/legal_screens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -53,6 +54,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final path = state.matchedLocation;
       final isSplash = path == '/';
       final isOnboarding = path == '/onboarding';
+      if (path.startsWith('/legal')) return isLoading ? '/' : null;
       final isAuthRoute = path == '/login' ||
           path == '/register' ||
           path == '/forgot-password' ||
@@ -83,6 +85,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const OnboardingScreen(),
       ),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(path: '/legal', builder: (_, __) => const LegalHubScreen()),
+      GoRoute(
+        path: '/legal/:slug',
+        builder: (_, state) => LegalDocScreen(slug: state.pathParameters['slug']!),
+      ),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
       GoRoute(
         path: '/forgot-password',

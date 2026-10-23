@@ -1,12 +1,11 @@
+import '../../legal/legal_screens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/ezoa_theme.dart';
-import '../../../core/utils/external_links.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/widgets/ezoa_searchable_picker.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
@@ -592,9 +591,26 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   style: TextStyle(fontSize: 13.5, height: 1.4, color: pal.textDim),
                 ),
                 GestureDetector(
-                  onTap: () => openExternalUrl(Env.conditionsUrl),
+                  onTap: () => openLegal(context, 'cgu'),
                   child: const Text(
                     'conditions d’utilisation',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      height: 1.4,
+                      color: EzoaColors.primary,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+                Text(
+                  ' et la ',
+                  style: TextStyle(fontSize: 13.5, height: 1.4, color: pal.textDim),
+                ),
+                GestureDetector(
+                  onTap: () => openLegal(context, 'confidentialite'),
+                  child: const Text(
+                    'politique de confidentialité',
                     style: TextStyle(
                       fontSize: 13.5,
                       height: 1.4,

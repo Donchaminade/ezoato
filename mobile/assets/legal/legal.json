@@ -1,0 +1,470 @@
+[
+ {
+  "slug": "cgu",
+  "title": "Conditions générales d'utilisation",
+  "short": "CGU",
+  "description": "Conditions générales d'utilisation d'EZOA-TO : accès, compte, archives d'épreuves, tuteur IA, contributions et responsabilités.",
+  "sections": [
+   {
+    "id": "objet",
+    "title": "1. Objet et acceptation",
+    "blocks": [
+     {
+      "p": "Les présentes conditions générales d'utilisation (« CGU ») régissent l'accès et l'utilisation du site web et de l'application mobile EZOA-TO (la « Plateforme »), éditée par [À compléter : dénomination sociale de l'éditeur]."
+     },
+     {
+      "p": "En créant un compte ou en utilisant la Plateforme, tu acceptes sans réserve les présentes CGU ainsi que la Politique de confidentialité. Si tu ne les acceptes pas, tu ne dois pas utiliser EZOA-TO."
+     }
+    ]
+   },
+   {
+    "id": "services",
+    "title": "2. Description des services",
+    "blocks": [
+     {
+      "list": [
+       "Consultation et téléchargement d'archives d'épreuves scolaires (devoirs, compositions, examens nationaux) du Togo.",
+       "Révision assistée par un tuteur d'intelligence artificielle.",
+       "Soumission d'épreuves par les contributeurs, vérifiées par une équipe humaine avant publication.",
+       "Abonnement Pro et achats à l'unité payables par Mobile Money.",
+       "Consultation hors ligne des contenus téléchargés dans l'application mobile."
+      ]
+     }
+    ]
+   },
+   {
+    "id": "compte",
+    "title": "3. Compte utilisateur",
+    "blocks": [
+     {
+      "p": "La création d'un compte nécessite des informations exactes (nom, adresse e-mail ou téléphone, classe, niveau, établissement, ville). Tu es responsable de la confidentialité de ton mot de passe et de toute activité réalisée depuis ton compte."
+     },
+     {
+      "p": "Les mineurs doivent utiliser la Plateforme avec l'accord et sous la responsabilité d'un parent ou tuteur légal."
+     },
+     {
+      "p": "Un même compte ne peut pas être partagé ni revendu."
+     }
+    ]
+   },
+   {
+    "id": "usage",
+    "title": "4. Règles d'utilisation",
+    "blocks": [
+     {
+      "p": "Il est interdit de :"
+     },
+     {
+      "list": [
+       "republier, revendre ou diffuser massivement les contenus de la Plateforme hors du cadre personnel et éducatif ;",
+       "extraire automatiquement les contenus (scraping, robots) ;",
+       "soumettre des contenus dont tu ne détiens pas les droits ou des contenus illicites ;",
+       "contourner les mesures techniques de paiement ou de sécurité ;",
+       "frauder le programme contributeur (doublons, faux documents, comptes multiples)."
+      ]
+     }
+    ]
+   },
+   {
+    "id": "ia",
+    "title": "5. Tuteur IA",
+    "blocks": [
+     {
+      "p": "Les réponses du tuteur IA sont générées automatiquement par des fournisseurs tiers d'intelligence artificielle. Elles peuvent contenir des erreurs et ne remplacent pas un enseignant. Ne saisis pas de données personnelles sensibles dans tes questions."
+     }
+    ]
+   },
+   {
+    "id": "propriete",
+    "title": "6. Propriété intellectuelle",
+    "blocks": [
+     {
+      "p": "La marque EZOA-TO, le logo, l'interface et les textes éditoriaux sont protégés. Les épreuves publiées restent la propriété de leurs auteurs ou des institutions concernées ; EZOA-TO les met à disposition à des fins éducatives. Tout titulaire de droits peut demander le retrait d'un contenu via la page Contact."
+     }
+    ]
+   },
+   {
+    "id": "responsabilite",
+    "title": "7. Responsabilité",
+    "blocks": [
+     {
+      "p": "EZOA-TO s'efforce d'assurer l'exactitude des contenus et la disponibilité du service, sans garantie absolue. EZOA-TO ne saurait être tenu responsable des résultats scolaires, d'interruptions techniques, ni des services des opérateurs de paiement tiers."
+     }
+    ]
+   },
+   {
+    "id": "suspension",
+    "title": "8. Suspension et résiliation",
+    "blocks": [
+     {
+      "p": "EZOA-TO peut suspendre ou supprimer un compte en cas de violation des CGU, de fraude ou d'usage abusif. Tu peux supprimer ton compte à tout moment depuis ton profil ou sur demande via la page Contact."
+     }
+    ]
+   },
+   {
+    "id": "droit",
+    "title": "9. Droit applicable",
+    "blocks": [
+     {
+      "p": "Les présentes CGU sont régies par le droit togolais. À défaut de règlement amiable, tout litige relève des juridictions compétentes de Lomé, Togo."
+     }
+    ]
+   },
+   {
+    "id": "modifications",
+    "title": "10. Modifications",
+    "blocks": [
+     {
+      "p": "EZOA-TO peut modifier les CGU. Les utilisateurs sont informés des changements importants ; la poursuite de l'utilisation vaut acceptation de la nouvelle version."
+     }
+    ]
+   }
+  ],
+  "updated": "23 octobre 2026"
+ },
+ {
+  "slug": "confidentialite",
+  "title": "Politique de confidentialité",
+  "short": "Confidentialité",
+  "description": "Comment EZOA-TO collecte, utilise et protège tes données personnelles, conformément à la loi togolaise n°2019-014.",
+  "sections": [
+   {
+    "id": "cadre",
+    "title": "1. Cadre légal et responsable du traitement",
+    "blocks": [
+     {
+      "p": "EZOA-TO traite tes données personnelles conformément à la loi n°2019-014 du 29 octobre 2019 relative à la protection des données à caractère personnel au Togo."
+     },
+     {
+      "p": "Responsable du traitement : [À compléter : dénomination sociale de l'éditeur], [À compléter : adresse du siège]. Contact données personnelles : [À compléter : e-mail du référent données personnelles]."
+     }
+    ]
+   },
+   {
+    "id": "collecte",
+    "title": "2. Données collectées",
+    "blocks": [
+     {
+      "list": [
+       "Données de compte : nom, prénom, e-mail ou téléphone, classe, niveau, profil, établissement, ville, mot de passe (stocké chiffré).",
+       "Données d'usage : épreuves consultées et téléchargées, favoris, recherches, historique de révision, données techniques (appareil, journaux de connexion).",
+       "Contenus soumis : fichiers d'épreuves envoyés par les contributeurs et métadonnées associées.",
+       "Métadonnées de paiement : opérateur Mobile Money, numéro de téléphone payeur, montant, référence et statut de transaction, traités via PayGate Global et FedaPay. EZOA-TO ne stocke aucun code secret Mobile Money.",
+       "Questions posées au tuteur IA."
+      ]
+     }
+    ]
+   },
+   {
+    "id": "finalites",
+    "title": "3. Finalités et bases légales",
+    "blocks": [
+     {
+      "list": [
+       "Fournir le service et gérer ton compte (exécution du contrat).",
+       "Traiter les paiements, abonnements et versements aux contributeurs (exécution du contrat, obligations légales).",
+       "Vérifier les contributions et prévenir la fraude (intérêt légitime).",
+       "Améliorer la Plateforme et mesurer son audience (intérêt légitime ou consentement pour les cookies non essentiels).",
+       "T'envoyer des informations sur le service (consentement, retirable à tout moment)."
+      ]
+     }
+    ]
+   },
+   {
+    "id": "ia",
+    "title": "4. Traitement par le tuteur IA",
+    "blocks": [
+     {
+      "p": "Les questions envoyées au tuteur IA sont transmises à des fournisseurs tiers d'intelligence artificielle pour générer une réponse. Ces prestataires peuvent être situés hors du Togo ; EZOA-TO veille à limiter les données transmises (pas d'identité ni de coordonnées) et à encadrer ces transferts conformément à la loi n°2019-014. Évite d'y inclure des informations personnelles."
+     }
+    ]
+   },
+   {
+    "id": "destinataires",
+    "title": "5. Destinataires",
+    "blocks": [
+     {
+      "p": "Tes données sont accessibles à l'équipe EZOA-TO habilitée et à ses sous-traitants techniques : hébergement, opérateurs de paiement (PayGate Global, FedaPay, opérateurs Mobile Money) et fournisseurs d'IA. Elles ne sont jamais vendues."
+     }
+    ]
+   },
+   {
+    "id": "hors-ligne",
+    "title": "6. Stockage hors ligne",
+    "blocks": [
+     {
+      "p": "L'application mobile peut enregistrer sur ton appareil les épreuves téléchargées et certaines données de session pour un usage hors ligne. Ces données restent sur ton appareil et sont effacées à la déconnexion ou à la désinstallation."
+     }
+    ]
+   },
+   {
+    "id": "conservation",
+    "title": "7. Durées de conservation",
+    "blocks": [
+     {
+      "list": [
+       "Données de compte : pendant la durée du compte, puis supprimées ou anonymisées dans un délai de [À compléter : durée] après sa suppression.",
+       "Données de paiement : pendant la durée exigée par les obligations comptables et fiscales.",
+       "Journaux techniques : 12 mois maximum."
+      ]
+     }
+    ]
+   },
+   {
+    "id": "droits",
+    "title": "8. Tes droits",
+    "blocks": [
+     {
+      "p": "Conformément à la loi n°2019-014, tu disposes d'un droit d'accès, de rectification, d'effacement, d'opposition et de limitation du traitement, ainsi que du droit de retirer ton consentement à tout moment."
+     },
+     {
+      "p": "Pour les exercer, écris à [À compléter : e-mail du référent données personnelles] ou passe par la page Contact. Une réponse t'est apportée dans un délai raisonnable. Tu peux également saisir l'Instance de protection des données à caractère personnel (IPDCP) du Togo."
+     }
+    ]
+   },
+   {
+    "id": "securite",
+    "title": "9. Sécurité",
+    "blocks": [
+     {
+      "p": "EZOA-TO met en œuvre des mesures techniques et organisationnelles adaptées : chiffrement des communications (HTTPS), mots de passe hachés, accès restreints et journalisés."
+     }
+    ]
+   }
+  ],
+  "updated": "23 octobre 2026"
+ },
+ {
+  "slug": "mentions-legales",
+  "title": "Mentions légales",
+  "short": "Mentions légales",
+  "description": "Informations légales sur l'éditeur et l'hébergeur de la plateforme EZOA-TO.",
+  "sections": [
+   {
+    "id": "editeur",
+    "title": "1. Éditeur",
+    "blocks": [
+     {
+      "list": [
+       "Dénomination : [À compléter : dénomination sociale]",
+       "Forme juridique et capital : [À compléter : forme juridique et capital]",
+       "RCCM : [À compléter : RCCM]",
+       "NIF : [À compléter : NIF]",
+       "Siège : [À compléter : adresse du siège]",
+       "Téléphone : [À compléter : téléphone]",
+       "E-mail : [À compléter : e-mail de contact]",
+       "Directeur de la publication : [À compléter : nom du directeur de la publication]"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "hebergement",
+    "title": "2. Hébergement",
+    "blocks": [
+     {
+      "list": [
+       "Site web : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis — vercel.com",
+       "API et base de données : [À compléter : hébergeur du backend et adresse]"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "propriete",
+    "title": "3. Propriété intellectuelle",
+    "blocks": [
+     {
+      "p": "L'ensemble des éléments de la Plateforme (marque, logo, design, textes) est protégé. Toute reproduction non autorisée est interdite. Les épreuves restent la propriété de leurs auteurs ou institutions."
+     }
+    ]
+   },
+   {
+    "id": "signalement",
+    "title": "4. Signalement",
+    "blocks": [
+     {
+      "p": "Pour signaler un contenu illicite ou demander le retrait d'une épreuve, utilise la page Contact."
+     }
+    ]
+   }
+  ],
+  "updated": "23 octobre 2026"
+ },
+ {
+  "slug": "conditions-de-vente",
+  "title": "Conditions de vente et abonnement Pro",
+  "short": "Conditions de vente",
+  "description": "Prix, paiement Mobile Money, durée, renouvellement et remboursement de l'abonnement Pro EZOA-TO.",
+  "sections": [
+   {
+    "id": "offres",
+    "title": "1. Offres et prix",
+    "blocks": [
+     {
+      "list": [
+       "Abonnement Pro : 1 000 FCFA TTC pour 6 mois, donnant accès illimité aux archives, aux corrigés disponibles et au tuteur IA.",
+       "Achat à l'unité : épreuve d'examen national à 100 FCFA, corrigé type à 200 FCFA."
+      ]
+     },
+     {
+      "p": "Les prix sont indiqués en francs CFA (XOF), toutes taxes comprises. EZOA-TO peut les modifier ; le prix applicable est celui affiché au moment du paiement."
+     }
+    ]
+   },
+   {
+    "id": "paiement",
+    "title": "2. Paiement",
+    "blocks": [
+     {
+      "p": "Le paiement s'effectue par Mobile Money (Flooz, T-Money et autres moyens proposés) via les prestataires PayGate Global ou FedaPay. La commande est confirmée dès réception de la confirmation de l'opérateur. EZOA-TO n'a jamais accès à ton code secret."
+     }
+    ]
+   },
+   {
+    "id": "duree",
+    "title": "3. Durée et renouvellement",
+    "blocks": [
+     {
+      "p": "L'abonnement Pro débute à la confirmation du paiement et dure 6 mois. Il n'est pas renouvelé automatiquement : tu es averti avant son expiration et peux le renouveler manuellement depuis ton espace."
+     }
+    ]
+   },
+   {
+    "id": "retractation",
+    "title": "4. Remboursement",
+    "blocks": [
+     {
+      "p": "Les contenus numériques étant accessibles immédiatement après paiement, l'achat n'est en principe pas remboursable une fois l'accès ouvert. Un remboursement est accordé en cas de double débit, de paiement débité sans activation du service ou d'indisponibilité prolongée imputable à EZOA-TO. Demande à adresser via la page Contact dans les 14 jours suivant le paiement, avec la référence de transaction."
+     }
+    ]
+   },
+   {
+    "id": "litiges",
+    "title": "5. Réclamations",
+    "blocks": [
+     {
+      "p": "Toute réclamation est à adresser à [À compléter : e-mail de contact]. À défaut d'accord amiable, le droit togolais s'applique et les juridictions de Lomé sont compétentes."
+     }
+    ]
+   }
+  ],
+  "updated": "23 octobre 2026"
+ },
+ {
+  "slug": "charte-contributeurs",
+  "title": "Charte des contributeurs",
+  "short": "Charte contributeurs",
+  "description": "Règles de soumission d'épreuves, droits, vérification humaine, rémunération Mobile Money et lutte contre la fraude sur EZOA-TO.",
+  "sections": [
+   {
+    "id": "principe",
+    "title": "1. Principe",
+    "blocks": [
+     {
+      "p": "Les contributeurs enrichissent les archives en soumettant des épreuves réelles. Chaque soumission est vérifiée par l'équipe EZOA-TO avant publication."
+     }
+    ]
+   },
+   {
+    "id": "originalite",
+    "title": "2. Originalité et qualité",
+    "blocks": [
+     {
+      "list": [
+       "Soumettre uniquement des épreuves authentiques (devoirs, compositions, examens) effectivement données dans un établissement ou un examen.",
+       "Fournir un document lisible et complet, avec matière, classe, année et établissement exacts.",
+       "Ne pas soumettre de doublon d'une épreuve déjà publiée."
+      ]
+     }
+    ]
+   },
+   {
+    "id": "droits",
+    "title": "3. Droits sur les contenus",
+    "blocks": [
+     {
+      "p": "En soumettant une épreuve, tu déclares avoir le droit de la partager et tu accordes à EZOA-TO une licence non exclusive, gratuite et mondiale pour la reproduire, l'adapter (recadrage, anonymisation) et la diffuser à des fins éducatives sur la Plateforme. Les droits d'auteur des enseignants et institutions sont respectés : tout retrait demandé par un ayant droit est traité."
+     }
+    ]
+   },
+   {
+    "id": "verification",
+    "title": "4. Vérification humaine",
+    "blocks": [
+     {
+      "p": "Chaque épreuve est examinée par un validateur humain qui peut l'accepter, demander une correction ou la refuser. Seules les épreuves validées comptent pour la rémunération."
+     }
+    ]
+   },
+   {
+    "id": "remuneration",
+    "title": "5. Rémunération par Mobile Money",
+    "blocks": [
+     {
+      "p": "Le contributeur reçoit 1 000 FCFA par tranche de 50 épreuves validées. Les gains sont retirables par Mobile Money à partir de 2 000 FCFA, sur un numéro au nom du contributeur ou de son représentant légal. Les montants et seuils en vigueur sont affichés dans l'espace contributeur."
+     }
+    ]
+   },
+   {
+    "id": "fraude",
+    "title": "6. Fraude et sanctions",
+    "blocks": [
+     {
+      "p": "Les faux documents, doublons volontaires, comptes multiples ou manipulations entraînent le refus des soumissions, l'annulation des gains non versés et la suspension du compte, sans préjudice de poursuites."
+     }
+    ]
+   }
+  ],
+  "updated": "23 octobre 2026"
+ },
+ {
+  "slug": "cookies",
+  "title": "Politique cookies",
+  "short": "Cookies",
+  "description": "Les cookies et stockages locaux utilisés par le site EZOA-TO et comment les gérer.",
+  "sections": [
+   {
+    "id": "definition",
+    "title": "1. Qu'est-ce qu'un cookie ?",
+    "blocks": [
+     {
+      "p": "Un cookie est un petit fichier déposé sur ton navigateur. Le site EZOA-TO utilise aussi le stockage local du navigateur (localStorage) et un service worker pour le fonctionnement hors ligne."
+     }
+    ]
+   },
+   {
+    "id": "utilises",
+    "title": "2. Cookies et stockages utilisés",
+    "blocks": [
+     {
+      "list": [
+       "Strictement nécessaires : session de connexion, préférences d'affichage (thème clair/sombre), sécurité. Ils ne nécessitent pas de consentement.",
+       "Fonctionnement hors ligne : cache du service worker pour les pages et images déjà consultées.",
+       "Mesure d'audience : uniquement si elle est activée, avec ton consentement et des données agrégées."
+      ]
+     }
+    ]
+   },
+   {
+    "id": "gerer",
+    "title": "3. Gérer tes préférences",
+    "blocks": [
+     {
+      "p": "Tu peux supprimer les cookies et le stockage local depuis les réglages de ton navigateur. Désactiver les éléments strictement nécessaires peut empêcher la connexion. Le service worker peut être désactivé en ajoutant ?sw=off à l'adresse."
+     }
+    ]
+   },
+   {
+    "id": "duree",
+    "title": "4. Durée",
+    "blocks": [
+     {
+      "p": "Les cookies de session expirent à la déconnexion ; les préférences sont conservées au maximum 13 mois."
+     }
+    ]
+   }
+  ],
+  "updated": "23 octobre 2026"
+ }
+]
