@@ -26,7 +26,17 @@ type LegalDoc = {
   sections: { id: string; title: string; blocks: Block[] }[];
 };
 
-export const LEGAL_DOCS = legal as LegalDoc[];
+/** Champs éditeur centralisés dans legal.json (`editeur`) : un seul endroit à modifier. */
+const EDITEUR = legal.editeur as Record<string, string>;
+const fill = (t: string) => t.replace(/\{(\w+)\}/g, (m, k: string) => EDITEUR[k] ?? m);
+
+export const LEGAL_DOCS: LegalDoc[] = (legal.docs as LegalDoc[]).map((d) => ({
+  ...d,
+  sections: d.sections.map((s) => ({
+    ...s,
+    blocks: s.blocks.map((b) => ({ p: b.p && fill(b.p), list: b.list?.map(fill) })),
+  })),
+}));
 
 export function getLegalDoc(slug: LegalSlug): LegalDoc {
   return LEGAL_DOCS.find((d) => d.slug === slug)!;

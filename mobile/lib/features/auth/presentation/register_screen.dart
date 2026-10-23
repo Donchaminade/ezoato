@@ -621,7 +621,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ),
                 Text(
-                  ' d’EZOA-TO.',
+                  ' d’EZOA-TO, et j’ai l’accord de mes parents si j’ai moins de 18 ans.',
                   style: TextStyle(fontSize: 13.5, height: 1.4, color: pal.textDim),
                 ),
               ],

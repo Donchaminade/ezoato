@@ -35,8 +35,11 @@ List<LegalDoc>? _cache;
 
 Future<List<LegalDoc>> loadLegalDocs() async {
   if (_cache != null) return _cache!;
-  final raw = await rootBundle.loadString('assets/legal/legal.json');
-  _cache = (jsonDecode(raw) as List)
+  var raw = await rootBundle.loadString('assets/legal/legal.json');
+  // Champs éditeur centralisés (`editeur`) substitués dans les textes.
+  final editeur = Map<String, dynamic>.from((jsonDecode(raw) as Map)['editeur'] as Map);
+  editeur.forEach((k, v) => raw = raw.replaceAll('{$k}', (v as String).replaceAll('"', r'\"')));
+  _cache = ((jsonDecode(raw) as Map)['docs'] as List)
       .map((e) => LegalDoc.fromJson(Map<String, dynamic>.from(e as Map)))
       .toList();
   return _cache!;

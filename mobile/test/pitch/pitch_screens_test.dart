@@ -67,7 +67,7 @@ void main() {
     '06-tuteur-ia': () => TutorScreen(subject: subjects.first),
     '07-contribuer': () => const Scaffold(body: PKBackground(child: ContributeScreen())),
     '08-pro-paywall': () => const PaywallScreen(),
-    '09-paiement': () => const CheckoutScreen(title: 'Abonnement Pro', item: 'EZOA-TO Pro · Mensuel', amount: 1000),
+    '09-paiement': () => const CheckoutScreen(title: 'Abonnement Pro', item: 'EZOA-TO Pro · 6 mois', amount: 1000),
     '10-retrait-mobile-money': () => const PayoutScreen(),
     '11-profil': () => const Scaffold(body: PKBackground(child: PitchProfile())),
   };
@@ -112,7 +112,7 @@ void main() {
   testWidgets('Paiement : formulaire → anneaux → succès', (t) async {
     t.view.physicalSize = const Size(780, 1688);
     t.view.devicePixelRatio = 2;
-    await t.pumpWidget(_wrap(const CheckoutScreen(title: 'Abonnement Pro', item: 'EZOA-TO Pro · Mensuel', amount: 1000), Brightness.dark));
+    await t.pumpWidget(_wrap(const CheckoutScreen(title: 'Abonnement Pro', item: 'EZOA-TO Pro · 6 mois', amount: 1000), Brightness.dark));
     await t.pump(const Duration(seconds: 1));
     await t.tap(find.textContaining('Payer 1'));
     await t.pump(const Duration(milliseconds: 1200));

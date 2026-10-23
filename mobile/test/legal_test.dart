@@ -14,4 +14,12 @@ void main() {
     expect(find.textContaining('2019-014'), findsWidgets);
     expect(find.textContaining('Dernière mise à jour : 23 octobre 2026'), findsOneWidget);
   });
+
+  testWidgets('mentions légales : éditeur centralisé substitué', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: LegalDocScreen(slug: 'mentions-legales')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Chaminade Dondah ADJOLOU'), findsWidgets);
+    expect(find.textContaining('PAYFLEX'), findsOneWidget);
+    expect(find.textContaining('{'), findsNothing);
+  });
 }
