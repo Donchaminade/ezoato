@@ -71,7 +71,7 @@ export function EpreuvePreviewDialog({
                 epreuve={epreuve}
                 message="Connecte-toi pour consulter cette épreuve. Le quota gratuit est de 50 épreuves par compte."
               />
-            ) : epreuve.thumbnailUrl ? (
+            ) : epreuve.thumbnailUrl || epreuve.pdfPreviewUrl ? (
               <EpreuveReader epreuve={epreuve} />
             ) : (
               <div className="grid h-72 place-items-center rounded-lg border border-dashed border-border bg-muted/40 text-muted-foreground">

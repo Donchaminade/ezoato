@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../shared/widgets/exam_reader.dart';
 import 'pitch_data.dart';
 import 'pitch_kit.dart';
 import 'pitch_money.dart';
@@ -98,10 +99,17 @@ class _SubjectScreenState extends State<SubjectScreen> {
                       Center(child: Text('${s.exam.toUpperCase()} ${s.serie.toUpperCase()} — SESSION ${s.year}', textAlign: TextAlign.center, style: const TextStyle(fontFamily: PK.fontDisplay, fontSize: 16, fontWeight: FontWeight.w700))),
                       Center(child: Text('Épreuve de ${s.matiere} · Durée ${s.duree}', style: const TextStyle(fontSize: 12, color: Color(0xFF5B635F)))),
                       const Divider(height: 28),
-                      for (final a in s.pageAssets) ...[
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: InteractiveViewer(maxScale: 4, child: Image.asset(a, fit: BoxFit.fitWidth, semanticLabel: 'Page du sujet ${s.title}')),
+                      if (s.pageAssets.isNotEmpty) ...[
+                        PKButton(label: 'Ouvrir dans la liseuse', icon: Icons.chrome_reader_mode_rounded, onTap: () => openSubjectReader(context, s)),
+                        const SizedBox(height: 12),
+                      ],
+                      for (var i = 0; i < s.pageAssets.length; i++) ...[
+                        GestureDetector(
+                          onTap: () => openSubjectReader(context, s, page: i + 1),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(s.pageAssets[i], fit: BoxFit.fitWidth, semanticLabel: 'Page ${i + 1} du sujet ${s.title}'),
+                          ),
                         ),
                         const SizedBox(height: 12),
                       ],
@@ -449,3 +457,22 @@ class _Typing extends StatelessWidget {
       );
 }
 
+
+/// Ouvre la liseuse protégée (zoom, pages, mode nuit, filigrane) sur un sujet démo.
+void openSubjectReader(BuildContext context, Subject s, {int page = 1}) {
+  final key = GlobalKey<ExamReaderState>();
+  Navigator.of(context).push(MaterialPageRoute<void>(
+    builder: (_) => ExamReader(
+      key: key,
+      title: s.title,
+      pageCount: s.pageAssets.length,
+      watermark: 'Démo · EZOA-TO',
+      pageBuilder: (_, i) => Image.asset(s.pageAssets[i], fit: BoxFit.contain),
+    ),
+  ));
+  if (page > 1) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => key.currentState?.goToPage(page));
+    });
+  }
+}

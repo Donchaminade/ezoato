@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
-  Download, ArrowLeft, FileText, Lock, Loader2,
+  ArrowLeft, FileText, Lock,
   MapPin, Calendar, Building2, Share2, Eye, CheckCircle2, ClipboardCheck, Crown,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -32,8 +32,6 @@ function EpreuveDetail() {
   const { id } = Route.useParams();
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [downloading, setDownloading] = useState(false);
-  const [downloadingCorrige, setDownloadingCorrige] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["epreuve", id],
@@ -64,19 +62,6 @@ function EpreuveDetail() {
       ? "Les examens officiels et les concours demandent l'abonnement Pro dès la première épreuve."
       : "Ton quota d'épreuves gratuites est atteint. Passe en Pro pour continuer.");
 
-  async function handleDownload(epreuveId: string, setLoading: (v: boolean) => void) {
-    setLoading(true);
-    try {
-      await api.downloadEpreuve(epreuveId);
-      toast.success("Téléchargement lancé");
-      qc.invalidateQueries({ queryKey: ["epreuve", id] });
-      qc.invalidateQueries({ queryKey: ["my-library"] });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Échec du téléchargement");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleShare() {
     if (!data) return;
@@ -152,7 +137,7 @@ function EpreuveDetail() {
               </Button>
               {!user ? (
                 <Button asChild size="lg">
-                  <Link to="/auth/login">Se connecter pour télécharger</Link>
+                  <Link to="/auth/login">Se connecter pour lire</Link>
                 </Button>
               ) : hasAccess ? (
                 <>
@@ -160,10 +145,6 @@ function EpreuveDetail() {
                     <a href="#visionneuse">
                       <Eye className="size-4" /> Lire l&apos;épreuve
                     </a>
-                  </Button>
-                  <Button size="lg" variant="outline" onClick={() => handleDownload(data.id, setDownloading)} disabled={downloading}>
-                    {downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-                    Télécharger le PDF
                   </Button>
                 </>
               ) : (
@@ -209,7 +190,7 @@ function EpreuveDetail() {
                           </Button>
                         )}
                       </div>
-                    ) : user && hasAccess && data.thumbnailUrl ? (
+                    ) : user && hasAccess && (data.thumbnailUrl || data.pdfPreviewUrl) ? (
                       <EpreuveReader epreuve={data} />
                     ) : user && hasAccess && data.pdfPreviewUrl ? (
                       <AuthenticatedPdf url={data.pdfPreviewUrl} />
@@ -248,9 +229,10 @@ function EpreuveDetail() {
                         </Button>
                       ) : corrigeHasAccess ? (
                         <>
-                          <Button onClick={() => handleDownload(data.corrigeType!.id, setDownloadingCorrige)} disabled={downloadingCorrige}>
-                            {downloadingCorrige ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-                            Télécharger le corrigé
+                          <Button asChild>
+                            <Link to="/epreuves/$id" params={{ id: data.corrigeType.id }} hash="visionneuse">
+                              <Eye className="size-4" /> Lire le corrigé
+                            </Link>
                           </Button>
                           <Button asChild variant="outline">
                             <Link to="/account/bibliotheque">Voir dans ma bibliothèque</Link>
