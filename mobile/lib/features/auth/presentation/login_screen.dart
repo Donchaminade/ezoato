@@ -1,3 +1,4 @@
+import '../../legal/legal_screens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -149,7 +150,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 12),
+        Center(
+          child: TextButton(
+            key: const Key('legal-link'),
+            onPressed: () => openLegal(context),
+            style: TextButton.styleFrom(foregroundColor: EzoaColors.of(context).textMuted),
+            child: const Text('CGU · Confidentialité · Mentions légales', style: TextStyle(fontSize: 12.5)),
+          ),
+        ),
+        const SizedBox(height: 8),
         Center(
           child: TextButton.icon(
             key: const Key('demo-mode-button'),

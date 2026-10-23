@@ -1,3 +1,4 @@
+import '../legal/legal_screens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -552,7 +553,8 @@ class PitchProfile extends ConsumerWidget {
         item(Icons.download_done_rounded, 'Hors ligne', 'Épreuves téléchargées', () => Navigator.of(context).push(pkRoute(const OfflineScreen())), 4),
         item(dark ? Icons.light_mode_rounded : Icons.dark_mode_rounded, dark ? 'Mode clair' : 'Mode sombre', 'Apparence de l\'application', () => ref.read(themeModeProvider.notifier).toggle(), 5),
         item(Icons.replay_rounded, 'Revoir la présentation', 'Écrans d\'accueil', () => Navigator.of(context).pushAndRemoveUntil(pkRoute(const PitchOnboarding()), (_) => false), 6),
-        item(Icons.logout_rounded, 'Quitter le mode démo', 'Revenir à la connexion réelle', () => ref.read(demoModeProvider.notifier).state = false, 7),
+        item(Icons.gavel_rounded, 'À propos & légal', 'CGU, confidentialité, mentions légales', () => openLegal(context), 7),
+        item(Icons.logout_rounded, 'Quitter le mode démo', 'Revenir à la connexion réelle', () => ref.read(demoModeProvider.notifier).state = false, 8),
         const SizedBox(height: 10),
         Center(child: Text('EZOA-TO · Archive. Révise. Excelle.', style: PK.body(context, 12, color: PK.muted(context)))).animate().fadeIn(delay: 600.ms),
       ]),

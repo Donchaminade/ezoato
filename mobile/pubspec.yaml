@@ -76,6 +76,7 @@ flutter:
     - assets/images/logo-ezoa.png
     - assets/images/icon-ezoa.png
     - assets/images/onboarding/
+    - assets/legal/legal.json
   fonts:
     - family: Inter
       fonts:

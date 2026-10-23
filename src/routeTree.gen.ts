@@ -14,12 +14,18 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CguRouteImport } from './routes/cgu'
+import { Route as CharteContributeursRouteImport } from './routes/charte-contributeurs'
 import { Route as ConditionsRouteImport } from './routes/conditions'
+import { Route as ConditionsDeVenteRouteImport } from './routes/conditions-de-vente'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ContributorRouteImport } from './routes/contributor'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CorrectionsRouteImport } from './routes/corrections'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as PartenariatRouteImport } from './routes/partenariat'
 import { Route as ReviserRouteImport } from './routes/reviser'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -70,9 +76,29 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CguRoute = CguRouteImport.update({
+  id: '/cgu',
+  path: '/cgu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CharteContributeursRoute = CharteContributeursRouteImport.update({
+  id: '/charte-contributeurs',
+  path: '/charte-contributeurs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConditionsRoute = ConditionsRouteImport.update({
   id: '/conditions',
   path: '/conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConditionsDeVenteRoute = ConditionsDeVenteRouteImport.update({
+  id: '/conditions-de-vente',
+  path: '/conditions-de-vente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -83,6 +109,11 @@ const ContactRoute = ContactRouteImport.update({
 const ContributorRoute = ContributorRouteImport.update({
   id: '/contributor',
   path: '/contributor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CorrectionsRoute = CorrectionsRouteImport.update({
@@ -98,6 +129,11 @@ const DocsRoute = DocsRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
+  id: '/mentions-legales',
+  path: '/mentions-legales',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartenariatRoute = PartenariatRouteImport.update({
@@ -227,12 +263,18 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRouteWithChildren
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRouteWithChildren
+  '/cgu': typeof CguRoute
+  '/charte-contributeurs': typeof CharteContributeursRoute
   '/conditions': typeof ConditionsRoute
+  '/conditions-de-vente': typeof ConditionsDeVenteRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
   '/contributor': typeof ContributorRoute
+  '/cookies': typeof CookiesRoute
   '/corrections': typeof CorrectionsRouteWithChildren
   '/docs': typeof DocsRoute
   '/faq': typeof FaqRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/partenariat': typeof PartenariatRoute
   '/reviser': typeof ReviserRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -263,11 +305,17 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRouteWithChildren
+  '/cgu': typeof CguRoute
+  '/charte-contributeurs': typeof CharteContributeursRoute
   '/conditions': typeof ConditionsRoute
+  '/conditions-de-vente': typeof ConditionsDeVenteRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
   '/contributor': typeof ContributorRoute
+  '/cookies': typeof CookiesRoute
   '/docs': typeof DocsRoute
   '/faq': typeof FaqRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/partenariat': typeof PartenariatRoute
   '/reviser': typeof ReviserRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -300,12 +348,18 @@ export interface FileRoutesById {
   '/account': typeof AccountRouteWithChildren
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRouteWithChildren
+  '/cgu': typeof CguRoute
+  '/charte-contributeurs': typeof CharteContributeursRoute
   '/conditions': typeof ConditionsRoute
+  '/conditions-de-vente': typeof ConditionsDeVenteRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
   '/contributor': typeof ContributorRoute
+  '/cookies': typeof CookiesRoute
   '/corrections': typeof CorrectionsRouteWithChildren
   '/docs': typeof DocsRoute
   '/faq': typeof FaqRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/partenariat': typeof PartenariatRoute
   '/reviser': typeof ReviserRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -339,12 +393,18 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
+    | '/cgu'
+    | '/charte-contributeurs'
     | '/conditions'
+    | '/conditions-de-vente'
+    | '/confidentialite'
     | '/contact'
     | '/contributor'
+    | '/cookies'
     | '/corrections'
     | '/docs'
     | '/faq'
+    | '/mentions-legales'
     | '/partenariat'
     | '/reviser'
     | '/sitemap.xml'
@@ -375,11 +435,17 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/auth'
+    | '/cgu'
+    | '/charte-contributeurs'
     | '/conditions'
+    | '/conditions-de-vente'
+    | '/confidentialite'
     | '/contact'
     | '/contributor'
+    | '/cookies'
     | '/docs'
     | '/faq'
+    | '/mentions-legales'
     | '/partenariat'
     | '/reviser'
     | '/sitemap.xml'
@@ -411,12 +477,18 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
+    | '/cgu'
+    | '/charte-contributeurs'
     | '/conditions'
+    | '/conditions-de-vente'
+    | '/confidentialite'
     | '/contact'
     | '/contributor'
+    | '/cookies'
     | '/corrections'
     | '/docs'
     | '/faq'
+    | '/mentions-legales'
     | '/partenariat'
     | '/reviser'
     | '/sitemap.xml'
@@ -449,12 +521,18 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRouteWithChildren
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRouteWithChildren
+  CguRoute: typeof CguRoute
+  CharteContributeursRoute: typeof CharteContributeursRoute
   ConditionsRoute: typeof ConditionsRoute
+  ConditionsDeVenteRoute: typeof ConditionsDeVenteRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
   ContactRoute: typeof ContactRoute
   ContributorRoute: typeof ContributorRoute
+  CookiesRoute: typeof CookiesRoute
   CorrectionsRoute: typeof CorrectionsRouteWithChildren
   DocsRoute: typeof DocsRoute
   FaqRoute: typeof FaqRoute
+  MentionsLegalesRoute: typeof MentionsLegalesRoute
   PartenariatRoute: typeof PartenariatRoute
   ReviserRoute: typeof ReviserRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -500,11 +578,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cgu': {
+      id: '/cgu'
+      path: '/cgu'
+      fullPath: '/cgu'
+      preLoaderRoute: typeof CguRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/charte-contributeurs': {
+      id: '/charte-contributeurs'
+      path: '/charte-contributeurs'
+      fullPath: '/charte-contributeurs'
+      preLoaderRoute: typeof CharteContributeursRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/conditions': {
       id: '/conditions'
       path: '/conditions'
       fullPath: '/conditions'
       preLoaderRoute: typeof ConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions-de-vente': {
+      id: '/conditions-de-vente'
+      path: '/conditions-de-vente'
+      fullPath: '/conditions-de-vente'
+      preLoaderRoute: typeof ConditionsDeVenteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -519,6 +625,13 @@ declare module '@tanstack/react-router' {
       path: '/contributor'
       fullPath: '/contributor'
       preLoaderRoute: typeof ContributorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/corrections': {
@@ -540,6 +653,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentions-legales': {
+      id: '/mentions-legales'
+      path: '/mentions-legales'
+      fullPath: '/mentions-legales'
+      preLoaderRoute: typeof MentionsLegalesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partenariat': {
@@ -782,12 +902,18 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRouteWithChildren,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRouteWithChildren,
+  CguRoute: CguRoute,
+  CharteContributeursRoute: CharteContributeursRoute,
   ConditionsRoute: ConditionsRoute,
+  ConditionsDeVenteRoute: ConditionsDeVenteRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
   ContactRoute: ContactRoute,
   ContributorRoute: ContributorRoute,
+  CookiesRoute: CookiesRoute,
   CorrectionsRoute: CorrectionsRouteWithChildren,
   DocsRoute: DocsRoute,
   FaqRoute: FaqRoute,
+  MentionsLegalesRoute: MentionsLegalesRoute,
   PartenariatRoute: PartenariatRoute,
   ReviserRoute: ReviserRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

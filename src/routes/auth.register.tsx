@@ -347,11 +347,11 @@ function RegisterPage() {
           />
           <span className="text-muted-foreground">
             J&apos;accepte les{" "}
-            <Link to="/conditions" className="font-medium text-primary hover:underline">
+            <Link to="/cgu" className="font-medium text-primary hover:underline">
               conditions d&apos;utilisation
             </Link>{" "}
             et la{" "}
-            <Link to="/conditions#donnees-personnelles" className="font-medium text-primary hover:underline">
+            <Link to="/confidentialite" className="font-medium text-primary hover:underline">
               politique de confidentialité
             </Link>{" "}
             de EZOA-TO.

@@ -39,6 +39,7 @@ class AccountMenuScreen extends ConsumerWidget {
 
   static const _preferencesSection = <_MenuEntry>[
     ('Notifications', 'Alertes et messages', '/account/notifications', LucideIcons.bell),
+    ('À propos & légal', 'CGU, confidentialité, mentions légales', '/legal', LucideIcons.scale),
   ];
 
   @override
