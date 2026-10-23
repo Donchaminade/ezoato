@@ -8,9 +8,12 @@ import '../../../core/storage/secure_storage.dart';
 import '../../../core/theme/ezoa_theme.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/widgets/epreuve_thumbnail.dart';
+import '../../../shared/widgets/exam_reader.dart';
+import '../../auth/data/auth_repository.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
 
-export '../../../shared/widgets/epreuve_thumbnail.dart' show epreuvePreviewPageUrl;
+export '../../../shared/widgets/epreuve_thumbnail.dart'
+    show epreuvePreviewPageUrl;
 
 /// Ouvre la visionneuse d'aperçu plein écran (pages feuilletables + zoom).
 void showEpreuvePreview(
@@ -88,7 +91,9 @@ class EpreuvePreviewCard extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     pages == 1 ? 'Aperçu — 1 page' : 'Aperçu — $pages pages',
-                    style: EzoaTypography.titleSmall(context).copyWith(fontSize: 13),
+                    style: EzoaTypography.titleSmall(
+                      context,
+                    ).copyWith(fontSize: 13),
                   ),
                 ),
                 Icon(LucideIcons.chevronRight, size: 16, color: pal.textDim),
@@ -185,8 +190,6 @@ class EpreuvePreviewViewer extends StatefulWidget {
 }
 
 class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
-  int _page = 1;
-  bool _paperDark = false;
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +201,11 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: Icon(LucideIcons.x, size: 20, color: EzoaColors.of(context).text),
+              icon: Icon(
+                LucideIcons.x,
+                size: 20,
+                color: EzoaColors.of(context).text,
+              ),
               onPressed: () => Navigator.of(context).pop(),
             ),
             title: Text('Aperçu', style: EzoaTypography.titleMedium(context)),
@@ -214,80 +221,33 @@ class _EpreuvePreviewViewerState extends State<EpreuvePreviewViewer> {
       );
     }
 
-    final pal = EzoaColors.of(context);
     final pageCount = widget.epreuve.pages < 1 ? 1 : widget.epreuve.pages;
-
-    return SecureScreenScope(
-      child: Scaffold(
-        backgroundColor: _paperDark ? const Color(0xFF121816) : pal.background,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            tooltip: 'Fermer',
-            icon: Icon(LucideIcons.x, size: 20, color: pal.text),
-            onPressed: () => Navigator.of(context).pop(),
+    return Consumer(
+      builder: (context, ref, _) {
+        final user = ref.watch(authProvider).user;
+        return ExamReader(
+          title: widget.epreuve.titre,
+          pageCount: pageCount,
+          watermark: user == null
+              ? 'EZOA-TO'
+              : '${user.nom} · ${user.email} · EZOA-TO',
+          pageBuilder: (context, index) => _PreviewPage(
+            url: epreuvePreviewPageUrl(
+              widget.epreuve.id,
+              index + 1,
+              lire: true,
+            ),
           ),
-          title: Text(
-            'Lire l\'épreuve',
-            style: EzoaTypography.titleMedium(context).copyWith(fontSize: 16),
-          ),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              tooltip: _paperDark ? 'Mode clair' : 'Mode sombre',
-              onPressed: () => setState(() => _paperDark = !_paperDark),
-              icon: Icon(
-                _paperDark ? LucideIcons.sun : LucideIcons.moon,
-                color: pal.text,
-              ),
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: PageView.builder(
-                itemCount: pageCount,
-                onPageChanged: (i) => setState(() => _page = i + 1),
-                itemBuilder: (context, index) => _PreviewPage(
-                  url: epreuvePreviewPageUrl(widget.epreuve.id, index + 1, lire: true),
-                  paperDark: _paperDark,
-                ),
-              ),
-            ),
-            SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: pal.subtleFill,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: pal.border),
-                  ),
-                  child: Text(
-                    pageCount > 1
-                        ? 'Page $_page / $pageCount · balayez pour tourner'
-                        : 'Page 1 / 1',
-                    style: EzoaTypography.mono(context).copyWith(fontSize: 11),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 class _PreviewPage extends ConsumerStatefulWidget {
-  const _PreviewPage({required this.url, this.paperDark = false});
+  const _PreviewPage({required this.url});
 
   final String url;
-  final bool paperDark;
 
   @override
   ConsumerState<_PreviewPage> createState() => _PreviewPageState();
@@ -328,44 +288,31 @@ class _PreviewPageState extends ConsumerState<_PreviewPage> {
       );
     }
 
-    final image = InteractiveViewer(
-      maxScale: 5,
-      child: Center(
-        child: CachedNetworkImage(
-          imageUrl: widget.url,
-          httpHeaders: _headers,
-          fit: BoxFit.contain,
-          progressIndicatorBuilder: (context, _, progress) => SizedBox(
-            width: 32,
-            height: 32,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              value: progress.progress,
-            ),
-          ),
-          errorWidget: (context, _, _) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(LucideIcons.imageOff, size: 36, color: pal.textDim),
-              const SizedBox(height: 10),
-              Text(
-                'Impossible de charger cette page',
-                style: EzoaTypography.bodySmall(context),
-              ),
-            ],
+    return Center(
+      child: CachedNetworkImage(
+        imageUrl: widget.url,
+        httpHeaders: _headers,
+        fit: BoxFit.contain,
+        progressIndicatorBuilder: (context, _, progress) => SizedBox(
+          width: 32,
+          height: 32,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            value: progress.progress,
           ),
         ),
+        errorWidget: (context, _, _) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(LucideIcons.imageOff, size: 36, color: pal.textDim),
+            const SizedBox(height: 10),
+            Text(
+              'Impossible de charger cette page',
+              style: EzoaTypography.bodySmall(context),
+            ),
+          ],
+        ),
       ),
-    );
-    if (!widget.paperDark) return image;
-    return ColorFiltered(
-      colorFilter: const ColorFilter.matrix(<double>[
-        -1, 0, 0, 0, 255,
-        0, -1, 0, 0, 255,
-        0, 0, -1, 0, 255,
-        0, 0, 0, 1, 0,
-      ]),
-      child: image,
     );
   }
 }

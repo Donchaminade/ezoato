@@ -593,3 +593,11 @@
   .ezoa-check path { stroke-dashoffset: 0; }
   .ezoa-liquid-wave { top: 40%; }
 }
+
+/* Visionneuse protégée : rien à imprimer. */
+@media print {
+  .ezoa-reader,
+  .ezoa-reader * {
+    display: none !important;
+  }
+}
