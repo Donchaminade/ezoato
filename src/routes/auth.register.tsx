@@ -1,18 +1,21 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { toast } from "sonner";
 import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
   Eye,
   EyeOff,
   GraduationCap,
-  Loader2,
   Lock,
   Mail,
+  MapPin,
   School,
   ShieldCheck,
   Smartphone,
-  Sparkles,
   User,
   UserPlus,
 } from "lucide-react";
@@ -38,6 +41,20 @@ export const Route = createFileRoute("/auth/register")({
   component: RegisterPage,
 });
 
+/** Profils acceptés par l'API (`profil_type`) ; tout compte peut ensuite contribuer. */
+const PROFILS = [
+  { id: "eleve", label: "Élève", hint: "Collège ou lycée" },
+  { id: "etudiant", label: "Étudiant", hint: "Université" },
+  { id: "concours", label: "Candidat concours", hint: "ENAM, ENI…" },
+  { id: "enseignant", label: "Enseignant", hint: "Contributeur" },
+  { id: "parent", label: "Parent", hint: "Suivi" },
+  { id: "autre", label: "Autre", hint: "" },
+] as const;
+type ProfilId = (typeof PROFILS)[number]["id"];
+const needsParcours = (p: ProfilId) => p === "eleve" || p === "etudiant" || p === "concours";
+
+const STEPS = ["Infos personnelles", "Profil scolaire", "Sécurité"] as const;
+
 function passwordStrength(pwd: string): { score: number; label: string; color: string } {
   if (!pwd) return { score: 0, label: "", color: "bg-muted" };
   let score = 0;
@@ -46,352 +63,599 @@ function passwordStrength(pwd: string): { score: number; label: string; color: s
   if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
   if (/\d/.test(pwd)) score++;
   if (/[^A-Za-z0-9]/.test(pwd)) score++;
-  if (score <= 2) return { score: 33, label: "Faible", color: "bg-destructive" };
-  if (score <= 3) return { score: 66, label: "Moyen", color: "bg-tg-yellow" };
-  return { score: 100, label: "Fort", color: "bg-primary" };
+  if (score <= 2) return { score: 33, label: "Faible", color: "bg-[#D21034]" };
+  if (score <= 3) return { score: 66, label: "Moyen", color: "bg-[#FFCE00]" };
+  return { score: 100, label: "Fort", color: "bg-[#02A671]" };
+}
+
+type Errors = Partial<Record<string, string>>;
+
+/** Indicateur de progression : cercles numérotés + ligne qui se remplit (charte vert/or). */
+function StepperProgress({ step }: { step: number }) {
+  return (
+    <div className="mb-6" aria-label={`Étape ${step + 1} sur ${STEPS.length}`}>
+      <div className="relative flex items-start justify-between">
+        <div
+          className="absolute left-[16%] right-[16%] top-4 h-1 rounded-full bg-muted"
+          aria-hidden
+        />
+        <motion.div
+          className="absolute left-[16%] top-4 h-1 rounded-full bg-gradient-to-r from-[#006A4E] to-[#02A671]"
+          initial={false}
+          animate={{ width: `${(step / (STEPS.length - 1)) * 68}%` }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          aria-hidden
+        />
+        {STEPS.map((label, i) => {
+          const done = i < step;
+          const active = i === step;
+          return (
+            <div
+              key={label}
+              className="relative z-10 flex w-1/3 flex-col items-center gap-1.5 text-center"
+            >
+              <motion.span
+                initial={false}
+                animate={{ scale: active ? 1.12 : 1 }}
+                transition={{ type: "spring", stiffness: 380, damping: 24 }}
+                className={cn(
+                  "grid size-9 place-items-center rounded-full border-2 text-sm font-bold transition-colors",
+                  done && "border-[#006A4E] bg-[#006A4E] text-white",
+                  active &&
+                    "border-[#006A4E] bg-white text-[#006A4E] shadow-md ring-4 ring-[#FFCE00]/40 dark:bg-[#0B1622] dark:text-[#02A671] dark:border-[#02A671]",
+                  !done && !active && "border-border bg-card text-muted-foreground",
+                )}
+                aria-current={active ? "step" : undefined}
+              >
+                {done ? <Check className="size-4" /> : i + 1}
+              </motion.span>
+              <span
+                className={cn(
+                  "text-[11px] font-semibold leading-tight sm:text-xs",
+                  active ? "text-foreground" : "text-muted-foreground",
+                )}
+              >
+                {label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function Field({
+  id,
+  label,
+  icon: Icon,
+  error,
+  hint,
+  children,
+}: {
+  id?: string;
+  label: string;
+  icon?: typeof User;
+  error?: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id} className="text-sm font-medium">
+        {label}
+      </Label>
+      <div className="relative">
+        {Icon && (
+          <Icon className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
+        )}
+        {children}
+      </div>
+      {error ? (
+        <p role="alert" className="text-xs font-medium text-destructive">
+          {error}
+        </p>
+      ) : (
+        hint && <p className="text-xs text-muted-foreground">{hint}</p>
+      )}
+    </div>
+  );
 }
 
 function RegisterPage() {
   const { register } = useAuth();
   const nav = useNavigate();
+  const reduce = useReducedMotion();
   const { data: meta } = useQuery({ queryKey: ["meta"], queryFn: () => api.getMeta() });
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const flagError = () => {
-    setFailed(true);
-    window.setTimeout(() => setFailed(false), 900);
-  };
-  const [showPwd, setShowPwd] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPwd, setConfirmPwd] = useState("");
-  const [acceptTerms, setAcceptTerms] = useState(false);
+
+  const [step, setStep] = useState(0);
+  const [dir, setDir] = useState(1);
+  const [errors, setErrors] = useState<Errors>({});
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  // Données conservées entre les étapes
+  const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [profil, setProfil] = useState<ProfilId>("eleve");
   const [niveau, setNiveau] = useState<"college" | "lycee">("college");
   const [classe, setClasse] = useState("");
   const [etablissement, setEtablissement] = useState("");
+  const [ville, setVille] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
-  const CLASSES_COLLEGE = meta?.classes?.college ?? ["6e", "5e", "4e", "3e"];
-  const CLASSES_LYCEE = meta?.classes?.lycee ?? [];
-  const etablissementSuggestions = useMemo(
+  const classOptions = useMemo(() => {
+    if (profil === "eleve")
+      return niveau === "college"
+        ? (meta?.classes?.college ?? ["6e", "5e", "4e", "3e"])
+        : (meta?.classes?.lycee ?? []);
+    if (profil === "etudiant") return meta?.classes?.universite ?? [];
+    if (profil === "concours") return meta?.classes?.concours ?? [];
+    return [];
+  }, [profil, niveau, meta]);
+  const etabSuggestions = useMemo(
     () => [...new Set((meta?.etablissements ?? []).map((e) => e.nom).filter(Boolean))],
     [meta?.etablissements],
   );
-
+  const villes = meta?.villes ?? [];
   const strength = useMemo(() => passwordStrength(password), [password]);
-  const pwdMismatch = confirmPwd.length > 0 && password !== confirmPwd;
+
+  function validate(s: number): Errors {
+    const e: Errors = {};
+    if (s === 0) {
+      if (nom.trim().length < 2) e.nom = "Indique ton nom complet (2 caractères minimum).";
+      if (!/^\S+@\S+\.\S+$/.test(email.trim())) e.email = "Adresse e-mail invalide.";
+      if (!isValidPhone(telephone)) e.telephone = "Numéro invalide (8 chiffres minimum).";
+    }
+    if (s === 1 && needsParcours(profil)) {
+      if (!classe)
+        e.classe = profil === "concours" ? "Choisis le concours visé." : "Sélectionne ta classe.";
+      if (profil !== "concours" && !etablissement.trim())
+        e.etablissement = "Indique ton établissement.";
+    }
+    if (s === 2) {
+      if (password.length < 8) e.password = "8 caractères minimum.";
+      if (password !== confirmPwd) e.confirm = "Les mots de passe ne correspondent pas.";
+      if (!acceptTerms) e.terms = "Accepte les conditions pour continuer.";
+    }
+    return e;
+  }
+
+  function fail(e: Errors) {
+    setErrors(e);
+    emitMascot("error");
+    setStatus("error");
+    window.setTimeout(() => setStatus("idle"), 900);
+  }
+
+  function goTo(next: number) {
+    setDir(next > step ? 1 : -1);
+    setStep(next);
+  }
+
+  function next() {
+    const e = validate(step);
+    if (Object.keys(e).length) return fail(e);
+    setErrors({});
+    goTo(step + 1);
+  }
+
+  /** Associe une erreur API à l'étape concernée. */
+  function stepForApiError(msg: string): { step: number; field: string } {
+    const m = msg.toLowerCase();
+    if (m.includes("email")) return { step: 0, field: "email" };
+    if (m.includes("téléphone") || m.includes("telephone")) return { step: 0, field: "telephone" };
+    if (m.includes("nom")) return { step: 0, field: "nom" };
+    if (m.includes("classe") || m.includes("profil") || m.includes("concours"))
+      return { step: 1, field: "classe" };
+    if (m.includes("établissement") || m.includes("etablissement"))
+      return { step: 1, field: "etablissement" };
+    return { step: 2, field: "password" };
+  }
+
+  async function submit() {
+    for (const s of [0, 1, 2]) {
+      const e = validate(s);
+      if (Object.keys(e).length) {
+        if (s !== step) goTo(s);
+        return fail(e);
+      }
+    }
+    setErrors({});
+    setStatus("loading");
+    try {
+      await register(
+        nom.trim(),
+        email.trim(),
+        normalizePhone(telephone),
+        password,
+        needsParcours(profil) ? classe : "",
+        etablissement.trim(),
+        { profilType: profil },
+      );
+      if (ville) {
+        api
+          .updateProfile({
+            nom: nom.trim(),
+            email: email.trim(),
+            telephone: normalizePhone(telephone),
+            ville,
+          })
+          .catch(() => undefined);
+      }
+      setStatus("success");
+      emitMascot("happy");
+      toast.success("Compte créé ! Bienvenue sur EZOA-TO.");
+      await new Promise((r) => setTimeout(r, 900));
+      nav({ to: "/account" });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Inscription impossible.";
+      const target = stepForApiError(msg);
+      if (target.step !== step) goTo(target.step);
+      fail({ [target.field]: msg });
+      toast.error(msg);
+    }
+  }
+
+  const slide = reduce
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
+    : {
+        initial: (d: number) => ({ opacity: 0, x: 48 * d }),
+        animate: { opacity: 1, x: 0 },
+        exit: (d: number) => ({ opacity: 0, x: -48 * d }),
+      };
 
   return (
     <AuthSplitLayout
       variant="register"
       title="Créer un compte"
-      subtitle="Compte gratuit pour élèves et contributeurs — accède aux archives et soumets des épreuves."
+      subtitle="Compte gratuit en 3 étapes — accède aux archives et soumets des épreuves."
     >
-      <div className="mb-6 flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/8 px-4 py-3 text-sm text-foreground">
-        <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
-        <span>
-          Inscription <strong>100 % gratuite</strong>. Devoirs et compositions accessibles sans abonnement.
-        </span>
-      </div>
+      <StepperProgress step={step} />
 
       <form
-        onSubmit={async (e) => {
+        noValidate
+        onSubmit={(e) => {
           e.preventDefault();
-          if (password !== confirmPwd) {
-            emitMascot("error");
-            flagError();
-            toast.error("Les mots de passe ne correspondent pas.");
-            return;
-          }
-          if (!acceptTerms) {
-            emitMascot("error");
-            flagError();
-            toast.error("Accepte les conditions pour continuer.");
-            return;
-          }
-          const fd = new FormData(e.currentTarget);
-          const telephone = String(fd.get("telephone"));
-          if (!isValidPhone(telephone)) {
-            emitMascot("error");
-            flagError();
-            toast.error("Numéro de téléphone invalide (8 chiffres minimum).");
-            return;
-          }
-          if (!classe) {
-            emitMascot("error");
-            flagError();
-            toast.error("Sélectionne ta classe.");
-            return;
-          }
-          if (!etablissement.trim()) {
-            emitMascot("error");
-            flagError();
-            toast.error("Indique ton établissement.");
-            return;
-          }
-          setLoading(true);
-          try {
-            await register(
-              String(fd.get("nom")),
-              String(fd.get("email")),
-              normalizePhone(telephone),
-              password,
-              classe,
-              etablissement.trim(),
-            );
-            toast.success("Compte créé ! Bienvenue sur EZOA-TO.");
-            emitMascot("happy");
-            setDone(true);
-            await new Promise((r) => setTimeout(r, 700));
-            nav({ to: "/account" });
-          } catch {
-            emitMascot("error");
-            flagError();
-            toast.error("Inscription impossible. Email ou numéro déjà utilisé.");
-          } finally {
-            setLoading(false);
-          }
+          if (step < 2) next();
+          else void submit();
         }}
-        className="space-y-4"
+        className="space-y-5"
       >
-        <div className="space-y-2">
-          <Label htmlFor="nom" className="text-sm font-medium">
-            Nom complet
-          </Label>
-          <div className="relative">
-            <User className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="nom"
-              name="nom"
-              required
-              minLength={2}
-              placeholder="Ex. Afi Kouami"
-              className={AUTH_FIELD}
-            />
-          </div>
+        <div className="relative overflow-x-clip">
+          <AnimatePresence mode="wait" custom={dir} initial={false}>
+            <motion.div
+              key={step}
+              custom={dir}
+              variants={slide as never}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="space-y-4 p-0.5"
+            >
+              {step === 0 && (
+                <>
+                  <Field id="nom" label="Nom complet" icon={User} error={errors.nom}>
+                    <Input
+                      id="nom"
+                      value={nom}
+                      onChange={(e) => setNom(e.target.value)}
+                      placeholder="Ex. Afi Kouami"
+                      autoComplete="name"
+                      className={AUTH_FIELD}
+                      aria-invalid={!!errors.nom}
+                    />
+                  </Field>
+                  <Field id="email" label="Adresse e-mail" icon={Mail} error={errors.email}>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="ton.email@exemple.tg"
+                      autoComplete="email"
+                      className={AUTH_FIELD}
+                      aria-invalid={!!errors.email}
+                    />
+                  </Field>
+                  <Field
+                    id="telephone"
+                    label="Numéro de téléphone"
+                    icon={Smartphone}
+                    error={errors.telephone}
+                    hint="Connexion, paiements Mobile Money et retraits contributeur."
+                  >
+                    <Input
+                      id="telephone"
+                      type="tel"
+                      inputMode="tel"
+                      value={telephone}
+                      onChange={(e) => setTelephone(e.target.value)}
+                      placeholder="90 12 34 56"
+                      autoComplete="tel"
+                      className={AUTH_FIELD}
+                      aria-invalid={!!errors.telephone}
+                    />
+                  </Field>
+                </>
+              )}
+
+              {step === 1 && (
+                <>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Je suis…</Label>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" role="radiogroup">
+                      {PROFILS.map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={profil === p.id}
+                          onClick={() => {
+                            setProfil(p.id);
+                            setClasse("");
+                          }}
+                          className={cn(
+                            "rounded-2xl border px-3 py-2.5 text-left text-sm transition-all active:scale-[0.97]",
+                            profil === p.id
+                              ? "border-[#006A4E] bg-[#006A4E]/10 font-semibold text-foreground ring-2 ring-[#006A4E]/30 dark:border-[#02A671]"
+                              : "border-border bg-card text-muted-foreground hover:border-[#02A671]/50",
+                          )}
+                        >
+                          {p.label}
+                          {p.hint && (
+                            <span className="block text-[11px] font-normal text-muted-foreground">
+                              {p.hint}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Tous les comptes peuvent soumettre des épreuves et devenir contributeurs.
+                    </p>
+                  </div>
+
+                  {needsParcours(profil) && (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {profil === "eleve" && (
+                        <Field label="Niveau">
+                          <Select
+                            value={niveau}
+                            onValueChange={(v) => {
+                              setNiveau(v as "college" | "lycee");
+                              setClasse("");
+                            }}
+                          >
+                            <SelectTrigger className={cn(AUTH_FIELD, "pl-4")}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="college">Collège</SelectItem>
+                              <SelectItem value="lycee">Lycée</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </Field>
+                      )}
+                      <Field
+                        label={profil === "concours" ? "Concours visé" : "Classe / examen visé"}
+                        icon={GraduationCap}
+                        error={errors.classe}
+                      >
+                        <Select value={classe} onValueChange={setClasse}>
+                          <SelectTrigger className={AUTH_FIELD} aria-invalid={!!errors.classe}>
+                            <SelectValue
+                              placeholder={profil === "concours" ? "Choisis" : "Ta classe"}
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {classOptions.map((c) => (
+                              <SelectItem key={c} value={c}>
+                                {c}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    </div>
+                  )}
+
+                  {profil !== "concours" && (
+                    <Field
+                      id="etablissement"
+                      label="Établissement"
+                      icon={School}
+                      error={errors.etablissement}
+                      hint={needsParcours(profil) ? undefined : "Optionnel"}
+                    >
+                      <Input
+                        id="etablissement"
+                        list="register-etablissements"
+                        value={etablissement}
+                        onChange={(e) => setEtablissement(e.target.value)}
+                        placeholder="Ex. Lycée de Tokoin"
+                        autoComplete="organization"
+                        className={AUTH_FIELD}
+                        aria-invalid={!!errors.etablissement}
+                      />
+                      <datalist id="register-etablissements">
+                        {etabSuggestions.map((e) => (
+                          <option key={e} value={e} />
+                        ))}
+                      </datalist>
+                    </Field>
+                  )}
+
+                  <Field
+                    label="Ville / région"
+                    icon={MapPin}
+                    hint="Optionnel — pour les épreuves de ta zone."
+                  >
+                    <Select value={ville} onValueChange={setVille}>
+                      <SelectTrigger className={AUTH_FIELD}>
+                        <SelectValue placeholder="Ta ville" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {villes.map((v) => (
+                          <SelectItem key={v} value={v}>
+                            {v}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  <Field id="password" label="Mot de passe" icon={Lock} error={errors.password}>
+                    <Input
+                      id="password"
+                      type={showPwd ? "text" : "password"}
+                      data-mascot="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="8 caractères minimum"
+                      autoComplete="new-password"
+                      className={cn(AUTH_FIELD, "pr-11")}
+                      aria-invalid={!!errors.password}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPwd((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
+                      aria-label={showPwd ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                    >
+                      {showPwd ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </Field>
+                  {password.length > 0 && (
+                    <div className="-mt-2 space-y-1.5">
+                      <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                        <motion.div
+                          className={cn("h-full rounded-full", strength.color)}
+                          initial={false}
+                          animate={{ width: `${strength.score}%` }}
+                          transition={{ duration: 0.35 }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Force :{" "}
+                        <span className="font-medium text-foreground">{strength.label}</span>
+                      </p>
+                    </div>
+                  )}
+                  <Field
+                    id="confirm"
+                    label="Confirmer le mot de passe"
+                    icon={Lock}
+                    error={errors.confirm}
+                  >
+                    <Input
+                      id="confirm"
+                      type={showConfirm ? "text" : "password"}
+                      data-mascot="password"
+                      value={confirmPwd}
+                      onChange={(e) => setConfirmPwd(e.target.value)}
+                      placeholder="Répète ton mot de passe"
+                      autoComplete="new-password"
+                      className={cn(AUTH_FIELD, "pr-11")}
+                      aria-invalid={!!errors.confirm}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
+                      aria-label={
+                        showConfirm ? "Masquer la confirmation" : "Afficher la confirmation"
+                      }
+                    >
+                      {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </Field>
+                  <div>
+                    <label
+                      className={cn(
+                        "flex cursor-pointer items-start gap-3 rounded-xl border bg-muted/30 px-4 py-3 text-sm",
+                        errors.terms ? "border-destructive" : "border-border/60",
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={acceptTerms}
+                        onChange={(e) => setAcceptTerms(e.target.checked)}
+                        className="mt-0.5 size-4 shrink-0 accent-primary"
+                      />
+                      <span className="text-muted-foreground">
+                        J&apos;accepte les{" "}
+                        <Link to="/cgu" className="font-medium text-primary hover:underline">
+                          conditions d&apos;utilisation
+                        </Link>{" "}
+                        et la{" "}
+                        <Link
+                          to="/confidentialite"
+                          className="font-medium text-primary hover:underline"
+                        >
+                          politique de confidentialité
+                        </Link>
+                        , et j&apos;ai l&apos;accord de mes parents si j&apos;ai moins de 18 ans.
+                      </span>
+                    </label>
+                    {errors.terms && (
+                      <p role="alert" className="mt-1.5 text-xs font-medium text-destructive">
+                        {errors.terms}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium">
-            Adresse email
-          </Label>
-          <div className="relative">
-            <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="ton.email@exemple.tg"
-              className={AUTH_FIELD}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="telephone" className="text-sm font-medium">
-            Numéro de téléphone
-          </Label>
-          <div className="relative">
-            <Smartphone className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="telephone"
-              name="telephone"
-              type="tel"
-              required
-              autoComplete="tel"
-              inputMode="tel"
-              placeholder="90 12 34 56"
-              className={AUTH_FIELD}
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Utilisé pour la connexion, les paiements Mobile Money et les retraits contributeur.
-          </p>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Niveau</Label>
-            <Select
-              value={niveau}
-              onValueChange={(v) => {
-                setNiveau(v as "college" | "lycee");
-                setClasse("");
+        <div className="flex gap-3">
+          {step > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="h-12 shrink-0 rounded-xl px-4"
+              onClick={() => {
+                setErrors({});
+                goTo(step - 1);
               }}
             >
-              <SelectTrigger className={AUTH_FIELD}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="college">Collège</SelectItem>
-                <SelectItem value="lycee">Lycée</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Classe</Label>
-            <div className="relative">
-              <GraduationCap className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Select value={classe} onValueChange={setClasse} required>
-                <SelectTrigger className={cn(AUTH_FIELD, "pl-11")}>
-                  <SelectValue placeholder="Ta classe" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(niveau === "college" ? CLASSES_COLLEGE : CLASSES_LYCEE).map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="etablissement" className="text-sm font-medium">
-            Établissement scolaire
-          </Label>
-          <div className="relative">
-            <School className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="etablissement"
-              list="register-etablissements"
-              required
-              value={etablissement}
-              onChange={(e) => setEtablissement(e.target.value)}
-              placeholder="Ex. Collège Saint-Joseph, Lycée 2 Février…"
-              className={AUTH_FIELD}
-              autoComplete="organization"
-            />
-            {etablissementSuggestions.length > 0 && (
-              <datalist id="register-etablissements">
-                {etablissementSuggestions.map((e) => (
-                  <option key={e} value={e} />
-                ))}
-              </datalist>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Permet de personnaliser ton expérience et les notifications d&apos;épreuves pour ta classe.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="password" className="text-sm font-medium">
-            Mot de passe
-          </Label>
-          <div className="relative">
-            <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="password"
-              name="password"
-              type={showPwd ? "text" : "password"}
-              data-mascot="password"
-              minLength={8}
-              required
-              autoComplete="new-password"
-              placeholder="8 caractères minimum"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={cn(AUTH_FIELD, "pr-11")}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPwd((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition hover:text-foreground"
-              aria-label={showPwd ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              <ArrowLeft className="size-4" /> Précédent
+            </Button>
+          )}
+          {step < 2 ? (
+            <Button
+              type="submit"
+              size="lg"
+              className="tea-water-fill-none h-12 min-w-0 flex-1 rounded-xl text-base font-semibold"
+              status={status === "error" ? "error" : "idle"}
             >
-              {showPwd ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </button>
-          </div>
-          {password.length > 0 && (
-            <div className="space-y-1.5">
-              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                <div
-                  className={cn(
-                    "h-full rounded-full transition-all duration-300",
-                    strength.color,
-                    strength.score <= 33 && "w-1/3",
-                    strength.score > 33 && strength.score <= 66 && "w-2/3",
-                    strength.score > 66 && "w-full",
-                  )}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Force du mot de passe : <span className="font-medium text-foreground">{strength.label}</span>
-              </p>
-            </div>
+              Suivant <ArrowRight className="size-4" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              size="lg"
+              className="tea-water-fill-none h-12 min-w-0 flex-1 rounded-xl text-base font-semibold"
+              status={status}
+              disabled={status === "loading" || status === "success"}
+            >
+              <UserPlus className="size-4 max-sm:hidden" />{" "}
+              <span className="truncate">{status === "loading" ? "Création…" : "Créer mon compte"}</span>
+            </Button>
           )}
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="confirm" className="text-sm font-medium">
-            Confirmer le mot de passe
-          </Label>
-          <div className="relative">
-            <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="confirm"
-              type={showConfirm ? "text" : "password"}
-              data-mascot="password"
-              required
-              autoComplete="new-password"
-              placeholder="Répète ton mot de passe"
-              value={confirmPwd}
-              onChange={(e) => setConfirmPwd(e.target.value)}
-              className={cn(
-                AUTH_FIELD,
-                "pr-11",
-                pwdMismatch && "border-destructive focus-visible:ring-destructive",
-              )}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirm((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition hover:text-foreground"
-              aria-label={showConfirm ? "Masquer la confirmation" : "Afficher la confirmation"}
-            >
-              {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </button>
-          </div>
-          {pwdMismatch && (
-            <p className="text-xs text-destructive">Les mots de passe ne correspondent pas.</p>
-          )}
-        </div>
-
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/60 bg-muted/30 px-4 py-3 text-sm">
-          <input
-            type="checkbox"
-            checked={acceptTerms}
-            onChange={(e) => setAcceptTerms(e.target.checked)}
-            className="mt-0.5 size-4 shrink-0 rounded border-input accent-primary"
-          />
-          <span className="text-muted-foreground">
-            J&apos;accepte les{" "}
-            <Link to="/cgu" className="font-medium text-primary hover:underline">
-              conditions d&apos;utilisation
-            </Link>{" "}
-            et la{" "}
-            <Link to="/confidentialite" className="font-medium text-primary hover:underline">
-              politique de confidentialité
-            </Link>{" "}
-            de EZOA-TO, et j&apos;ai l&apos;accord de mes parents si j&apos;ai moins de 18 ans.
-          </span>
-        </label>
-
-        <Button
-          type="submit"
-          size="lg"
-          className="tea-water-fill-none h-12 w-full rounded-xl text-base font-semibold shadow-md"
-          status={done ? "success" : failed ? "error" : loading ? "loading" : "idle"}
-          disabled={loading || pwdMismatch || !acceptTerms}
-        >
-          {loading ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
-          {loading ? "Création du compte…" : "Créer mon compte gratuit"}
-        </Button>
 
         <p className="pt-1 text-center text-sm text-muted-foreground">
           Déjà inscrit ?{" "}

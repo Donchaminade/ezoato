@@ -12,6 +12,7 @@ import '../../../shared/widgets/ezoa_widgets.dart';
 import '../../../shared/widgets/bird_mascot.dart';
 import '../../epreuves/presentation/home_screen.dart' show metaProvider;
 import '../data/auth_repository.dart';
+import 'register_widgets.dart';
 
 /// Profils d'inscription (valeurs API `profil_type`).
 enum RegisterProfil {
@@ -48,27 +49,32 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _confirmPassword = TextEditingController();
   final _etablissement = TextEditingController();
 
-  /// Index dans [_visibleSteps] (pas l'index logique fixe).
+  static const stepLabels = [
+    'Infos personnelles',
+    'Profil scolaire',
+    'Sécurité',
+  ];
+
   int _stepIndex = 0;
-  RegisterProfil? _profil;
+  int _dir = 1;
+  RegisterProfil? _profil = RegisterProfil.eleve;
   String _niveau = 'college';
   String? _classe;
+  String? _ville;
   bool _acceptCgu = false;
-  bool _loading = false;
+  SubmitStatus _status = SubmitStatus.idle;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   String? _error;
-  String? _confirmError;
+  final Map<String, String> _fieldErrors = {};
 
-  List<_RegStep> get _visibleSteps {
-    final steps = <_RegStep>[_RegStep.compte, _RegStep.profil];
-    if (_profil?.needsParcours ?? false) steps.add(_RegStep.parcours);
-    steps.add(_RegStep.pret);
-    return steps;
+  @override
+  void initState() {
+    super.initState();
+    _password.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
-
-  _RegStep get _currentStep =>
-      _visibleSteps[_stepIndex.clamp(0, _visibleSteps.length - 1)];
 
   @override
   void dispose() {
@@ -85,93 +91,90 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() {
       _profil = p;
       _error = null;
-      if (!p.needsParcours) {
-        _classe = null;
-        _etablissement.clear();
-      } else if (p == RegisterProfil.eleve) {
-        _niveau = 'college';
-        _classe = null;
-      } else if (p == RegisterProfil.etudiant) {
-        _niveau = 'universite';
-        _classe = null;
-      } else if (p == RegisterProfil.concours) {
-        _niveau = 'concours';
-        _classe = null;
+      _classe = null;
+      if (!p.needsParcours) _etablissement.clear();
+      _niveau = switch (p) {
+        RegisterProfil.etudiant => 'universite',
+        RegisterProfil.concours => 'concours',
+        _ => 'college',
+      };
+    });
+  }
+
+  /// Validation par étape ; renvoie les erreurs par champ.
+  Map<String, String> _validate(int step) {
+    final e = <String, String>{};
+    if (step == 0) {
+      if (_nom.text.trim().length < 2) e['nom'] = 'Indique ton nom complet';
+      if (!RegExp(r'^\S+@\S+\.\S+$').hasMatch(_email.text.trim())) {
+        e['email'] = 'Adresse e-mail invalide';
       }
-      // Recalcule les étapes visibles si on change de profil sur une étape avancée
-      final steps = <_RegStep>[_RegStep.compte, _RegStep.profil];
-      if (p.needsParcours) steps.add(_RegStep.parcours);
-      steps.add(_RegStep.pret);
-      if (_stepIndex >= steps.length) _stepIndex = steps.length - 1;
-    });
+      if (_telephone.text.replaceAll(RegExp(r'\D'), '').length < 8) {
+        e['telephone'] = 'Numéro invalide (8 chiffres minimum)';
+      }
+    } else if (step == 1) {
+      final p = _profil;
+      if (p == null) {
+        e['profil'] = 'Choisis qui tu es';
+      } else if (p.needsParcours) {
+        if (_classe == null || _classe!.isEmpty) {
+          e['classe'] = p == RegisterProfil.concours
+              ? 'Sélectionne ton concours'
+              : 'Sélectionne ta classe ou filière';
+        }
+        if (p != RegisterProfil.concours &&
+            _etablissement.text.trim().isEmpty) {
+          e['etablissement'] = 'Indique ton établissement';
+        }
+      }
+    } else {
+      if (_password.text.length < 8) e['password'] = '8 caractères minimum';
+      if (_password.text != _confirmPassword.text) {
+        e['confirm'] = 'Les mots de passe ne correspondent pas';
+      }
+      if (!_acceptCgu) e['cgu'] = 'Accepte les conditions pour continuer';
+    }
+    return e;
   }
 
-  bool _validateCompte() {
+  void _fail(Map<String, String> e) {
     setState(() {
-      _error = null;
-      _confirmError = null;
+      _fieldErrors
+        ..clear()
+        ..addAll(e);
+      _error = e.values.first;
+      _status = SubmitStatus.error;
     });
-    if (_nom.text.trim().length < 2 ||
-        _email.text.trim().isEmpty ||
-        _telephone.text.trim().isEmpty ||
-        _password.text.length < 8) {
-      setState(
-        () => _error = 'Nom, email, téléphone et mot de passe (8+) sont requis',
-      );
-      return false;
-    }
-    if (_password.text != _confirmPassword.text) {
-      setState(() => _confirmError = 'Les mots de passe ne correspondent pas');
-      return false;
-    }
-    return true;
+    _mascot.flash(MascotMood.error);
+    Future<void>.delayed(const Duration(milliseconds: 900), () {
+      if (mounted && _status == SubmitStatus.error) {
+        setState(() => _status = SubmitStatus.idle);
+      }
+    });
   }
 
-  bool _validateProfil() {
-    if (_profil == null) {
-      setState(() => _error = 'Choisis qui tu es pour continuer');
-      return false;
-    }
-    setState(() => _error = null);
-    return true;
-  }
-
-  bool _validateParcours() {
-    final p = _profil;
-    if (p == null || !p.needsParcours) return true;
-    if (_classe == null || _classe!.isEmpty) {
-      setState(
-        () => _error = p == RegisterProfil.concours
-            ? 'Sélectionne ton concours'
-            : 'Sélectionne ta classe ou filière',
-      );
-      return false;
-    }
-    if (p != RegisterProfil.concours && _etablissement.text.trim().isEmpty) {
-      setState(() => _error = 'Indique ton établissement');
-      return false;
-    }
-    setState(() => _error = null);
-    return true;
-  }
+  void _goTo(int i) => setState(() {
+    _dir = i > _stepIndex ? 1 : -1;
+    _stepIndex = i;
+  });
 
   void _next() {
-    final step = _currentStep;
-    if (step == _RegStep.compte && !_validateCompte()) return;
-    if (step == _RegStep.profil && !_validateProfil()) return;
-    if (step == _RegStep.parcours && !_validateParcours()) return;
-    if (_stepIndex < _visibleSteps.length - 1) {
-      setState(() => _stepIndex++);
-    }
+    final e = _validate(_stepIndex);
+    if (e.isNotEmpty) return _fail(e);
+    setState(() {
+      _fieldErrors.clear();
+      _error = null;
+    });
+    _goTo(_stepIndex + 1);
   }
 
   void _back() {
     if (_stepIndex > 0) {
       setState(() {
         _error = null;
-        _confirmError = null;
-        _stepIndex--;
+        _fieldErrors.clear();
       });
+      _goTo(_stepIndex - 1);
       return;
     }
     context.pop();
@@ -198,18 +201,37 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     child: field,
   );
 
+  /// Associe un message d'erreur serveur à l'étape concernée.
+  (int, String) _stepForServerError(String msg) {
+    final m = msg.toLowerCase();
+    if (m.contains('email')) return (0, 'email');
+    if (m.contains('téléphone') || m.contains('telephone')) {
+      return (0, 'telephone');
+    }
+    if (m.contains('nom')) return (0, 'nom');
+    if (m.contains('classe') ||
+        m.contains('profil') ||
+        m.contains('concours')) {
+      return (1, 'classe');
+    }
+    if (m.contains('établissement') || m.contains('etablissement')) {
+      return (1, 'etablissement');
+    }
+    return (2, 'password');
+  }
+
   Future<void> _submit() async {
-    if (!_validateCompte() || !_validateProfil()) return;
-    if (_profil!.needsParcours && !_validateParcours()) return;
-    if (!_acceptCgu) {
-      setState(
-        () => _error = 'Accepte les conditions d’utilisation pour continuer',
-      );
-      return;
+    for (final s in [0, 1, 2]) {
+      final e = _validate(s);
+      if (e.isNotEmpty) {
+        if (s != _stepIndex) _goTo(s);
+        return _fail(e);
+      }
     }
     setState(() {
-      _loading = true;
+      _status = SubmitStatus.loading;
       _error = null;
+      _fieldErrors.clear();
     });
     try {
       final needs = _profil!.needsParcours;
@@ -222,10 +244,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             password: _password.text,
             profilType: _profil!.apiValue,
             classe: needs ? _classe : null,
-            etablissement: needs ? _etablissement.text.trim() : null,
+            etablissement: _etablissement.text.trim().isEmpty
+                ? null
+                : _etablissement.text.trim(),
           );
+      if (_ville != null) {
+        ref.read(apiClientProvider).updateProfile({
+          'nom': _nom.text.trim(),
+          'email': _email.text.trim(),
+          'telephone': _telephone.text.trim(),
+          'ville': _ville,
+        }).ignore();
+      }
+      setState(() => _status = SubmitStatus.success);
       _mascot.flash(MascotMood.happy);
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+      await Future<void>.delayed(const Duration(milliseconds: 900));
       if (mounted) context.go('/home');
     } catch (e) {
       final msg = e is MobileAccessDeniedException
@@ -233,75 +266,82 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           : e is ApiException
           ? e.message
           : e.toString().replaceFirst('ApiException: ', '');
-      setState(() => _error = msg);
-      _mascot.flash(MascotMood.error);
+      final (step, field) = _stepForServerError(msg);
+      if (step != _stepIndex) _goTo(step);
+      _fail({field: msg});
       if (e is MobileAccessDeniedException && mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(msg)));
       }
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  String get _title {
-    switch (_currentStep) {
-      case _RegStep.compte:
-        return 'Ton compte';
-      case _RegStep.profil:
-        return 'Qui es-tu ?';
-      case _RegStep.parcours:
-        return 'Ton parcours';
-      case _RegStep.pret:
-        return 'Prêt';
-    }
-  }
-
-  String get _subtitle {
-    switch (_currentStep) {
-      case _RegStep.compte:
-        return 'Identifiants pour rejoindre EZOA-TO';
-      case _RegStep.profil:
-        return 'Pour personnaliser ton expérience';
-      case _RegStep.parcours:
-        return _profil == RegisterProfil.concours
-            ? 'Concours et centre de préparation'
-            : 'Niveau, classe et établissement';
-      case _RegStep.pret:
-        return 'Vérifie puis crée ton compte';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final pal = EzoaColors.of(context);
-    final steps = _visibleSteps;
-    final isLast = _currentStep == _RegStep.pret;
+    final isLast = _stepIndex == 2;
+    final reduce = MediaQuery.of(context).disableAnimations;
 
     return EzoaAuthLayout(
-      title: _title,
-      subtitle: _subtitle,
+      title: 'Créer un compte',
+      subtitle: 'Gratuit, en 3 étapes',
       showBack: true,
       onBack: _back,
       children: [
-        if (_currentStep == _RegStep.compte) ...[
-          Center(
-            child: BirdMascot(
-              key: const Key('auth-mascot'),
-              controller: _mascot,
-              size: 96,
+        Center(
+          child: BirdMascot(
+            key: const Key('auth-mascot'),
+            controller: _mascot,
+            size: 88,
+          ),
+        ),
+        const SizedBox(height: 8),
+        RegisterStepper(labels: stepLabels, index: _stepIndex),
+        const SizedBox(height: 20),
+        ClipRect(
+          child: AnimatedSwitcher(
+            duration: Duration(milliseconds: reduce ? 0 : 300),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, anim) {
+              final incoming = child.key == ValueKey(_stepIndex);
+              final dx = (incoming ? 0.25 : -0.25) * _dir;
+              return FadeTransition(
+                opacity: anim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: Offset(dx, 0),
+                    end: Offset.zero,
+                  ).animate(anim),
+                  child: child,
+                ),
+              );
+            },
+            layoutBuilder: (current, previous) => Stack(
+              alignment: Alignment.topCenter,
+              children: [...previous, ?current],
+            ),
+            child: Column(
+              key: ValueKey(_stepIndex),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: switch (_stepIndex) {
+                0 => _buildInfosStep(),
+                1 => [
+                  ..._buildProfilStep(pal),
+                  const SizedBox(height: 8),
+                  ..._buildParcoursStep(),
+                ],
+                _ => _buildSecuriteStep(context, pal),
+              },
             ),
           ),
-          const SizedBox(height: 8),
-        ],
-        _ProgressDots(count: steps.length, index: _stepIndex),
-        const SizedBox(height: 20),
-        ..._buildStepBody(context, pal),
-        if (_error != null && _currentStep != _RegStep.compte) ...[
+        ),
+        if (_error != null) ...[
           const SizedBox(height: 8),
           Text(
             _error!,
+            key: const Key('register-error'),
             style: TextStyle(
               color: Theme.of(context).colorScheme.error,
               fontSize: 13,
@@ -309,49 +349,54 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ],
         const SizedBox(height: 20),
-        if (isLast)
-          EzoaButton(
-            label: 'Créer mon compte',
-            onPressed: _submit,
-            loading: _loading,
-            icon: LucideIcons.userPlus,
-          )
-        else
-          EzoaButton(
-            label: 'Suivant',
-            onPressed: _next,
-            icon: LucideIcons.arrowRight,
-          ),
-        const SizedBox(height: 8),
-        EzoaButton(
-          label: _stepIndex == 0 ? 'Déjà inscrit ? Se connecter' : 'Retour',
-          variant: EzoaButtonVariant.ghost,
-          onPressed: _back,
+        Row(
+          children: [
+            if (_stepIndex > 0) ...[
+              Expanded(
+                flex: 2,
+                child: EzoaButton(
+                  label: 'Retour',
+                  variant: EzoaButtonVariant.secondary,
+                  onPressed: _back,
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
+            Expanded(
+              flex: 3,
+              child: isLast
+                  ? StatusSubmitButton(
+                      label: 'Créer mon compte',
+                      status: _status,
+                      onPressed: _submit,
+                    )
+                  : EzoaButton(
+                      label: 'Suivant',
+                      onPressed: _next,
+                      icon: LucideIcons.arrowRight,
+                    ),
+            ),
+          ],
         ),
+        const SizedBox(height: 8),
+        if (_stepIndex == 0)
+          EzoaButton(
+            label: 'Déjà inscrit ? Se connecter',
+            variant: EzoaButtonVariant.ghost,
+            onPressed: () => context.go('/login'),
+          ),
       ],
     );
   }
 
-  List<Widget> _buildStepBody(BuildContext context, EzoaPalette pal) {
-    switch (_currentStep) {
-      case _RegStep.compte:
-        return _buildCompteStep();
-      case _RegStep.profil:
-        return _buildProfilStep(pal);
-      case _RegStep.parcours:
-        return _buildParcoursStep();
-      case _RegStep.pret:
-        return _buildPretStep(context, pal);
-    }
-  }
-
-  List<Widget> _buildCompteStep() {
+  List<Widget> _buildInfosStep() {
     return [
       _watch(
         EzoaTextField(
           label: 'Nom complet',
           controller: _nom,
           prefixIcon: LucideIcons.user,
+          errorText: _fieldErrors['nom'],
           onChanged: _mascot.typing,
         ),
         ctrl: _nom,
@@ -360,8 +405,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ctrl: _email,
         EzoaTextField(
           onChanged: _mascot.typing,
-          label: 'Email',
+          label: 'E-mail',
           controller: _email,
+          errorText: _fieldErrors['email'],
           keyboardType: TextInputType.emailAddress,
           prefixIcon: LucideIcons.mail,
         ),
@@ -372,23 +418,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           onChanged: _mascot.typing,
           label: 'Téléphone',
           controller: _telephone,
+          errorText: _fieldErrors['telephone'],
           keyboardType: TextInputType.phone,
           prefixIcon: LucideIcons.phone,
         ),
       ),
+    ];
+  }
+
+  List<Widget> _buildSecuriteStep(BuildContext context, EzoaPalette pal) {
+    final strength = passwordStrength(_password.text);
+    return [
       _watch(
         obscured: () => _obscurePassword,
         EzoaTextField(
           label: 'Mot de passe',
           controller: _password,
           obscureText: _obscurePassword,
-          errorText: _error,
+          errorText: _fieldErrors['password'],
           prefixIcon: LucideIcons.lock,
           suffixIcon: IconButton(
             icon: Icon(
               _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
               size: 20,
-              color: EzoaColors.of(context).textFaint,
+              color: pal.textFaint,
             ),
             onPressed: () {
               setState(() => _obscurePassword = !_obscurePassword);
@@ -400,19 +453,40 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ),
       ),
+      if (_password.text.isNotEmpty) ...[
+        ClipRRect(
+          borderRadius: BorderRadius.circular(99),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(end: strength.$1),
+            duration: const Duration(milliseconds: 300),
+            builder: (_, v, __) => LinearProgressIndicator(
+              value: v,
+              minHeight: 6,
+              backgroundColor: pal.subtleFill,
+              color: strength.$3,
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Force : ${strength.$2}',
+          style: TextStyle(fontSize: 12, color: pal.textMuted),
+        ),
+        const SizedBox(height: 12),
+      ],
       _watch(
         obscured: () => _obscureConfirmPassword,
         EzoaTextField(
           label: 'Confirmer le mot de passe',
           controller: _confirmPassword,
           obscureText: _obscureConfirmPassword,
-          errorText: _confirmError,
+          errorText: _fieldErrors['confirm'],
           prefixIcon: LucideIcons.lock,
           suffixIcon: IconButton(
             icon: Icon(
               _obscureConfirmPassword ? LucideIcons.eyeOff : LucideIcons.eye,
               size: 20,
-              color: EzoaColors.of(context).textFaint,
+              color: pal.textFaint,
             ),
             onPressed: () {
               setState(
@@ -428,74 +502,151 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ),
       ),
+      const SizedBox(height: 8),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: Checkbox(
+              value: _acceptCgu,
+              onChanged: (v) => setState(() => _acceptCgu = v ?? false),
+              activeColor: EzoaColors.primary,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  'J’accepte les ',
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    height: 1.4,
+                    color: pal.textDim,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => openLegal(context, 'cgu'),
+                  child: const Text(
+                    'conditions d’utilisation',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      height: 1.4,
+                      color: EzoaColors.primary,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+                Text(
+                  ' et la ',
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    height: 1.4,
+                    color: pal.textDim,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => openLegal(context, 'confidentialite'),
+                  child: const Text(
+                    'politique de confidentialité',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      height: 1.4,
+                      color: EzoaColors.primary,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+                Text(
+                  ' d’EZOA-TO, et j’ai l’accord de mes parents si j’ai moins de 18 ans.',
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    height: 1.4,
+                    color: pal.textDim,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     ];
   }
 
   List<Widget> _buildProfilStep(EzoaPalette pal) {
     return [
-      ...RegisterProfil.values.map((p) {
-        final selected = _profil == p;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => _setProfil(p),
-              borderRadius: BorderRadius.circular(14),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: selected
-                      ? EzoaColors.primary.withValues(alpha: 0.12)
-                      : pal.subtleFill,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: selected
-                        ? EzoaColors.primary.withValues(alpha: 0.55)
-                        : pal.border,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            p.label,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15.5,
-                              color: selected ? EzoaColors.primary : pal.text,
-                            ),
+      LayoutBuilder(
+        builder: (context, c) {
+          final w = (c.maxWidth - 10) / 2;
+          return Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (final p in RegisterProfil.values)
+                SizedBox(
+                  width: w,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _setProfil(p),
+                      borderRadius: BorderRadius.circular(14),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _profil == p
+                              ? EzoaColors.primary.withValues(alpha: 0.12)
+                              : pal.subtleFill,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            width: _profil == p ? 1.6 : 1,
+                            color: _profil == p
+                                ? EzoaColors.primary.withValues(alpha: 0.7)
+                                : pal.border,
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            p.hint,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: pal.textMuted,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              p.label,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14.5,
+                                color: _profil == p
+                                    ? EzoaColors.primary
+                                    : pal.text,
+                              ),
                             ),
-                          ),
-                        ],
+                            Text(
+                              p.hint,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: pal.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    Icon(
-                      selected ? LucideIcons.checkCircle2 : LucideIcons.circle,
-                      size: 22,
-                      color: selected ? EzoaColors.primary : pal.textFaint,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ),
-        );
-      }),
+            ],
+          );
+        },
+      ),
+      const SizedBox(height: 14),
     ];
   }
 
@@ -607,166 +758,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         },
       ),
     ];
-  }
-
-  List<Widget> _buildPretStep(BuildContext context, EzoaPalette pal) {
-    final profil = _profil;
-    final lines = <(String, String)>[
-      ('Nom', _nom.text.trim()),
-      ('Email', _email.text.trim()),
-      ('Téléphone', _telephone.text.trim()),
-      if (profil != null) ('Profil', profil.label),
-      if (profil?.needsParcours == true && _classe != null)
-        ('Classe / concours', _classe!),
-      if (profil?.needsParcours == true &&
-          _etablissement.text.trim().isNotEmpty)
-        ('Établissement', _etablissement.text.trim()),
-    ];
-
-    return [
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: pal.subtleFill,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: pal.border),
-        ),
-        child: Column(
-          children: [
-            for (var i = 0; i < lines.length; i++) ...[
-              if (i > 0) const SizedBox(height: 10),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 110,
-                    child: Text(
-                      lines[i].$1,
-                      style: TextStyle(fontSize: 13, color: pal.textMuted),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      lines[i].$2,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: pal.text,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
-      const SizedBox(height: 16),
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: Checkbox(
-              value: _acceptCgu,
-              onChanged: (v) => setState(() => _acceptCgu = v ?? false),
-              activeColor: EzoaColors.primary,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  'J’accepte les ',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    height: 1.4,
-                    color: pal.textDim,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => openLegal(context, 'cgu'),
-                  child: const Text(
-                    'conditions d’utilisation',
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      height: 1.4,
-                      color: EzoaColors.primary,
-                      fontWeight: FontWeight.w600,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-                Text(
-                  ' et la ',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    height: 1.4,
-                    color: pal.textDim,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => openLegal(context, 'confidentialite'),
-                  child: const Text(
-                    'politique de confidentialité',
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      height: 1.4,
-                      color: EzoaColors.primary,
-                      fontWeight: FontWeight.w600,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-                Text(
-                  ' d’EZOA-TO, et j’ai l’accord de mes parents si j’ai moins de 18 ans.',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    height: 1.4,
-                    color: pal.textDim,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ];
-  }
-}
-
-enum _RegStep { compte, profil, parcours, pret }
-
-class _ProgressDots extends StatelessWidget {
-  const _ProgressDots({required this.count, required this.index});
-
-  final int count;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(count, (i) {
-        final active = i == index;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          height: 8,
-          width: active ? 22 : 8,
-          decoration: BoxDecoration(
-            color: active
-                ? EzoaColors.primary
-                : EzoaColors.primary.withValues(alpha: 0.18),
-            borderRadius: BorderRadius.circular(99),
-          ),
-        );
-      }),
-    );
   }
 }
 

@@ -686,10 +686,19 @@ export const api = {
     password: string,
     classe: string,
     etablissement: string,
+    extra?: { profilType?: string },
   ): Promise<{ token: string; user: User }> {
     return http("/auth/register", {
       method: "POST",
-      body: JSON.stringify({ nom, email, telephone, password, classe, etablissement }),
+      body: JSON.stringify({
+        nom,
+        email,
+        telephone,
+        password,
+        classe,
+        etablissement,
+        ...(extra?.profilType ? { profil_type: extra.profilType } : {}),
+      }),
     });
   },
 

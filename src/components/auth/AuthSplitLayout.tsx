@@ -113,16 +113,16 @@ export function AuthSplitLayout({
     <div className="flex min-h-svh items-center justify-center bg-muted/40 px-4 py-8 sm:px-6">
       <motion.div
         layoutId="auth-card"
-        className="relative w-full max-w-5xl overflow-hidden rounded-3xl border border-border/60 bg-card shadow-2xl shadow-black/10"
+        className="relative w-full max-w-5xl overflow-clip rounded-3xl border border-border/60 bg-card shadow-2xl shadow-black/10"
         transition={{ duration: 0.6, ease }}
       >
-        <div className="grid lg:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2">
           <motion.div
             key={variant}
             initial={{ opacity: 0, x: 60 * dir }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.55, ease, delay: 0.12 }}
-            className={`flex flex-col justify-between p-8 sm:p-10 lg:min-h-[680px] lg:p-12 ${variant === "register" ? "lg:order-2" : ""}`}
+            className={`flex min-w-0 flex-col justify-between p-6 sm:p-10 lg:min-h-[680px] lg:p-12 ${variant === "register" ? "lg:order-2" : ""}`}
           >
             <div>
               <div className="flex items-start justify-between gap-4">
