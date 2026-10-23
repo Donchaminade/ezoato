@@ -19,8 +19,8 @@ if (!$ep) fail('Introuvable', 404);
 $eval = evaluer_acces_epreuve($user['id'], $ep, true);
 refuser_si_acces_interdit($eval);
 
-$pdfPath = $ep['pdf_path'];
-if (!is_file($pdfPath)) fail('Fichier PDF introuvable', 404);
+$pdfPath = (string)$ep['pdf_path'];
+if (!fichier_dans_uploads($pdfPath, (string)cfg()['uploads_dir'])) fail('Fichier PDF introuvable', 404);
 
 // Enregistrer le téléchargement (une fois par user/épreuve)
 $dl = db()->prepare("INSERT IGNORE INTO telechargements (user_id, epreuve_id) VALUES (?, ?)");
@@ -34,6 +34,7 @@ $filename = preg_replace('/[^a-zA-Z0-9._-]/', '_', $ep['titre']) . '.pdf';
 header('Content-Type: application/pdf');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
 header('Content-Length: ' . filesize($pdfPath));
-header('Cache-Control: private, max-age=3600');
+header('Cache-Control: private, no-store');
+header('X-Content-Type-Options: nosniff');
 readfile($pdfPath);
 exit;

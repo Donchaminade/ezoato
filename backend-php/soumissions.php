@@ -8,7 +8,7 @@ require_once __DIR__ . '/lib/corrections/bootstrap.php';
 
 cors();
 $user = require_user();
-$cfg  = require __DIR__ . '/config.php';
+$cfg  = cfg();
 
 $attestationErreur = correction_attestation_requise($_POST['attestation_enonce'] ?? null);
 if ($attestationErreur) {

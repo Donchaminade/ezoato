@@ -99,7 +99,7 @@ function archives_resolve_path(array $cfg, string $root, string $relative = ''):
   if ($relative === '' || $relative === '.') return $base;
   if (str_contains($relative, '..')) return null;
   $full = realpath("$base/$relative");
-  if (!$full || !str_starts_with($full, $base)) return null;
+  if ($full === false || !path_is_within($base, $full)) return null;
   return $full;
 }
 
@@ -110,7 +110,9 @@ function publish_soumission_to_epreuve(array $cfg, array $sub, string $newId): a
   $destPdf = epreuve_pdf_path($cfg, $annee, $type, $newId);
   $destImgDir = epreuve_images_dir($cfg, $annee, $type, $newId);
 
-  if (!is_file($sub['pdf_preview_path'])) fail('PDF preview introuvable', 500);
+  if (!is_file($sub['pdf_preview_path']) || !fichier_dans_uploads((string)$sub['pdf_preview_path'], (string)$cfg['uploads_dir'])) {
+    fail('PDF preview introuvable', 500);
+  }
   copy($sub['pdf_preview_path'], $destPdf);
 
   require_once __DIR__ . '/image-pdf.php';

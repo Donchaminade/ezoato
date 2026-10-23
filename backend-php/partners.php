@@ -28,7 +28,7 @@ if ($action === 'logo') {
   $stmt = db()->prepare('SELECT logo_path FROM partenaires WHERE id = ? AND visible = 1');
   $stmt->execute([$id]);
   $path = $stmt->fetchColumn();
-  if (!$path || !is_file($path)) fail('Logo introuvable', 404);
+  if (!$path || !fichier_dans_uploads((string)$path, (string)$cfg['uploads_dir'])) fail('Logo introuvable', 404);
   $mime = mime_content_type($path) ?: 'image/png';
   header('Content-Type: ' . $mime);
   header('Cache-Control: public, max-age=86400');

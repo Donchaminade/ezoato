@@ -8,6 +8,11 @@ return [
     'user' => 'zovu_user',
     'pass' => 'CHANGE_ME',
   ],
+  /**
+   * Placeholder public. jwt_encode/jwt_decode lisent config.local.php (load_config).
+   * En production : secret long aléatoire dans config.local.php ET EZOATO_ENV=production.
+   * Un hôte public qui garde ce placeholder refuse d'émettre et d'accepter des JWT.
+   */
   'jwt_secret' => 'CHANGE_ME_LONG_RANDOM_STRING',
   'uploads_dir' => __DIR__ . '/uploads',
   'api_base_url' => 'http://localhost/zovu-project/backend-php',
@@ -59,6 +64,8 @@ return [
   'dev' => [
     /** En local : renvoyer le lien de reset dans la réponse API (jamais en prod) */
     'expose_reset_links' => false,
+    /** Réservé au développement local. Ignoré si EZOATO_ENV=production. */
+    'allow_insecure_jwt' => false,
   ],
   'contact' => [
     'email' => 'contact@ezoa-to.tg',

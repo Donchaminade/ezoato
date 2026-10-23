@@ -19,6 +19,13 @@ if (empty($verif['ok'])) {
   json_out(['ok' => false, 'error' => $verif['erreur'] ?? 'Notification refusée'], 400);
 }
 
+if ($fournisseur->estSimule()) {
+  $secret = (string)(ezoa_env('EZOATO_PAYMENT_WEBHOOK_SECRET') ?? '');
+  if (!webhook_secret_correspond($headers, $secret)) {
+    json_out(['ok' => false, 'error' => 'Notification refusée'], 401);
+  }
+}
+
 $reference = (string)($verif['reference'] ?? '');
 $providerRef = $verif['providerRef'] ?? null;
 if (column_exists('abonnements', 'provider_ref') && $providerRef) {
@@ -40,6 +47,13 @@ if (!$ab) {
     'resultat' => $corr['resultat'] ?? null,
     'duplicate' => !empty($corr['duplicate']),
   ], $corr['ok'] ? 200 : (int)$corr['code']);
+}
+
+$montantNotifie = array_key_exists('montant', $verif) && $verif['montant'] !== null
+  ? (int)$verif['montant']
+  : null;
+if (!montant_notification_compatible((int)$ab['montant'], $montantNotifie)) {
+  json_out(['ok' => false, 'error' => 'Montant incohérent'], 400);
 }
 
 $evenement = [
