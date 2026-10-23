@@ -109,10 +109,39 @@ function evaluer_acces_epreuve(string $userId, array $ep, bool $consommer): arra
   }
 
   if ($consommer && $decision['consume'] && $quotaActif && !empty($ep['id'])) {
-    db()->prepare('INSERT IGNORE INTO acces_gratuits (user_id, epreuve_id, categorie) VALUES (?,?,?)')
-      ->execute([$userId, $ep['id'], categorie_quota($ep)]);
-    $used = compter_quota($userId, $bucket, $cfg['mode']);
-    $decision['reason'] = 'consumed';
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+      $pdo->prepare('SELECT id FROM users WHERE id=? FOR UPDATE')->execute([$userId]);
+      if (acces_deja_compte($userId, (string)$ep['id'])) {
+        $decision['reason'] = 'already';
+        $decision['consume'] = false;
+        $pdo->commit();
+      } else {
+        $usedNow = compter_quota($userId, $bucket, $cfg['mode']);
+        if ($usedNow >= $limit) {
+          $pdo->commit();
+          $used = $usedNow;
+          $decision = freemium_decision([
+            'tier' => $tier,
+            'isPro' => $isPro,
+            'legacyAccess' => $legacy,
+            'alreadyCounted' => false,
+            'used' => $usedNow,
+            'limit' => $limit,
+          ]);
+        } else {
+          $pdo->prepare('INSERT IGNORE INTO acces_gratuits (user_id, epreuve_id, categorie) VALUES (?,?,?)')
+            ->execute([$userId, $ep['id'], categorie_quota($ep)]);
+          $pdo->commit();
+          $used = compter_quota($userId, $bucket, $cfg['mode']);
+          $decision['reason'] = 'consumed';
+        }
+      }
+    } catch (Throwable $e) {
+      if ($pdo->inTransaction()) $pdo->rollBack();
+      throw $e;
+    }
   }
 
   $message = null;

@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/freemium.php';
+require_once __DIR__ . '/security.php';
 
 interface FournisseurPaiement {
   public function code(): string;
@@ -298,9 +299,9 @@ final class FournisseurFedapay implements FournisseurPaiement {
     }
     $secret = (string)(ezoa_env('FEDAPAY_WEBHOOK_SECRET') ?? $this->secret());
     $sig = $norm['x-fedapay-signature'] ?? '';
-    if ($secret !== '' && $sig !== '') {
+    if ($secret !== '') {
       $expected = hash_hmac('sha256', $rawBody, $secret);
-      if (!hash_equals($expected, $sig)) {
+      if ($sig === '' || !hash_equals($expected, $sig)) {
         return ['ok' => false, 'paye' => false, 'reference' => '', 'providerRef' => null, 'providerEventId' => '', 'montant' => null, 'erreur' => 'Signature FedaPay invalide'];
       }
     }

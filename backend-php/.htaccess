@@ -3,6 +3,10 @@
 AddDefaultCharset UTF-8
 
 RewriteEngine On
+Options -Indexes
+
+# Fichiers d'épreuves : jamais en accès direct (paywall / quota).
+RewriteRule ^uploads/ - [F,L]
 
 # XAMPP / Apache : transmettre Authorization (Bearer JWT) à PHP
 RewriteCond %{HTTP:Authorization} .
