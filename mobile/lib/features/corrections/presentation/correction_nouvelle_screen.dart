@@ -99,7 +99,7 @@ class _CorrectionNouvelleScreenState extends ConsumerState<CorrectionNouvelleScr
   }
 
   Future<void> _choisirAudio() async {
-    final fichier = await FilePicker.platform.pickFiles(
+    final fichier = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['m4a', 'mp3', 'aac', 'wav', 'webm', 'ogg'],
     );

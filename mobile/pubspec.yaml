@@ -76,3 +76,10 @@ flutter:
     - assets/images/logo-ezoa.png
     - assets/images/icon-ezoa.png
     - assets/images/onboarding/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk.ttf
