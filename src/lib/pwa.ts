@@ -1,6 +1,6 @@
 /**
  * Enregistrement contrôlé du service worker EZOA-TO.
- * - Jamais en dev / preview Lovable / iframe
+ * - Jamais en dev / preview Vercel / iframe
  * - Kill-switch via ?sw=off
  */
 export async function registerEzoaSW() {
@@ -10,14 +10,7 @@ export async function registerEzoaSW() {
   const url = new URL(window.location.href);
   const host = window.location.hostname;
   const isPreview =
-    host.startsWith("id-preview--") ||
-    host.startsWith("preview--") ||
-    host === "lovableproject.com" ||
-    host.endsWith(".lovableproject.com") ||
-    host === "lovableproject-dev.com" ||
-    host.endsWith(".lovableproject-dev.com") ||
-    host === "beta.lovable.dev" ||
-    host.endsWith(".beta.lovable.dev");
+    host.endsWith(".vercel.app") && host !== "ezoato.vercel.app";
   const inIframe = window.self !== window.top;
   const killed = url.searchParams.get("sw") === "off";
 
