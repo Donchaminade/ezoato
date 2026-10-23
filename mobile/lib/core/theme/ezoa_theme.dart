@@ -12,14 +12,14 @@ class EzoaColors {
   static const primaryDark = Color(0xFF004D38);
   static const accent = Color(0xFF2D8A6E); // émeraude lisible (liens, focus)
   static const accentBlue = Color(0xFF2D8A6E); // alias rétrocompat → émeraude
-  static const emerald = Color(0xFF34D399);
+  static const emerald = Color(0xFF02A671);
   static const gold = Color(0xFFFFCE00);
-  static const error = Color(0xFFF87171);
+  static const error = Color(0xFFEE3533);
 
   // Surfaces sombres soft (charcoal, pas noir pur)
-  static const zinc950 = Color(0xFF121816);
-  static const cobaltNight = Color(0xFF1A2220);
-  static const cobaltDeep = Color(0xFF161C1A);
+  static const zinc950 = Color(0xFF081221);
+  static const cobaltNight = Color(0xFF101D2F);
+  static const cobaltDeep = Color(0xFF0D192A);
   static const zinc300 = Color(0xFFD4D4D8);
   static const zinc400 = Color(0xFFA1A1AA);
   static const zinc500 = Color(0xFF71717A);
@@ -115,7 +115,7 @@ class EzoaPalette {
   /// Mode sombre soft : charcoal verdâtre, surfaces mates, peu de shine.
   static const dark = EzoaPalette(
     brightness: Brightness.dark,
-    text: Color(0xFFF4F4F5),
+    text: Color(0xFFE0E5ED),
     textMuted: Color(0xFFD4D4D8),
     textDim: Color(0xFFA1A1AA),
     textFaint: Color(0xFF71717A),
@@ -124,7 +124,7 @@ class EzoaPalette {
     gold: EzoaColors.gold,
     error: EzoaColors.error,
     background: EzoaColors.zinc950,
-    surfaceSolid: Color(0xFF1A2220),
+    surfaceSolid: Color(0xFF101D2F),
     border: Color(0x14FFFFFF),
     borderStrong: Color(0x1FFFFFFF),
     glassFill: Color(0xE61A2220),
@@ -138,7 +138,7 @@ class EzoaPalette {
     navBarFill: Color(0xE61A2220),
     appBarFillTop: Color(0xF2121816),
     appBarFillBottom: Color(0xCC121816),
-    dialogBg: Color(0xFF1A2220),
+    dialogBg: Color(0xFF101D2F),
     offlineFill: Color(0xD93F3F46),
     offlineText: EzoaColors.zinc300,
     gridLine: Color(0x06FFFFFF),
@@ -149,7 +149,7 @@ class EzoaPalette {
     gradientStops: [
       EzoaColors.zinc950,
       EzoaColors.cobaltDeep,
-      Color(0xFF1A2220),
+      Color(0xFF101D2F),
       EzoaColors.cobaltDeep,
       EzoaColors.zinc950,
     ],
@@ -158,15 +158,15 @@ class EzoaPalette {
   /// Mode clair : off-white #FAFAFA, CTAs émeraude, or en micro-accent.
   static const light = EzoaPalette(
     brightness: Brightness.light,
-    text: Color(0xFF18181B),
+    text: Color(0xFF0B121A),
     textMuted: Color(0xFF3F3F46),
     textDim: Color(0xFF71717A),
     textFaint: Color(0xFFA1A1AA),
     accent: EzoaColors.primary,
-    emerald: Color(0xFF059669),
-    gold: Color(0xFFB45309),
-    error: Color(0xFFDC2626),
-    background: Color(0xFFFAFAFA),
+    emerald: Color(0xFF006A4E),
+    gold: Color(0xFF8A6D00),
+    error: Color(0xFFD21034),
+    background: Color(0xFFFCFCFA),
     surfaceSolid: Colors.white,
     border: Color(0x12000000),
     borderStrong: Color(0x1A000000),
@@ -190,11 +190,11 @@ class EzoaPalette {
     shineStrong: Color(0x33FFFFFF),
     shineSoft: Color(0x14FFFFFF),
     gradientStops: [
-      Color(0xFFFAFAFA),
+      Color(0xFFFCFCFA),
       Color(0xFFF5F7F6),
       Color(0xFFEEF5F2),
       Color(0xFFF5F7F6),
-      Color(0xFFFAFAFA),
+      Color(0xFFFCFCFA),
     ],
   );
 }

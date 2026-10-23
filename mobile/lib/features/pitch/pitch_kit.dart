@@ -319,3 +319,27 @@ String fcfa(int v) {
   }
   return '$b FCFA';
 }
+
+
+/// Petit badge discret « Démo », visible sur tous les écrans du mode démo.
+class DemoBadge extends StatelessWidget {
+  const DemoBadge({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final top = MediaQuery.paddingOf(context).top;
+    return Positioned(
+      top: top + 4,
+      right: 10,
+      child: IgnorePointer(
+        child: Semantics(
+          label: 'Mode démo actif',
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(color: PK.gold.withValues(alpha: 0.92), borderRadius: BorderRadius.circular(999)),
+            child: const Text('Démo', style: TextStyle(fontFamily: PK.fontBody, fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF0B121A), decoration: TextDecoration.none)),
+          ),
+        ),
+      ),
+    );
+  }
+}

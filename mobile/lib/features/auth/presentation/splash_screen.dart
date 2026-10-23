@@ -20,7 +20,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   static const _bg = Color(0xFFFAFAFA);
   /// Durée minimale d'affichage du splash avant navigation.
-  static const _holdDuration = Duration(seconds: 4);
+  static const _holdDuration = Duration(milliseconds: 2300);
 
   late final AnimationController _controller;
   late final Animation<double> _logoFade;
@@ -43,23 +43,22 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1100),
+      duration: const Duration(milliseconds: 2200),
     );
 
-    _logoFade = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.0, 0.55, curve: Curves.easeOut),
-    );
+    // Flash du logo : apparition, courte tenue, puis fondu de sortie.
+    _logoFade = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeOut)), weight: 30),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 45),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0).chain(CurveTween(curve: Curves.easeIn)), weight: 25),
+    ]).animate(_controller);
     _logoScale = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(0.0, 0.7, curve: Curves.easeOutCubic),
       ),
     );
-    _titleFade = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.35, 0.9, curve: Curves.easeOut),
-    );
+    _titleFade = _logoFade;
 
     _controller.forward();
     Future<void>.delayed(_holdDuration, () {
