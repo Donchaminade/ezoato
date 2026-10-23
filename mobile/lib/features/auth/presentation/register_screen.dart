@@ -9,6 +9,7 @@ import '../../../core/theme/ezoa_theme.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/widgets/ezoa_searchable_picker.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
+import '../../../shared/widgets/bird_mascot.dart';
 import '../../epreuves/presentation/home_screen.dart' show metaProvider;
 import '../data/auth_repository.dart';
 
@@ -66,7 +67,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return steps;
   }
 
-  _RegStep get _currentStep => _visibleSteps[_stepIndex.clamp(0, _visibleSteps.length - 1)];
+  _RegStep get _currentStep =>
+      _visibleSteps[_stepIndex.clamp(0, _visibleSteps.length - 1)];
 
   @override
   void dispose() {
@@ -113,7 +115,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         _email.text.trim().isEmpty ||
         _telephone.text.trim().isEmpty ||
         _password.text.length < 8) {
-      setState(() => _error = 'Nom, email, téléphone et mot de passe (8+) sont requis');
+      setState(
+        () => _error = 'Nom, email, téléphone et mot de passe (8+) sont requis',
+      );
       return false;
     }
     if (_password.text != _confirmPassword.text) {
@@ -136,9 +140,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final p = _profil;
     if (p == null || !p.needsParcours) return true;
     if (_classe == null || _classe!.isEmpty) {
-      setState(() => _error = p == RegisterProfil.concours
-          ? 'Sélectionne ton concours'
-          : 'Sélectionne ta classe ou filière');
+      setState(
+        () => _error = p == RegisterProfil.concours
+            ? 'Sélectionne ton concours'
+            : 'Sélectionne ta classe ou filière',
+      );
       return false;
     }
     if (p != RegisterProfil.concours && _etablissement.text.trim().isEmpty) {
@@ -171,11 +177,34 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     context.pop();
   }
 
+  final _mascot = MascotController();
+
+  /// Branche la mascotte sur un champ : suit la saisie, ou se cache les yeux (mot de passe).
+  Widget _watch(
+    Widget field, {
+    TextEditingController? ctrl,
+    bool Function()? obscured,
+  }) => Focus(
+    canRequestFocus: false,
+    skipTraversal: true,
+    onFocusChange: (f) {
+      if (!f) return _mascot.set(MascotMood.idle);
+      if (obscured != null) {
+        _mascot.set(obscured() ? MascotMood.hide : MascotMood.peek);
+      } else {
+        _mascot.typing(ctrl?.text ?? '');
+      }
+    },
+    child: field,
+  );
+
   Future<void> _submit() async {
     if (!_validateCompte() || !_validateProfil()) return;
     if (_profil!.needsParcours && !_validateParcours()) return;
     if (!_acceptCgu) {
-      setState(() => _error = 'Accepte les conditions d’utilisation pour continuer');
+      setState(
+        () => _error = 'Accepte les conditions d’utilisation pour continuer',
+      );
       return;
     }
     setState(() {
@@ -184,7 +213,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
     try {
       final needs = _profil!.needsParcours;
-      await ref.read(authProvider.notifier).register(
+      await ref
+          .read(authProvider.notifier)
+          .register(
             nom: _nom.text.trim(),
             email: _email.text.trim(),
             telephone: _telephone.text.trim(),
@@ -193,16 +224,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             classe: needs ? _classe : null,
             etablissement: needs ? _etablissement.text.trim() : null,
           );
+      _mascot.flash(MascotMood.happy);
+      await Future<void>.delayed(const Duration(milliseconds: 700));
       if (mounted) context.go('/home');
     } catch (e) {
       final msg = e is MobileAccessDeniedException
           ? e.message
           : e is ApiException
-              ? e.message
-              : e.toString().replaceFirst('ApiException: ', '');
+          ? e.message
+          : e.toString().replaceFirst('ApiException: ', '');
       setState(() => _error = msg);
+      _mascot.flash(MascotMood.error);
       if (e is MobileAccessDeniedException && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -249,6 +285,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       showBack: true,
       onBack: _back,
       children: [
+        if (_currentStep == _RegStep.compte) ...[
+          Center(
+            child: BirdMascot(
+              key: const Key('auth-mascot'),
+              controller: _mascot,
+              size: 96,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
         _ProgressDots(count: steps.length, index: _stepIndex),
         const SizedBox(height: 20),
         ..._buildStepBody(context, pal),
@@ -256,7 +302,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           const SizedBox(height: 8),
           Text(
             _error!,
-            style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 13),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.error,
+              fontSize: 13,
+            ),
           ),
         ],
         const SizedBox(height: 20),
@@ -298,49 +347,85 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   List<Widget> _buildCompteStep() {
     return [
-      EzoaTextField(label: 'Nom complet', controller: _nom, prefixIcon: LucideIcons.user),
-      EzoaTextField(
-        label: 'Email',
-        controller: _email,
-        keyboardType: TextInputType.emailAddress,
-        prefixIcon: LucideIcons.mail,
+      _watch(
+        EzoaTextField(
+          label: 'Nom complet',
+          controller: _nom,
+          prefixIcon: LucideIcons.user,
+          onChanged: _mascot.typing,
+        ),
+        ctrl: _nom,
       ),
-      EzoaTextField(
-        label: 'Téléphone',
-        controller: _telephone,
-        keyboardType: TextInputType.phone,
-        prefixIcon: LucideIcons.phone,
-      ),
-      EzoaTextField(
-        label: 'Mot de passe',
-        controller: _password,
-        obscureText: _obscurePassword,
-        errorText: _error,
-        prefixIcon: LucideIcons.lock,
-        suffixIcon: IconButton(
-          icon: Icon(
-            _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
-            size: 20,
-            color: EzoaColors.of(context).textFaint,
-          ),
-          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-          tooltip: _obscurePassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe',
+      _watch(
+        ctrl: _email,
+        EzoaTextField(
+          onChanged: _mascot.typing,
+          label: 'Email',
+          controller: _email,
+          keyboardType: TextInputType.emailAddress,
+          prefixIcon: LucideIcons.mail,
         ),
       ),
-      EzoaTextField(
-        label: 'Confirmer le mot de passe',
-        controller: _confirmPassword,
-        obscureText: _obscureConfirmPassword,
-        errorText: _confirmError,
-        prefixIcon: LucideIcons.lock,
-        suffixIcon: IconButton(
-          icon: Icon(
-            _obscureConfirmPassword ? LucideIcons.eyeOff : LucideIcons.eye,
-            size: 20,
-            color: EzoaColors.of(context).textFaint,
+      _watch(
+        ctrl: _telephone,
+        EzoaTextField(
+          onChanged: _mascot.typing,
+          label: 'Téléphone',
+          controller: _telephone,
+          keyboardType: TextInputType.phone,
+          prefixIcon: LucideIcons.phone,
+        ),
+      ),
+      _watch(
+        obscured: () => _obscurePassword,
+        EzoaTextField(
+          label: 'Mot de passe',
+          controller: _password,
+          obscureText: _obscurePassword,
+          errorText: _error,
+          prefixIcon: LucideIcons.lock,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
+              size: 20,
+              color: EzoaColors.of(context).textFaint,
+            ),
+            onPressed: () {
+              setState(() => _obscurePassword = !_obscurePassword);
+              _mascot.set(_obscurePassword ? MascotMood.hide : MascotMood.peek);
+            },
+            tooltip: _obscurePassword
+                ? 'Afficher le mot de passe'
+                : 'Masquer le mot de passe',
           ),
-          onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
-          tooltip: _obscureConfirmPassword ? 'Afficher la confirmation' : 'Masquer la confirmation',
+        ),
+      ),
+      _watch(
+        obscured: () => _obscureConfirmPassword,
+        EzoaTextField(
+          label: 'Confirmer le mot de passe',
+          controller: _confirmPassword,
+          obscureText: _obscureConfirmPassword,
+          errorText: _confirmError,
+          prefixIcon: LucideIcons.lock,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscureConfirmPassword ? LucideIcons.eyeOff : LucideIcons.eye,
+              size: 20,
+              color: EzoaColors.of(context).textFaint,
+            ),
+            onPressed: () {
+              setState(
+                () => _obscureConfirmPassword = !_obscureConfirmPassword,
+              );
+              _mascot.set(
+                _obscureConfirmPassword ? MascotMood.hide : MascotMood.peek,
+              );
+            },
+            tooltip: _obscureConfirmPassword
+                ? 'Afficher la confirmation'
+                : 'Masquer la confirmation',
+          ),
         ),
       ),
     ];
@@ -359,7 +444,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               borderRadius: BorderRadius.circular(14),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: selected
                       ? EzoaColors.primary.withValues(alpha: 0.12)
@@ -388,7 +476,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           const SizedBox(height: 2),
                           Text(
                             p.hint,
-                            style: TextStyle(fontSize: 13, color: pal.textMuted),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: pal.textMuted,
+                            ),
                           ),
                         ],
                       ),
@@ -424,8 +515,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
         data: (meta) {
           if (profil == RegisterProfil.eleve) {
-            final classes =
-                _niveau == 'college' ? meta.classes.college : meta.classes.lycee;
+            final classes = _niveau == 'college'
+                ? meta.classes.college
+                : meta.classes.lycee;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -524,8 +616,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       ('Email', _email.text.trim()),
       ('Téléphone', _telephone.text.trim()),
       if (profil != null) ('Profil', profil.label),
-      if (profil?.needsParcours == true && _classe != null) ('Classe / concours', _classe!),
-      if (profil?.needsParcours == true && _etablissement.text.trim().isNotEmpty)
+      if (profil?.needsParcours == true && _classe != null)
+        ('Classe / concours', _classe!),
+      if (profil?.needsParcours == true &&
+          _etablissement.text.trim().isNotEmpty)
         ('Établissement', _etablissement.text.trim()),
     ];
 
@@ -588,7 +682,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 Text(
                   'J’accepte les ',
-                  style: TextStyle(fontSize: 13.5, height: 1.4, color: pal.textDim),
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    height: 1.4,
+                    color: pal.textDim,
+                  ),
                 ),
                 GestureDetector(
                   onTap: () => openLegal(context, 'cgu'),
@@ -605,7 +703,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 Text(
                   ' et la ',
-                  style: TextStyle(fontSize: 13.5, height: 1.4, color: pal.textDim),
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    height: 1.4,
+                    color: pal.textDim,
+                  ),
                 ),
                 GestureDetector(
                   onTap: () => openLegal(context, 'confidentialite'),
@@ -622,7 +724,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 Text(
                   ' d’EZOA-TO, et j’ai l’accord de mes parents si j’ai moins de 18 ans.',
-                  style: TextStyle(fontSize: 13.5, height: 1.4, color: pal.textDim),
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    height: 1.4,
+                    color: pal.textDim,
+                  ),
                 ),
               ],
             ),
@@ -688,7 +794,9 @@ class _NiveauChip extends StatelessWidget {
               : EzoaColors.of(context).subtleFill,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? EzoaColors.primary.withValues(alpha: 0.5) : EzoaColors.of(context).border,
+            color: selected
+                ? EzoaColors.primary.withValues(alpha: 0.5)
+                : EzoaColors.of(context).border,
           ),
         ),
         alignment: Alignment.center,
@@ -696,7 +804,9 @@ class _NiveauChip extends StatelessWidget {
           label,
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: selected ? EzoaColors.primary : EzoaColors.of(context).textDim,
+            color: selected
+                ? EzoaColors.primary
+                : EzoaColors.of(context).textDim,
           ),
         ),
       ),

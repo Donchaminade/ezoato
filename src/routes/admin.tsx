@@ -1,3 +1,4 @@
+import { useAsyncStatus } from "@/hooks/use-async-status";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -257,8 +258,15 @@ function SoumissionsTab() {
     similaires.length,
   );
 
+  const validateBtn = useAsyncStatus();
   async function valider(s: Soumission) {
-    await api.validerSoumission(s.id, corrections());
+    try {
+      await validateBtn.run(() => api.validerSoumission(s.id, corrections()));
+    } catch {
+      toast.error("Validation impossible.");
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 650));
     toast.success("Épreuve validée et publiée");
     setCompare(null);
     setActive(null);
@@ -516,10 +524,10 @@ function SoumissionsTab() {
                 </p>
 
                 <div className="flex gap-2">
-                  <Button onClick={() => valider(active)} className="flex-1">
+                  <Button onClick={() => valider(active)} className="flex-1 rounded-full" status={validateBtn.status}>
                     <Check className="size-4" /> Valider & publier
                   </Button>
-                <Button onClick={() => setRejectOpen(true)} variant="destructive">
+                  <Button onClick={() => setRejectOpen(true)} variant="destructive" className="rounded-full">
                     <X className="size-4" /> Rejeter
                   </Button>
                 </div>

@@ -16,6 +16,7 @@ import {
   User,
   UserPlus,
 } from "lucide-react";
+import { emitMascot } from "@/components/auth/BirdMascot";
 import { AUTH_FIELD, AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +56,12 @@ function RegisterPage() {
   const nav = useNavigate();
   const { data: meta } = useQuery({ queryKey: ["meta"], queryFn: () => api.getMeta() });
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const flagError = () => {
+    setFailed(true);
+    window.setTimeout(() => setFailed(false), 900);
+  };
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [password, setPassword] = useState("");
@@ -91,24 +98,34 @@ function RegisterPage() {
         onSubmit={async (e) => {
           e.preventDefault();
           if (password !== confirmPwd) {
+            emitMascot("error");
+            flagError();
             toast.error("Les mots de passe ne correspondent pas.");
             return;
           }
           if (!acceptTerms) {
+            emitMascot("error");
+            flagError();
             toast.error("Accepte les conditions pour continuer.");
             return;
           }
           const fd = new FormData(e.currentTarget);
           const telephone = String(fd.get("telephone"));
           if (!isValidPhone(telephone)) {
+            emitMascot("error");
+            flagError();
             toast.error("Numéro de téléphone invalide (8 chiffres minimum).");
             return;
           }
           if (!classe) {
+            emitMascot("error");
+            flagError();
             toast.error("Sélectionne ta classe.");
             return;
           }
           if (!etablissement.trim()) {
+            emitMascot("error");
+            flagError();
             toast.error("Indique ton établissement.");
             return;
           }
@@ -123,8 +140,13 @@ function RegisterPage() {
               etablissement.trim(),
             );
             toast.success("Compte créé ! Bienvenue sur EZOA-TO.");
+            emitMascot("happy");
+            setDone(true);
+            await new Promise((r) => setTimeout(r, 700));
             nav({ to: "/account" });
           } catch {
+            emitMascot("error");
+            flagError();
             toast.error("Inscription impossible. Email ou numéro déjà utilisé.");
           } finally {
             setLoading(false);
@@ -267,6 +289,7 @@ function RegisterPage() {
               id="password"
               name="password"
               type={showPwd ? "text" : "password"}
+              data-mascot="password"
               minLength={8}
               required
               autoComplete="new-password"
@@ -313,6 +336,7 @@ function RegisterPage() {
             <Input
               id="confirm"
               type={showConfirm ? "text" : "password"}
+              data-mascot="password"
               required
               autoComplete="new-password"
               placeholder="Répète ton mot de passe"
@@ -362,6 +386,7 @@ function RegisterPage() {
           type="submit"
           size="lg"
           className="tea-water-fill-none h-12 w-full rounded-xl text-base font-semibold shadow-md"
+          status={done ? "success" : failed ? "error" : loading ? "loading" : "idle"}
           disabled={loading || pwdMismatch || !acceptTerms}
         >
           {loading ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}

@@ -12,6 +12,8 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+import { motion, MotionConfig } from "motion/react";
+import { BirdMascot } from "@/components/auth/BirdMascot";
 import { EzoaLogo } from "@/components/branding/EzoaLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { EZOA_BRAND } from "@/lib/branding";
@@ -102,11 +104,26 @@ export function AuthSplitLayout({
 }: AuthSplitLayoutProps) {
   const panel = PANEL_COPY[variant];
 
+  // Transition login ↔ inscription (inspirée du panneau coulissant @code.xr / DeefFnvTwrm) :
+  // le panneau vert change de côté via un layoutId partagé, le formulaire glisse depuis le côté opposé.
+  const dir = variant === "register" ? -1 : 1;
+  const ease = [0.22, 1, 0.36, 1] as const;
   return (
+    <MotionConfig reducedMotion="user">
     <div className="flex min-h-svh items-center justify-center bg-muted/40 px-4 py-8 sm:px-6">
-      <div className="relative w-full max-w-5xl overflow-hidden rounded-3xl border border-border/60 bg-card shadow-2xl shadow-black/10">
+      <motion.div
+        layoutId="auth-card"
+        className="relative w-full max-w-5xl overflow-hidden rounded-3xl border border-border/60 bg-card shadow-2xl shadow-black/10"
+        transition={{ duration: 0.6, ease }}
+      >
         <div className="grid lg:grid-cols-2">
-          <div className="flex flex-col justify-between p-8 sm:p-10 lg:min-h-[680px] lg:p-12">
+          <motion.div
+            key={variant}
+            initial={{ opacity: 0, x: 60 * dir }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.55, ease, delay: 0.12 }}
+            className={`flex flex-col justify-between p-8 sm:p-10 lg:min-h-[680px] lg:p-12 ${variant === "register" ? "lg:order-2" : ""}`}
+          >
             <div>
               <div className="flex items-start justify-between gap-4">
                 <Link to="/" className="inline-flex items-center gap-3">
@@ -126,7 +143,8 @@ export function AuthSplitLayout({
               <p className="mt-2 text-sm font-medium text-primary">{EZOA_BRAND.fullName}</p>
               <p className="text-xs text-muted-foreground">{EZOA_BRAND.tagline}</p>
 
-              <h1 className="mt-8 font-display text-2xl font-bold tracking-tight text-foreground sm:text-[1.65rem]">
+              <BirdMascot className="mx-auto mt-6 h-28 w-32 sm:h-32 sm:w-36" />
+              <h1 className="mt-4 font-display text-2xl font-bold tracking-tight text-foreground sm:text-[1.65rem]">
                 {title}
               </h1>
               <div className="mt-2 h-1 w-12 rounded-full bg-primary" aria-hidden />
@@ -143,13 +161,15 @@ export function AuthSplitLayout({
                 Zone sécurisée — Accès réservé aux membres EZOA-TO
               </p>
             )}
-          </div>
+          </motion.div>
 
-          <div
-            className={
+          <motion.div
+            layoutId="auth-panel"
+            transition={{ duration: 0.65, ease }}
+            className={(variant === "register" ? "lg:order-1 " : "") + (
               variant === "register"
                 ? "relative hidden overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/90 p-10 text-primary-foreground lg:flex lg:flex-col lg:justify-between lg:p-12"
-                : "relative hidden overflow-hidden bg-primary p-10 text-primary-foreground lg:flex lg:flex-col lg:justify-between lg:p-12"
+                : "relative hidden overflow-hidden bg-primary p-10 text-primary-foreground lg:flex lg:flex-col lg:justify-between lg:p-12")
             }
           >
             <div
@@ -165,7 +185,13 @@ export function AuthSplitLayout({
               aria-hidden
             />
 
-            <div className="relative z-10">
+            <motion.div
+              key={`panel-${variant}`}
+              className="relative z-10"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease, delay: 0.3 }}
+            >
               {variant === "register" && (
                 <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-tg-yellow px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-tg-ink">
                   <Sparkles className="size-3" />
@@ -195,7 +221,7 @@ export function AuthSplitLayout({
                   );
                 })}
               </ul>
-            </div>
+            </motion.div>
 
             <p className="relative z-10 mt-10 flex items-center gap-2 text-xs text-primary-foreground/75">
               <CircleHelp className="size-3.5 shrink-0" />
@@ -207,10 +233,11 @@ export function AuthSplitLayout({
                 Contacte le support EZOA-TO
               </Link>
             </p>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
+    </MotionConfig>
   );
 }
 

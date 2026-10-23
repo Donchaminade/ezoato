@@ -34,7 +34,7 @@ export function DataTableShell({
   className?: string;
 }) {
   return (
-    <div className={cn(dataTableWrapper, className)}>
+    <div className={cn(dataTableWrapper, "rounded-[20px] border-border/70 shadow-sm sm:rounded-3xl [&_tbody_tr]:transition-colors [&_tbody_tr:hover]:bg-[#02A671]/6", className)}>
       <p className="border-b border-border bg-muted/30 px-3 py-1.5 text-[10px] text-muted-foreground sm:hidden">
         Glissez horizontalement pour voir tout le tableau
       </p>

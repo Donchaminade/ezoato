@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Smartphone,
 } from "lucide-react";
+import { emitMascot } from "@/components/auth/BirdMascot";
 import { AUTH_FIELD, AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +41,12 @@ function LoginPage() {
   const nav = useNavigate();
   const { logout } = useSearch({ from: "/auth/login" });
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const flagError = () => {
+    setFailed(true);
+    window.setTimeout(() => setFailed(false), 900);
+  };
   const [showPwd, setShowPwd] = useState(false);
   const loggedOut = logout === "1";
 
@@ -60,12 +67,17 @@ function LoginPage() {
           try {
             const user = await login(String(fd.get("identifier")), String(fd.get("password")));
             toast.success("Connecté !");
+            emitMascot("happy");
+            setDone(true);
+            await new Promise((r) => setTimeout(r, 700));
             if (user.role === "admin" || user.role === "gestionnaire") {
               nav({ to: "/admin", search: { section: "overview" } });
             } else {
               nav({ to: "/account" });
             }
           } catch {
+            emitMascot("error");
+            flagError();
             toast.error("Identifiants incorrects.");
           } finally {
             setLoading(false);
@@ -105,6 +117,7 @@ function LoginPage() {
               id="password"
               name="password"
               type={showPwd ? "text" : "password"}
+              data-mascot="password"
               required
               autoComplete="current-password"
               placeholder="Mot de passe"
@@ -125,6 +138,7 @@ function LoginPage() {
           type="submit"
           size="lg"
           className="tea-water-fill-none h-12 w-full rounded-xl text-base font-semibold shadow-md"
+          status={done ? "success" : failed ? "error" : loading ? "loading" : "idle"}
           disabled={loading}
         >
           {loading ? (
