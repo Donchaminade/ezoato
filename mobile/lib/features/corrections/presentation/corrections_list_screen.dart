@@ -48,7 +48,7 @@ class CorrectionsListScreen extends ConsumerWidget {
               ...items.map((demande) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Material(
-                      color: EzoaColors.of(context).surface,
+                      color: EzoaColors.of(context).surfaceSolid,
                       borderRadius: BorderRadius.circular(16),
                       child: ListTile(
                         title: Text(demande.epreuveTitre, style: EzoaTypography.titleSmall(context)),

@@ -1350,7 +1350,7 @@ class AiQuizStart {
     required this.disclaimer,
     required this.questions,
     this.currentQuestion,
-    this.progress,
+    this.progress = const AiProgress(index: 0, total: 0, answered: 0, correct: 0),
     this.grounded = false,
     this.officialGrade = false,
   });
