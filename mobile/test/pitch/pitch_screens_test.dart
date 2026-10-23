@@ -134,13 +134,14 @@ void main() {
     await t.pump(const Duration(seconds: 1));
     expect(find.text('${subjects.length} épreuves trouvées'), findsOneWidget);
     debugPrint('LYCEE ${t.getCenter(find.text('Lycée'))} ${t.getSize(find.text('Lycée'))}');
-    await t.ensureVisible(find.text('Lycée'));
+    await t.drag(find.text('Collège'), const Offset(-200, 0));
     await t.pump(const Duration(seconds: 1));
     await t.tap(find.text('Lycée'));
     await t.pump(const Duration(seconds: 1));
     debugPrint(find.textContaining('trouvée').evaluate().map((e) => (e.widget as Text).data).join('|'));
     await t.pump(const Duration(seconds: 1));
-    expect(find.text('2 épreuves trouvées'), findsOneWidget);
+    final lycee = subjects.where((s) => s.examInfo.level == 'Lycée').length;
+    expect(find.text('$lycee épreuves trouvées'), findsOneWidget);
     await t.pumpWidget(const SizedBox());
     await t.pump(const Duration(seconds: 5));
   });

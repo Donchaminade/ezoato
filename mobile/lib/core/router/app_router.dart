@@ -36,10 +36,18 @@ import '../onboarding/onboarding_provider.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'home');
-final _shellNavigatorArchivesKey = GlobalKey<NavigatorState>(debugLabel: 'archives');
-final _shellNavigatorSubmitKey = GlobalKey<NavigatorState>(debugLabel: 'submit');
-final _shellNavigatorFavorisKey = GlobalKey<NavigatorState>(debugLabel: 'favoris');
-final _shellNavigatorAccountKey = GlobalKey<NavigatorState>(debugLabel: 'account');
+final _shellNavigatorArchivesKey = GlobalKey<NavigatorState>(
+  debugLabel: 'archives',
+);
+final _shellNavigatorSubmitKey = GlobalKey<NavigatorState>(
+  debugLabel: 'submit',
+);
+final _shellNavigatorFavorisKey = GlobalKey<NavigatorState>(
+  debugLabel: 'favoris',
+);
+final _shellNavigatorAccountKey = GlobalKey<NavigatorState>(
+  debugLabel: 'account',
+);
 
 final routerProvider = Provider<GoRouter>((ref) {
   final auth = ref.watch(authProvider);
@@ -55,7 +63,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isSplash = path == '/';
       final isOnboarding = path == '/onboarding';
       if (path.startsWith('/legal')) return isLoading ? '/' : null;
-      final isAuthRoute = path == '/login' ||
+      final isAuthRoute =
+          path == '/login' ||
           path == '/register' ||
           path == '/forgot-password' ||
           path == '/reset-password';
@@ -84,22 +93,30 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         builder: (_, __) => const OnboardingScreen(),
       ),
-      GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(
+        path: '/login',
+        pageBuilder: (_, state) =>
+            authFlipPage(state, const LoginScreen(), fromRight: false),
+      ),
       GoRoute(path: '/legal', builder: (_, __) => const LegalHubScreen()),
       GoRoute(
         path: '/legal/:slug',
-        builder: (_, state) => LegalDocScreen(slug: state.pathParameters['slug']!),
+        builder: (_, state) =>
+            LegalDocScreen(slug: state.pathParameters['slug']!),
       ),
-      GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
+      GoRoute(
+        path: '/register',
+        pageBuilder: (_, state) =>
+            authFlipPage(state, const RegisterScreen(), fromRight: true),
+      ),
       GoRoute(
         path: '/forgot-password',
         builder: (_, __) => const ForgotPasswordScreen(),
       ),
       GoRoute(
         path: '/reset-password',
-        builder: (_, state) => ResetPasswordScreen(
-          token: state.uri.queryParameters['token'],
-        ),
+        builder: (_, state) =>
+            ResetPasswordScreen(token: state.uri.queryParameters['token']),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -115,13 +132,19 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             navigatorKey: _shellNavigatorArchivesKey,
             routes: [
-              GoRoute(path: '/archives', builder: (_, __) => const ArchivesScreen()),
+              GoRoute(
+                path: '/archives',
+                builder: (_, __) => const ArchivesScreen(),
+              ),
             ],
           ),
           StatefulShellBranch(
             navigatorKey: _shellNavigatorSubmitKey,
             routes: [
-              GoRoute(path: '/submit', builder: (_, __) => const SubmitScreen()),
+              GoRoute(
+                path: '/submit',
+                builder: (_, __) => const SubmitScreen(),
+              ),
             ],
           ),
           StatefulShellBranch(
@@ -136,7 +159,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             navigatorKey: _shellNavigatorAccountKey,
             routes: [
-              GoRoute(path: '/account', builder: (_, __) => const AccountMenuScreen()),
+              GoRoute(
+                path: '/account',
+                builder: (_, __) => const AccountMenuScreen(),
+              ),
             ],
           ),
         ],
@@ -144,7 +170,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/epreuve/:id',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, state) => EpreuveDetailScreen(id: state.pathParameters['id']!),
+        builder: (_, state) =>
+            EpreuveDetailScreen(id: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/reviser',
@@ -187,7 +214,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/offline/:id',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, state) => OfflineReaderScreen(id: state.pathParameters['id']!),
+        builder: (_, state) =>
+            OfflineReaderScreen(id: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/account/portefeuille',
@@ -246,3 +274,48 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+/// Transition login ↔ inscription : la carte pivote légèrement en glissant
+/// (réf. Instagram DeefFnvTwrm, slide/fade ~300 ms). Désactivée si animations réduites.
+CustomTransitionPage<void> authFlipPage(
+  GoRouterState state,
+  Widget child, {
+  required bool fromRight,
+}) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 420),
+    reverseTransitionDuration: const Duration(milliseconds: 360),
+    transitionsBuilder: (context, animation, secondary, child) {
+      if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+        return FadeTransition(opacity: animation, child: child);
+      }
+      final a = CurvedAnimation(
+        parent: animation,
+        curve: const Cubic(0.22, 1, 0.36, 1),
+      );
+      return AnimatedBuilder(
+        animation: a,
+        child: child,
+        builder: (context, child) {
+          final t = 1 - a.value;
+          final dir = fromRight ? 1.0 : -1.0;
+          return Opacity(
+            opacity: a.value.clamp(0.0, 1.0),
+            child: Transform(
+              alignment: fromRight
+                  ? Alignment.centerLeft
+                  : Alignment.centerRight,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.0012)
+                ..translateByDouble(dir * 80 * t, 0, 0, 1)
+                ..rotateY(-dir * 0.45 * t),
+              child: child,
+            ),
+          );
+        },
+      );
+    },
+  );
+}

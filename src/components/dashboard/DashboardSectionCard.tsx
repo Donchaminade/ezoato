@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export function DashboardSectionCard({
@@ -15,7 +16,16 @@ export function DashboardSectionCard({
   action?: ReactNode;
 }) {
   return (
-    <section className={cn("rounded-xl border border-border bg-card p-3 shadow-sm sm:rounded-2xl sm:p-6", className)}>
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className={cn(
+        "rounded-[20px] border border-border/70 bg-card p-3 shadow-sm transition-shadow hover:shadow-md sm:rounded-3xl sm:p-6",
+        className,
+      )}
+    >
       <div className="mb-3 flex items-start justify-between gap-2 sm:mb-5 sm:gap-3">
         <div className="min-w-0">
           <h2 className="font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground sm:text-sm">
@@ -28,7 +38,7 @@ export function DashboardSectionCard({
         {action}
       </div>
       {children}
-    </section>
+    </motion.section>
   );
 }
 
@@ -60,7 +70,13 @@ export function DashboardProgressRow({
         <span className="tabular-nums text-muted-foreground">{value}</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-muted sm:h-2">
-        <div className={cn("h-full rounded-full transition-all", bar)} style={{ width: `${pct}%` }} />
+        <motion.div
+          className={cn("h-full rounded-full", bar)}
+          initial={{ width: 0 }}
+          whileInView={{ width: `${pct}%` }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        />
       </div>
     </div>
   );
@@ -91,7 +107,7 @@ export function DashboardTodoItem({
       type={onClick ? "button" : undefined}
       onClick={onClick}
       className={cn(
-        "flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-xs font-medium transition sm:px-4 sm:py-3 sm:text-sm",
+        "flex w-full items-center justify-between gap-2 rounded-2xl border px-3 transition-transform hover:-translate-y-0.5 active:scale-[0.98] py-2.5 text-left text-xs font-medium transition sm:px-4 sm:py-3 sm:text-sm",
         tones[tone],
         onClick && "cursor-pointer",
       )}

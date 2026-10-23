@@ -1,5 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowLeft, LogOut } from "lucide-react";
+import { motion } from "motion/react";
 import { EzoaLogo } from "@/components/branding/EzoaLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Badge } from "@/components/ui/badge";
@@ -39,19 +40,20 @@ export function DashboardSidebar({
     return pathname === item.to || pathname.startsWith(`${item.to}/`);
   }
 
+  // Sidebar premium — réf. DeywyTcvzbX (pill actif coulissant, spring 380/32) + règle 100dvh / déconnexion épinglée
   return (
-    <aside className="flex h-full w-full flex-col border-r border-border bg-card">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-4">
+    <aside className="flex h-dvh w-full flex-col bg-gradient-to-b from-[#004D38] via-[#00412F] to-[#003325] text-white dark:from-[#0B1622] dark:via-[#0B1622] dark:to-[#08111B] dark:border-r dark:border-white/5">
+      <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-4">
         <Link to="/" className="shrink-0">
-          <EzoaLogo className="h-8" />
+          <span className="inline-flex rounded-xl bg-white px-2 py-1"><EzoaLogo className="h-7" /></span>
         </Link>
-        <ThemeToggle className="text-muted-foreground" />
+        <ThemeToggle className="text-white/80 hover:bg-white/10 hover:text-white" />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         {groups.map((group) => (
           <div key={group.title} className="mb-6 last:mb-0">
-            <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
               {group.title}
             </p>
             <ul className="space-y-1">
@@ -74,21 +76,26 @@ export function DashboardSidebar({
                       activeProps={{ className: "" }}
                       inactiveProps={{ className: "" }}
                       className={cn(
-                        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
+                        "group relative flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-medium transition-colors",
                         active
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-muted-foreground hover:bg-muted hover:!text-foreground dark:hover:!text-white",
+                          ? "!text-[#004D38] dark:!text-[#0B1622]"
+                          : "text-white/70 hover:bg-white/8 hover:!text-white",
                       )}
                     >
-                      <Icon className="size-4 shrink-0" />
-                      <span className="flex-1 truncate">{item.label}</span>
+                      {active && (
+                        <motion.span
+                          layoutId="admin-sidebar-pill"
+                          className="absolute inset-0 rounded-full bg-white shadow-md dark:bg-[#02A671]"
+                          transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                        />
+                      )}
+                      <Icon className="relative size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                      <span className="relative flex-1 truncate">{item.label}</span>
                       {(item.badge ?? 0) > 0 && (
                         <span
                           className={cn(
-                            "rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums",
-                            active
-                              ? "bg-primary-foreground/20 text-primary-foreground"
-                              : "bg-destructive text-destructive-foreground",
+                            "relative rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums",
+                            active ? "bg-[#FFCE00] text-[#0B121A]" : "bg-[#D21034] text-white",
                           )}
                         >
                           {item.badge}
@@ -103,29 +110,33 @@ export function DashboardSidebar({
         ))}
       </nav>
 
-      <div className="border-t border-border p-4">
+      <div className="mt-auto border-t border-white/10 p-4">
         <Link
           to="/account/profil"
-          className="block rounded-xl bg-muted/50 px-3 py-3 transition hover:bg-muted"
+          className="flex items-center gap-3 rounded-2xl bg-white/8 px-3 py-3 transition hover:bg-white/12"
         >
-          <p className="truncate text-sm font-semibold">{user.nom}</p>
-          <Badge variant="secondary" className="mt-1.5 text-[10px] uppercase tracking-wide">
-            {roleLabel(user.role)}
-          </Badge>
-          <p className="mt-1 text-[10px] text-muted-foreground">Voir mon profil →</p>
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#FFCE00] font-display text-sm font-bold text-[#0B121A]">
+            {user.nom.trim().charAt(0).toUpperCase()}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold">{user.nom}</span>
+            <Badge className="mt-1 border-0 bg-white/15 text-[10px] uppercase tracking-wide text-white">
+              {roleLabel(user.role)}
+            </Badge>
+          </span>
         </Link>
         <div className="mt-3 space-y-1">
           <button
             type="button"
             onClick={() => navigate({ to: "/" })}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="flex w-full items-center gap-2 rounded-full px-3 py-2 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
           >
             <ArrowLeft className="size-4" /> Retour au site
           </button>
           <button
             type="button"
             onClick={onLogout}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+            className="flex w-full items-center gap-2 rounded-full px-3 py-2 text-sm text-white/70 transition hover:bg-[#D21034]/20 hover:text-white"
           >
             <LogOut className="size-4" /> Déconnexion
           </button>

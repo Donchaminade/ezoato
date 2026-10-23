@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
+import { motion } from "motion/react";
 import {
   BookOpen,
   Inbox,
@@ -37,14 +38,68 @@ export function AdminOverview({ stats, isAdmin }: { stats: AdminStats; isAdmin: 
 
   return (
     <div className={dashboardSectionStack}>
+      {/* Bandeau d'accueil — réf. DeywyTcvzbX (salutation + date) / orbes lents DZPqMZ2T1PA */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-[#006A4E] via-[#005A42] to-[#004D38] p-5 text-white shadow-lg shadow-[#004D38]/20 sm:rounded-[28px] sm:p-7 dark:from-[#0F2A3D] dark:via-[#0D2233] dark:to-[#0B1622]"
+      >
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute -right-10 -top-16 size-56 rounded-full bg-[#FFCE00]/20 blur-2xl"
+          animate={{ x: [0, -20, 0], y: [0, 14, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-20 left-1/3 size-64 rounded-full bg-[#02A671]/30 blur-3xl"
+          animate={{ x: [0, 24, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">Centre de pilotage</p>
+            <h2 className="mt-1 font-display text-2xl font-bold sm:text-3xl">
+              {new Date().getHours() < 18 ? "Bonjour" : "Bonsoir"} 👋
+            </h2>
+            <p className="mt-1 max-w-md text-sm text-white/80">
+              {stats.soumissionsEnAttente ?? 0} sujet(s) à modérer · {stats.retraitsEnAttente ?? 0} retrait(s) Mobile
+              Money en attente
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              className="tea-water-fill-none rounded-full bg-[#FFCE00] text-[#0B121A] hover:bg-[#FFD833]"
+              onClick={() => go("soumissions")}
+            >
+              <Inbox className="size-4" /> Modérer
+            </Button>
+            {isAdmin && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="tea-water-fill-none rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20"
+                onClick={() => go("retraits")}
+              >
+                <Banknote className="size-4" /> Retraits
+              </Button>
+            )}
+          </div>
+        </div>
+      </motion.div>
+
       <div className={dashboardAdminStatGrid}>
-        <DashboardStatCard label="Épreuves validées" value={stats.epreuvesValidees ?? 0} icon={BookOpen} tone="green" />
-        <DashboardStatCard label="En attente" value={stats.soumissionsEnAttente ?? 0} icon={Inbox} tone="yellow" />
-        <DashboardStatCard label="Utilisateurs" value={stats.utilisateurs ?? 0} icon={Users} tone="blue" />
-        <DashboardStatCard label="Retraits en attente" value={stats.retraitsEnAttente ?? 0} icon={Banknote} tone="red" />
+        <DashboardStatCard index={0} label="Épreuves validées" value={stats.epreuvesValidees ?? 0} icon={BookOpen} tone="green" />
+        <DashboardStatCard index={1} label="En attente" value={stats.soumissionsEnAttente ?? 0} icon={Inbox} tone="yellow" />
+        <DashboardStatCard index={2} label="Utilisateurs" value={stats.utilisateurs ?? 0} icon={Users} tone="blue" />
+        <DashboardStatCard index={3} label="Retraits en attente" value={stats.retraitsEnAttente ?? 0} icon={Banknote} tone="red" />
         <DashboardStatCard
+          index={4}
           label={isAdmin ? "Revenus" : "Téléchargements"}
-          value={isAdmin ? formatFcfa(stats.revenusFcfa ?? 0) : (stats.telechargements ?? 0)}
+          value={isAdmin ? (stats.revenusFcfa ?? 0) : (stats.telechargements ?? 0)}
+          format={isAdmin ? formatFcfa : undefined}
           icon={BarChart3}
           tone="purple"
         />

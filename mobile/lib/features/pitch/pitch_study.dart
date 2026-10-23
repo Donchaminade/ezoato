@@ -75,8 +75,8 @@ class _SubjectScreenState extends State<SubjectScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('Vérifiée par un enseignant', style: PK.body(context, 14, w: FontWeight.w700)),
-                        Text(s.verifiedBy, style: PK.body(context, 12, color: PK.muted(context))),
+                        Text(s.sourceUrl != null ? 'Sujet officiel · ${s.region}' : 'Vérifiée par un enseignant', style: PK.body(context, 14, w: FontWeight.w700)),
+                        Text(s.sourceUrl != null ? s.sourceLabel : s.verifiedBy, style: PK.body(context, 12, color: PK.muted(context))),
                       ]),
                     ),
                   ]),
@@ -98,6 +98,21 @@ class _SubjectScreenState extends State<SubjectScreen> {
                       Center(child: Text('${s.exam.toUpperCase()} ${s.serie.toUpperCase()} — SESSION ${s.year}', textAlign: TextAlign.center, style: const TextStyle(fontFamily: PK.fontDisplay, fontSize: 16, fontWeight: FontWeight.w700))),
                       Center(child: Text('Épreuve de ${s.matiere} · Durée ${s.duree}', style: const TextStyle(fontSize: 12, color: Color(0xFF5B635F)))),
                       const Divider(height: 28),
+                      for (final a in s.pageAssets) ...[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: InteractiveViewer(maxScale: 4, child: Image.asset(a, fit: BoxFit.fitWidth, semanticLabel: 'Page du sujet ${s.title}')),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (s.sourceUrl != null)
+                        Center(
+                          child: Text(
+                            '${s.sourceLabel}\n${s.sourceUrl}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 11, color: Color(0xFF5B635F)),
+                          ),
+                        ),
                       for (final e in s.exercises) ...[
                         Row(children: [
                           Expanded(child: Text(e.title, style: const TextStyle(fontFamily: PK.fontDisplay, fontWeight: FontWeight.w700, fontSize: 15.5, color: PK.emerald))),

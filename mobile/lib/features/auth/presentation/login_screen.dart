@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../core/theme/ezoa_theme.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
+import '../../../shared/widgets/bird_mascot.dart';
 import '../data/auth_repository.dart';
 import '../../../core/demo/demo_mode.dart';
 
@@ -22,11 +23,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _loading = false;
   bool _obscurePassword = true;
   String? _error;
+  final _mascot = MascotController();
+  bool _pwdFocused = false;
+
+  void _syncPwdMood() {
+    if (_pwdFocused) {
+      _mascot.set(_obscurePassword ? MascotMood.hide : MascotMood.peek);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _showAccessDeniedIfNeeded());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _showAccessDeniedIfNeeded(),
+    );
   }
 
   void _showAccessDeniedIfNeeded() {
@@ -41,6 +52,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void dispose() {
     _identifier.dispose();
     _password.dispose();
+    _mascot.dispose();
     super.dispose();
   }
 
@@ -52,10 +64,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
     setState(() => _loading = true);
     try {
-      await ref.read(authProvider.notifier).login(
-            _identifier.text.trim(),
-            _password.text,
-          );
+      await ref
+          .read(authProvider.notifier)
+          .login(_identifier.text.trim(), _password.text);
+      _mascot.flash(MascotMood.happy);
+      await Future<void>.delayed(const Duration(milliseconds: 700));
       if (mounted) context.go('/home');
     } catch (e) {
       final String msg;
@@ -67,8 +80,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         msg = e.toString().replaceFirst('ApiException: ', '');
       }
       setState(() => _error = msg);
+      _mascot.flash(MascotMood.error, after: MascotMood.idle);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -81,7 +97,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final msg = next.accessDeniedMessage;
       if (msg != null && msg != prev?.accessDeniedMessage) {
         setState(() => _error = msg);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
         ref.read(authProvider.notifier).clearAccessDeniedMessage();
       }
     });
@@ -91,26 +109,58 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       title: 'Bienvenue sur EZOA-TO',
       subtitle: 'Connectez-vous pour accéder aux épreuves',
       children: [
-        EzoaTextField(
-          label: 'Email ou téléphone',
-          controller: _identifier,
-          keyboardType: TextInputType.emailAddress,
-          prefixIcon: LucideIcons.mail,
+        Center(
+          child: BirdMascot(
+            key: const Key('auth-mascot'),
+            controller: _mascot,
+            size: 104,
+          ),
         ),
-        EzoaTextField(
-          label: 'Mot de passe',
-          controller: _password,
-          obscureText: _obscurePassword,
-          errorText: _error,
-          prefixIcon: LucideIcons.lock,
-          suffixIcon: IconButton(
-            icon: Icon(
-              _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
-              size: 20,
-              color: EzoaColors.of(context).textFaint,
+        Focus(
+          canRequestFocus: false,
+          skipTraversal: true,
+          onFocusChange: (f) => f
+              ? _mascot.typing(_identifier.text)
+              : _mascot.set(MascotMood.idle),
+          child: EzoaTextField(
+            label: 'Email ou téléphone',
+            controller: _identifier,
+            keyboardType: TextInputType.emailAddress,
+            prefixIcon: LucideIcons.mail,
+            onChanged: _mascot.typing,
+          ),
+        ),
+        Focus(
+          canRequestFocus: false,
+          skipTraversal: true,
+          onFocusChange: (f) {
+            _pwdFocused = f;
+            f ? _syncPwdMood() : _mascot.set(MascotMood.idle);
+          },
+          child: EzoaTextField(
+            label: 'Mot de passe',
+            controller: _password,
+            obscureText: _obscurePassword,
+            errorText: _error,
+            prefixIcon: LucideIcons.lock,
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
+                size: 20,
+                color: EzoaColors.of(context).textFaint,
+              ),
+              onPressed: () {
+                setState(() => _obscurePassword = !_obscurePassword);
+                if (_pwdFocused || !_obscurePassword) {
+                  _mascot.set(
+                    _obscurePassword ? MascotMood.hide : MascotMood.peek,
+                  );
+                }
+              },
+              tooltip: _obscurePassword
+                  ? 'Afficher le mot de passe'
+                  : 'Masquer le mot de passe',
             ),
-            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-            tooltip: _obscurePassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe',
           ),
         ),
         Center(
@@ -137,7 +187,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Pas encore de compte ? ', style: EzoaTypography.bodySmall(context)),
+            Text(
+              'Pas encore de compte ? ',
+              style: EzoaTypography.bodySmall(context),
+            ),
             GestureDetector(
               onTap: () => context.push('/register'),
               child: Text(
@@ -155,8 +208,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: TextButton(
             key: const Key('legal-link'),
             onPressed: () => openLegal(context),
-            style: TextButton.styleFrom(foregroundColor: EzoaColors.of(context).textMuted),
-            child: const Text('CGU · Confidentialité · Mentions légales', style: TextStyle(fontSize: 12.5)),
+            style: TextButton.styleFrom(
+              foregroundColor: EzoaColors.of(context).textMuted,
+            ),
+            child: const Text(
+              'CGU · Confidentialité · Mentions légales',
+              style: TextStyle(fontSize: 12.5),
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -166,7 +224,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             onPressed: () => ref.read(demoModeProvider.notifier).state = true,
             icon: const Icon(LucideIcons.playCircle, size: 18),
             label: const Text('Mode démo'),
-            style: TextButton.styleFrom(foregroundColor: EzoaColors.of(context).textMuted),
+            style: TextButton.styleFrom(
+              foregroundColor: EzoaColors.of(context).textMuted,
+            ),
           ),
         ),
       ],
