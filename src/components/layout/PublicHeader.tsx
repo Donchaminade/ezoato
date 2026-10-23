@@ -92,7 +92,7 @@ export function PublicHeader() {
                   <Button
                     asChild
                     variant="outline"
-                    className={`${NAV_BTN} border-primary/40 text-primary hover:bg-primary/12 hover:!text-primary`}
+                    className={`${NAV_BTN} hidden sm:inline-flex border-primary/40 text-primary hover:bg-primary/12 hover:!text-primary`}
                   >
                     <a
                       href={PITCH_DECK_HREF}

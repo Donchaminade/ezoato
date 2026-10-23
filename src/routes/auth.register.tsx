@@ -354,7 +354,7 @@ function RegisterPage() {
             <Link to="/confidentialite" className="font-medium text-primary hover:underline">
               politique de confidentialité
             </Link>{" "}
-            de EZOA-TO.
+            de EZOA-TO, et j&apos;ai l&apos;accord de mes parents si j&apos;ai moins de 18 ans.
           </span>
         </label>
 

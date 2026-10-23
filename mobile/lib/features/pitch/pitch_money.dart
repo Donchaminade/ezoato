@@ -37,12 +37,12 @@ class _ContributeScreenState extends State<ContributeScreen> {
             ]),
             const SizedBox(height: 6),
             Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text('12\u202F500', style: PK.display(context, 46, color: Colors.white)),
+              Text('3\u202F000', style: PK.display(context, 46, color: Colors.white)),
               const SizedBox(width: 6),
               Padding(padding: const EdgeInsets.only(bottom: 8), child: Text('FCFA', style: PK.body(context, 15, color: Colors.white54))),
             ]),
             const SizedBox(height: 4),
-            Text('25 sujets validés · 500 FCFA par sujet', style: PK.body(context, 13, color: PK.lime, w: FontWeight.w600)),
+            Text('150 épreuves validées · 1 000 FCFA / 50', style: PK.body(context, 13, color: PK.lime, w: FontWeight.w600)),
             const SizedBox(height: 16),
             PKButton(label: 'Retirer sur Mobile Money', icon: Icons.account_balance_wallet_rounded, style: PKButtonStyle.gold, onTap: () => Navigator.of(context).push(pkRoute(const PayoutScreen()))),
           ]),
@@ -94,7 +94,7 @@ class _ContributeScreenState extends State<ContributeScreen> {
                         behavior: SnackBarBehavior.floating,
                         backgroundColor: PK.emerald,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        content: Text('Sujet envoyé ! Vérification sous 48 h. +500 FCFA à la validation.', style: PK.body(context, 14, color: Colors.white, w: FontWeight.w600)),
+                        content: Text('Sujet envoyé ! Vérification sous 48 h. Comptée pour ta prochaine récompense.', style: PK.body(context, 14, color: Colors.white, w: FontWeight.w600)),
                       ));
                       setState(() => _sent = false);
                     }
@@ -105,9 +105,9 @@ class _ContributeScreenState extends State<ContributeScreen> {
         const SizedBox(height: 22),
         PKSectionTitle('Mes envois').reveal(5),
         const SizedBox(height: 12),
-        _sub(context, 'BEPC · Maths 2023', 'Validé · +500 FCFA', Icons.check_circle_rounded, PK.accent(context), 6),
+        _sub(context, 'BEPC · Maths 2023', 'Validé · compté', Icons.check_circle_rounded, PK.accent(context), 6),
         _sub(context, 'BAC II D · Philo 2024', 'En vérification par un enseignant', Icons.hourglass_top_rounded, const Color(0xFF8A6D00), 7),
-        _sub(context, 'CEPD · Calcul 2022', 'Validé · +500 FCFA', Icons.check_circle_rounded, PK.accent(context), 8),
+        _sub(context, 'CEPD · Calcul 2022', 'Validé · compté', Icons.check_circle_rounded, PK.accent(context), 8),
       ]),
     );
   }
@@ -151,7 +151,7 @@ class PaywallScreen extends StatefulWidget {
 
 class _PaywallScreenState extends State<PaywallScreen> {
   int _plan = 0;
-  static const _plans = [('Mensuel', 1000, 'par mois', ''), ('Trimestre', 2500, '3 mois', '−17 %'), ('Année scolaire', 8000, '10 mois', '−20 %')];
+  static const _plans = [('Pro 6 mois', 1000, '6 mois', '')];
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +179,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     const SizedBox(height: 12),
                     Text('Révise comme\nun major de promo', style: PK.display(context, 30, color: Colors.white)),
                     const SizedBox(height: 8),
-                    Text('Moins cher qu\'un cahier par mois.', style: PK.body(context, 14, color: Colors.white70)),
+                    Text('Moins cher qu\'un cahier, pour 6 mois.', style: PK.body(context, 14, color: Colors.white70)),
                   ]),
                 ).reveal(0, card: true),
                 const SizedBox(height: 16),
@@ -250,7 +250,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
 class PayoutScreen extends StatelessWidget {
   const PayoutScreen({super.key});
   @override
-  Widget build(BuildContext context) => const CheckoutScreen(title: 'Retrait de gains', item: 'Gains contributeur · 25 sujets', amount: 12500, payout: true);
+  Widget build(BuildContext context) => const CheckoutScreen(title: 'Retrait de gains', item: 'Gains contributeur · 150 épreuves', amount: 3000, payout: true);
 }
 
 /// Écran de paiement façon DcGgytAzym7 : carte sombre, bouton « Payer »,
