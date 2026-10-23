@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 const TONES = {
   green: "bg-primary/12 text-primary",
   yellow: "bg-tg-yellow/20 text-tg-ink dark:text-tg-yellow",
-  blue: "bg-blue-500/12 text-blue-600 dark:text-blue-400",
+  blue: "bg-accent/12 text-primary dark:text-primary",
   red: "bg-destructive/12 text-destructive",
-  purple: "bg-violet-500/12 text-violet-600 dark:text-violet-400",
+  purple: "bg-primary/12 text-primary dark:text-primary",
 } as const;
 
 export function DashboardStatCard({

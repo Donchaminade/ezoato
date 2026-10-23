@@ -80,9 +80,9 @@ export function AdminOverviewCharts({ stats, isAdmin }: { stats: AdminStats; isA
   const fluxSteps = [
     { label: "Soumissions", value: stats.soumissionsEnAttente ?? 0, color: "bg-tg-yellow" },
     { label: "Validées", value: stats.epreuvesValidees ?? 0, color: "bg-primary" },
-    { label: "Téléchargements", value: stats.telechargements ?? 0, color: "bg-blue-500" },
+    { label: "Téléchargements", value: stats.telechargements ?? 0, color: "bg-accent" },
     ...(isAdmin
-      ? [{ label: "Revenus", value: formatFcfa(stats.revenusFcfa ?? 0), color: "bg-violet-500" }]
+      ? [{ label: "Revenus", value: formatFcfa(stats.revenusFcfa ?? 0), color: "bg-primary" }]
       : []),
   ];
   const fluxEmpty = adminFluxEmpty(stats, isAdmin);

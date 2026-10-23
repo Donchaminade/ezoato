@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/ezoa_theme.dart';
 import '../../../shared/widgets/ezoa_widgets.dart';
 import '../data/auth_repository.dart';
+import '../../../core/demo/demo_mode.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -147,6 +148,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 28),
+        Center(
+          child: TextButton.icon(
+            key: const Key('demo-mode-button'),
+            onPressed: () => ref.read(demoModeProvider.notifier).state = true,
+            icon: const Icon(LucideIcons.playCircle, size: 18),
+            label: const Text('Mode démo'),
+            style: TextButton.styleFrom(foregroundColor: EzoaColors.of(context).textMuted),
+          ),
         ),
       ],
     );

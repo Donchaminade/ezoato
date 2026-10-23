@@ -9,105 +9,45 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SubmitRouteImport } from './routes/submit'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ReviserRouteImport } from './routes/reviser'
-import { Route as PartenariatRouteImport } from './routes/partenariat'
-import { Route as FaqRouteImport } from './routes/faq'
-import { Route as DocsRouteImport } from './routes/docs'
-import { Route as CorrectionsRouteImport } from './routes/corrections'
-import { Route as ContributorRouteImport } from './routes/contributor'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as ConditionsRouteImport } from './routes/conditions'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AccountRouteImport } from './routes/account'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CorrectionsIndexRouteImport } from './routes/corrections.index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ConditionsRouteImport } from './routes/conditions'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ContributorRouteImport } from './routes/contributor'
+import { Route as CorrectionsRouteImport } from './routes/corrections'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as PartenariatRouteImport } from './routes/partenariat'
+import { Route as ReviserRouteImport } from './routes/reviser'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
-import { Route as EpreuvesIdRouteImport } from './routes/epreuves.$id'
-import { Route as CorrectionsValidateurRouteImport } from './routes/corrections.validateur'
-import { Route as CorrectionsNouvelleRouteImport } from './routes/corrections.nouvelle'
-import { Route as CorrectionsCorrecteurRouteImport } from './routes/corrections.correcteur'
-import { Route as CorrectionsCandidatureRouteImport } from './routes/corrections.candidature'
-import { Route as CorrectionsIdRouteImport } from './routes/corrections.$id'
-import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
-import { Route as AuthRegisterRouteImport } from './routes/auth.register'
-import { Route as AuthLoginRouteImport } from './routes/auth.login'
-import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
-import { Route as AdminCorrectionsRouteImport } from './routes/admin_.corrections'
-import { Route as AccountSoumissionsRouteImport } from './routes/account.soumissions'
-import { Route as AccountProfilRouteImport } from './routes/account.profil'
-import { Route as AccountPortefeuilleRouteImport } from './routes/account.portefeuille'
-import { Route as AccountFavorisRouteImport } from './routes/account.favoris'
-import { Route as AccountBibliothequeRouteImport } from './routes/account.bibliotheque'
 import { Route as AccountAbonnementRouteImport } from './routes/account.abonnement'
+import { Route as AccountBibliothequeRouteImport } from './routes/account.bibliotheque'
+import { Route as AccountFavorisRouteImport } from './routes/account.favoris'
+import { Route as AccountPortefeuilleRouteImport } from './routes/account.portefeuille'
+import { Route as AccountProfilRouteImport } from './routes/account.profil'
+import { Route as AccountSoumissionsRouteImport } from './routes/account.soumissions'
+import { Route as AdminCorrectionsRouteImport } from './routes/admin_.corrections'
+import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AuthRegisterRouteImport } from './routes/auth.register'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
+import { Route as CorrectionsIndexRouteImport } from './routes/corrections.index'
+import { Route as CorrectionsIdRouteImport } from './routes/corrections.$id'
+import { Route as CorrectionsCandidatureRouteImport } from './routes/corrections.candidature'
+import { Route as CorrectionsCorrecteurRouteImport } from './routes/corrections.correcteur'
+import { Route as CorrectionsNouvelleRouteImport } from './routes/corrections.nouvelle'
+import { Route as CorrectionsValidateurRouteImport } from './routes/corrections.validateur'
+import { Route as EpreuvesIdRouteImport } from './routes/epreuves.$id'
 import { Route as AccountSoumissionsIdRouteImport } from './routes/account.soumissions_.$id'
 
-const SubmitRoute = SubmitRouteImport.update({
-  id: '/submit',
-  path: '/submit',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReviserRoute = ReviserRouteImport.update({
-  id: '/reviser',
-  path: '/reviser',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PartenariatRoute = PartenariatRouteImport.update({
-  id: '/partenariat',
-  path: '/partenariat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FaqRoute = FaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocsRoute = DocsRouteImport.update({
-  id: '/docs',
-  path: '/docs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CorrectionsRoute = CorrectionsRouteImport.update({
-  id: '/corrections',
-  path: '/corrections',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContributorRoute = ContributorRouteImport.update({
-  id: '/contributor',
-  path: '/contributor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConditionsRoute = ConditionsRouteImport.update({
-  id: '/conditions',
-  path: '/conditions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccountRoute = AccountRouteImport.update({
-  id: '/account',
-  path: '/account',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -115,94 +55,79 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CorrectionsIndexRoute = CorrectionsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => CorrectionsRoute,
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConditionsRoute = ConditionsRouteImport.update({
+  id: '/conditions',
+  path: '/conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContributorRoute = ContributorRouteImport.update({
+  id: '/contributor',
+  path: '/contributor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorrectionsRoute = CorrectionsRouteImport.update({
+  id: '/corrections',
+  path: '/corrections',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartenariatRoute = PartenariatRouteImport.update({
+  id: '/partenariat',
+  path: '/partenariat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviserRoute = ReviserRouteImport.update({
+  id: '/reviser',
+  path: '/reviser',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubmitRoute = SubmitRouteImport.update({
+  id: '/submit',
+  path: '/submit',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AccountIndexRoute = AccountIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AccountRoute,
 } as any)
-const EpreuvesIdRoute = EpreuvesIdRouteImport.update({
-  id: '/epreuves/$id',
-  path: '/epreuves/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CorrectionsValidateurRoute = CorrectionsValidateurRouteImport.update({
-  id: '/validateur',
-  path: '/validateur',
-  getParentRoute: () => CorrectionsRoute,
-} as any)
-const CorrectionsNouvelleRoute = CorrectionsNouvelleRouteImport.update({
-  id: '/nouvelle',
-  path: '/nouvelle',
-  getParentRoute: () => CorrectionsRoute,
-} as any)
-const CorrectionsCorrecteurRoute = CorrectionsCorrecteurRouteImport.update({
-  id: '/correcteur',
-  path: '/correcteur',
-  getParentRoute: () => CorrectionsRoute,
-} as any)
-const CorrectionsCandidatureRoute = CorrectionsCandidatureRouteImport.update({
-  id: '/candidature',
-  path: '/candidature',
-  getParentRoute: () => CorrectionsRoute,
-} as any)
-const CorrectionsIdRoute = CorrectionsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => CorrectionsRoute,
-} as any)
-const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthRegisterRoute = AuthRegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AdminCorrectionsRoute = AdminCorrectionsRouteImport.update({
-  id: '/admin_/corrections',
-  path: '/admin/corrections',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccountSoumissionsRoute = AccountSoumissionsRouteImport.update({
-  id: '/soumissions',
-  path: '/soumissions',
-  getParentRoute: () => AccountRoute,
-} as any)
-const AccountProfilRoute = AccountProfilRouteImport.update({
-  id: '/profil',
-  path: '/profil',
-  getParentRoute: () => AccountRoute,
-} as any)
-const AccountPortefeuilleRoute = AccountPortefeuilleRouteImport.update({
-  id: '/portefeuille',
-  path: '/portefeuille',
-  getParentRoute: () => AccountRoute,
-} as any)
-const AccountFavorisRoute = AccountFavorisRouteImport.update({
-  id: '/favoris',
-  path: '/favoris',
+const AccountAbonnementRoute = AccountAbonnementRouteImport.update({
+  id: '/abonnement',
+  path: '/abonnement',
   getParentRoute: () => AccountRoute,
 } as any)
 const AccountBibliothequeRoute = AccountBibliothequeRouteImport.update({
@@ -210,10 +135,85 @@ const AccountBibliothequeRoute = AccountBibliothequeRouteImport.update({
   path: '/bibliotheque',
   getParentRoute: () => AccountRoute,
 } as any)
-const AccountAbonnementRoute = AccountAbonnementRouteImport.update({
-  id: '/abonnement',
-  path: '/abonnement',
+const AccountFavorisRoute = AccountFavorisRouteImport.update({
+  id: '/favoris',
+  path: '/favoris',
   getParentRoute: () => AccountRoute,
+} as any)
+const AccountPortefeuilleRoute = AccountPortefeuilleRouteImport.update({
+  id: '/portefeuille',
+  path: '/portefeuille',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountProfilRoute = AccountProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountSoumissionsRoute = AccountSoumissionsRouteImport.update({
+  id: '/soumissions',
+  path: '/soumissions',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AdminCorrectionsRoute = AdminCorrectionsRouteImport.update({
+  id: '/admin_/corrections',
+  path: '/admin/corrections',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AuthRoute,
+} as any)
+const CorrectionsIndexRoute = CorrectionsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsIdRoute = CorrectionsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsCandidatureRoute = CorrectionsCandidatureRouteImport.update({
+  id: '/candidature',
+  path: '/candidature',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsCorrecteurRoute = CorrectionsCorrecteurRouteImport.update({
+  id: '/correcteur',
+  path: '/correcteur',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsNouvelleRoute = CorrectionsNouvelleRouteImport.update({
+  id: '/nouvelle',
+  path: '/nouvelle',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const CorrectionsValidateurRoute = CorrectionsValidateurRouteImport.update({
+  id: '/validateur',
+  path: '/validateur',
+  getParentRoute: () => CorrectionsRoute,
+} as any)
+const EpreuvesIdRoute = EpreuvesIdRouteImport.update({
+  id: '/epreuves/$id',
+  path: '/epreuves/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AccountSoumissionsIdRoute = AccountSoumissionsIdRouteImport.update({
   id: '/soumissions_/$id',
@@ -465,95 +465,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/submit': {
-      id: '/submit'
-      path: '/submit'
-      fullPath: '/submit'
-      preLoaderRoute: typeof SubmitRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reviser': {
-      id: '/reviser'
-      path: '/reviser'
-      fullPath: '/reviser'
-      preLoaderRoute: typeof ReviserRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/partenariat': {
-      id: '/partenariat'
-      path: '/partenariat'
-      fullPath: '/partenariat'
-      preLoaderRoute: typeof PartenariatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/faq': {
-      id: '/faq'
-      path: '/faq'
-      fullPath: '/faq'
-      preLoaderRoute: typeof FaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/docs': {
-      id: '/docs'
-      path: '/docs'
-      fullPath: '/docs'
-      preLoaderRoute: typeof DocsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/corrections': {
-      id: '/corrections'
-      path: '/corrections'
-      fullPath: '/corrections'
-      preLoaderRoute: typeof CorrectionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contributor': {
-      id: '/contributor'
-      path: '/contributor'
-      fullPath: '/contributor'
-      preLoaderRoute: typeof ContributorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/conditions': {
-      id: '/conditions'
-      path: '/conditions'
-      fullPath: '/conditions'
-      preLoaderRoute: typeof ConditionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/account': {
-      id: '/account'
-      path: '/account'
-      fullPath: '/account'
-      preLoaderRoute: typeof AccountRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -563,19 +479,96 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/corrections/': {
-      id: '/corrections/'
-      path: '/'
-      fullPath: '/corrections/'
-      preLoaderRoute: typeof CorrectionsIndexRouteImport
-      parentRoute: typeof CorrectionsRoute
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions': {
+      id: '/conditions'
+      path: '/conditions'
+      fullPath: '/conditions'
+      preLoaderRoute: typeof ConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contributor': {
+      id: '/contributor'
+      path: '/contributor'
+      fullPath: '/contributor'
+      preLoaderRoute: typeof ContributorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/corrections': {
+      id: '/corrections'
+      path: '/corrections'
+      fullPath: '/corrections'
+      preLoaderRoute: typeof CorrectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partenariat': {
+      id: '/partenariat'
+      path: '/partenariat'
+      fullPath: '/partenariat'
+      preLoaderRoute: typeof PartenariatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reviser': {
+      id: '/reviser'
+      path: '/reviser'
+      fullPath: '/reviser'
+      preLoaderRoute: typeof ReviserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/submit': {
+      id: '/submit'
+      path: '/submit'
+      fullPath: '/submit'
+      preLoaderRoute: typeof SubmitRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/account/': {
       id: '/account/'
@@ -584,109 +577,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
     }
-    '/epreuves/$id': {
-      id: '/epreuves/$id'
-      path: '/epreuves/$id'
-      fullPath: '/epreuves/$id'
-      preLoaderRoute: typeof EpreuvesIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/corrections/validateur': {
-      id: '/corrections/validateur'
-      path: '/validateur'
-      fullPath: '/corrections/validateur'
-      preLoaderRoute: typeof CorrectionsValidateurRouteImport
-      parentRoute: typeof CorrectionsRoute
-    }
-    '/corrections/nouvelle': {
-      id: '/corrections/nouvelle'
-      path: '/nouvelle'
-      fullPath: '/corrections/nouvelle'
-      preLoaderRoute: typeof CorrectionsNouvelleRouteImport
-      parentRoute: typeof CorrectionsRoute
-    }
-    '/corrections/correcteur': {
-      id: '/corrections/correcteur'
-      path: '/correcteur'
-      fullPath: '/corrections/correcteur'
-      preLoaderRoute: typeof CorrectionsCorrecteurRouteImport
-      parentRoute: typeof CorrectionsRoute
-    }
-    '/corrections/candidature': {
-      id: '/corrections/candidature'
-      path: '/candidature'
-      fullPath: '/corrections/candidature'
-      preLoaderRoute: typeof CorrectionsCandidatureRouteImport
-      parentRoute: typeof CorrectionsRoute
-    }
-    '/corrections/$id': {
-      id: '/corrections/$id'
-      path: '/$id'
-      fullPath: '/corrections/$id'
-      preLoaderRoute: typeof CorrectionsIdRouteImport
-      parentRoute: typeof CorrectionsRoute
-    }
-    '/auth/reset-password': {
-      id: '/auth/reset-password'
-      path: '/reset-password'
-      fullPath: '/auth/reset-password'
-      preLoaderRoute: typeof AuthResetPasswordRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/auth/register': {
-      id: '/auth/register'
-      path: '/register'
-      fullPath: '/auth/register'
-      preLoaderRoute: typeof AuthRegisterRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/auth/forgot-password': {
-      id: '/auth/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/auth/forgot-password'
-      preLoaderRoute: typeof AuthForgotPasswordRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/admin_/corrections': {
-      id: '/admin_/corrections'
-      path: '/admin/corrections'
-      fullPath: '/admin/corrections'
-      preLoaderRoute: typeof AdminCorrectionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/account/soumissions': {
-      id: '/account/soumissions'
-      path: '/soumissions'
-      fullPath: '/account/soumissions'
-      preLoaderRoute: typeof AccountSoumissionsRouteImport
-      parentRoute: typeof AccountRoute
-    }
-    '/account/profil': {
-      id: '/account/profil'
-      path: '/profil'
-      fullPath: '/account/profil'
-      preLoaderRoute: typeof AccountProfilRouteImport
-      parentRoute: typeof AccountRoute
-    }
-    '/account/portefeuille': {
-      id: '/account/portefeuille'
-      path: '/portefeuille'
-      fullPath: '/account/portefeuille'
-      preLoaderRoute: typeof AccountPortefeuilleRouteImport
-      parentRoute: typeof AccountRoute
-    }
-    '/account/favoris': {
-      id: '/account/favoris'
-      path: '/favoris'
-      fullPath: '/account/favoris'
-      preLoaderRoute: typeof AccountFavorisRouteImport
+    '/account/abonnement': {
+      id: '/account/abonnement'
+      path: '/abonnement'
+      fullPath: '/account/abonnement'
+      preLoaderRoute: typeof AccountAbonnementRouteImport
       parentRoute: typeof AccountRoute
     }
     '/account/bibliotheque': {
@@ -696,12 +591,117 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountBibliothequeRouteImport
       parentRoute: typeof AccountRoute
     }
-    '/account/abonnement': {
-      id: '/account/abonnement'
-      path: '/abonnement'
-      fullPath: '/account/abonnement'
-      preLoaderRoute: typeof AccountAbonnementRouteImport
+    '/account/favoris': {
+      id: '/account/favoris'
+      path: '/favoris'
+      fullPath: '/account/favoris'
+      preLoaderRoute: typeof AccountFavorisRouteImport
       parentRoute: typeof AccountRoute
+    }
+    '/account/portefeuille': {
+      id: '/account/portefeuille'
+      path: '/portefeuille'
+      fullPath: '/account/portefeuille'
+      preLoaderRoute: typeof AccountPortefeuilleRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/profil': {
+      id: '/account/profil'
+      path: '/profil'
+      fullPath: '/account/profil'
+      preLoaderRoute: typeof AccountProfilRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/soumissions': {
+      id: '/account/soumissions'
+      path: '/soumissions'
+      fullPath: '/account/soumissions'
+      preLoaderRoute: typeof AccountSoumissionsRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/admin_/corrections': {
+      id: '/admin_/corrections'
+      path: '/admin/corrections'
+      fullPath: '/admin/corrections'
+      preLoaderRoute: typeof AdminCorrectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/register': {
+      id: '/auth/register'
+      path: '/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/corrections/': {
+      id: '/corrections/'
+      path: '/'
+      fullPath: '/corrections/'
+      preLoaderRoute: typeof CorrectionsIndexRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/$id': {
+      id: '/corrections/$id'
+      path: '/$id'
+      fullPath: '/corrections/$id'
+      preLoaderRoute: typeof CorrectionsIdRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/candidature': {
+      id: '/corrections/candidature'
+      path: '/candidature'
+      fullPath: '/corrections/candidature'
+      preLoaderRoute: typeof CorrectionsCandidatureRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/correcteur': {
+      id: '/corrections/correcteur'
+      path: '/correcteur'
+      fullPath: '/corrections/correcteur'
+      preLoaderRoute: typeof CorrectionsCorrecteurRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/nouvelle': {
+      id: '/corrections/nouvelle'
+      path: '/nouvelle'
+      fullPath: '/corrections/nouvelle'
+      preLoaderRoute: typeof CorrectionsNouvelleRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/corrections/validateur': {
+      id: '/corrections/validateur'
+      path: '/validateur'
+      fullPath: '/corrections/validateur'
+      preLoaderRoute: typeof CorrectionsValidateurRouteImport
+      parentRoute: typeof CorrectionsRoute
+    }
+    '/epreuves/$id': {
+      id: '/epreuves/$id'
+      path: '/epreuves/$id'
+      fullPath: '/epreuves/$id'
+      preLoaderRoute: typeof EpreuvesIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/account/soumissions_/$id': {
       id: '/account/soumissions_/$id'

@@ -42,8 +42,8 @@ import { roleLabel } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 const ROLE_BADGE: Partial<Record<AdminUser["role"], string>> = {
-  admin: "border-violet-200 bg-violet-100 text-violet-800",
-  gestionnaire: "border-sky-200 bg-sky-100 text-sky-800",
+  admin: "border-primary bg-primary text-primary",
+  gestionnaire: "border-accent bg-accent text-primary",
   utilisateur: "border-emerald-200 bg-emerald-50 text-emerald-800",
 };
 
@@ -668,7 +668,7 @@ function EventIcon({ type, statut }: { type: string; statut?: string | null }) {
     return <Wallet className="mt-0.5 size-4 shrink-0 text-amber-600" />;
   }
   if (type === "retrait") {
-    return <Wallet className="mt-0.5 size-4 shrink-0 text-sky-600" />;
+    return <Wallet className="mt-0.5 size-4 shrink-0 text-primary" />;
   }
   return <Download className="mt-0.5 size-4 shrink-0 text-muted-foreground" />;
 }

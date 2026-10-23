@@ -80,7 +80,7 @@ export function DashboardTodoItem({
   const tones = {
     yellow: "border-tg-yellow/40 bg-tg-yellow/10 text-tg-ink dark:text-tg-yellow hover:bg-tg-yellow/18",
     red: "border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/15",
-    purple: "border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/15",
+    purple: "border-primary/30 bg-primary/10 text-primary dark:text-primary hover:bg-primary/15",
     green: "border-primary/30 bg-primary/10 text-primary hover:bg-primary/15",
   };
 
