@@ -86,10 +86,10 @@ export function UserOverviewCharts({
     soumissions.length === 0 && enAttente === 0 && validees === 0 && solde === 0;
 
   const fluxSteps = [
-    { icon: Upload, label: "Soumises", value: soumissions.length, tone: "text-blue-500" },
+    { icon: Upload, label: "Soumises", value: soumissions.length, tone: "text-primary" },
     { icon: Clock, label: "En attente", value: enAttente, tone: "text-tg-yellow" },
     { icon: CheckCircle2, label: "Validées", value: validees, tone: "text-primary" },
-    { icon: Wallet, label: "Solde", value: formatFcfa(solde), tone: "text-violet-500" },
+    { icon: Wallet, label: "Solde", value: formatFcfa(solde), tone: "text-primary" },
   ];
 
   const hasAnyChart =

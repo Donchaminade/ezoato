@@ -20,7 +20,7 @@ function formatSize(bytes: number) {
 
 function FileIcon({ type }: { type: string }) {
   if (type === "pdf") return <FileText className="size-5 text-red-500" />;
-  if (type === "image") return <ImageIcon className="size-5 text-blue-500" />;
+  if (type === "image") return <ImageIcon className="size-5 text-primary" />;
   return <FileText className="size-5 text-muted-foreground" />;
 }
 

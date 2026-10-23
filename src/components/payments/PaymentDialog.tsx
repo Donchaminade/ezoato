@@ -121,7 +121,7 @@ export function PaymentDialog({
                   methode === "tmoney" ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"
                 }`}
               >
-                <div className="font-semibold text-blue-600">T-Money</div>
+                <div className="font-semibold text-primary">T-Money</div>
                 <div className="text-xs text-muted-foreground">Togocom / Yas</div>
               </button>
             </div>
