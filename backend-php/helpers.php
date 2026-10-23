@@ -522,6 +522,11 @@ function apply_soumission_corrections(string $id, array $sub, array $body): arra
 }
 
 function cors(): void {
+  header('X-Content-Type-Options: nosniff');
+  header('X-Frame-Options: DENY');
+  header('Referrer-Policy: no-referrer');
+  header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+  header('X-Permitted-Cross-Domain-Policies: none');
   $cfg = load_config();
   $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
   $allowed = in_array($origin, $cfg['allowed_origins'], true);
@@ -621,25 +626,51 @@ function log_admin_action(string $actorId, string $action, ?string $targetId = n
       ->execute([uuid(), $actorId, $targetId, $action, $details]);
 }
 
-// --- JWT minimal HS256 ---
+// --- JWT minimal HS256 (secret = load_config, jamais le fichier d'exemple seul) ---
+function jwt_signing_secret(): string {
+  return jwt_secret_effectif(load_config());
+}
+
 function jwt_encode(array $payload): string {
-  $cfg = require __DIR__ . '/config.php';
-  $h = b64u(json_encode(['alg'=>'HS256','typ'=>'JWT']));
+  $secret = jwt_signing_secret();
+  if ($secret === '') fail('Configuration de session non sécurisée', 503);
+  $h = b64u(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
   $p = b64u(json_encode($payload));
-  $s = b64u(hash_hmac('sha256', "$h.$p", $cfg['jwt_secret'], true));
+  $s = b64u(hash_hmac('sha256', "$h.$p", $secret, true));
   return "$h.$p.$s";
 }
+
 function jwt_decode(string $token): ?array {
-  $cfg = require __DIR__ . '/config.php';
+  $secret = jwt_signing_secret();
+  if ($secret === '') return null;
   $parts = explode('.', $token);
   if (count($parts) !== 3) return null;
-  [$h,$p,$s] = $parts;
-  $expected = b64u(hash_hmac('sha256', "$h.$p", $cfg['jwt_secret'], true));
+  [$h, $p, $s] = $parts;
+  $header = json_decode(b64u_dec($h), true);
+  if (!jwt_entete_accepte(is_array($header) ? $header : null)) return null;
+  $expected = b64u(hash_hmac('sha256', "$h.$p", $secret, true));
   if (!hash_equals($expected, $s)) return null;
   $payload = json_decode(b64u_dec($p), true);
   if (!is_array($payload)) return null;
   if (isset($payload['exp']) && $payload['exp'] < time()) return null;
   return $payload;
+}
+
+function issue_auth_token(array $userRow): string {
+  $payload = [
+    'sub' => $userRow['id'],
+    'exp' => time() + 86400 * 30,
+  ];
+  if (column_exists('users', 'session_version')) {
+    $payload['sv'] = (int)($userRow['session_version'] ?? 0);
+  }
+  return jwt_encode($payload);
+}
+
+function bump_session_version(string $userId): void {
+  if (!column_exists('users', 'session_version')) return;
+  db()->prepare('UPDATE users SET session_version = COALESCE(session_version, 0) + 1 WHERE id = ?')
+    ->execute([$userId]);
 }
 function b64u(string $s): string { return rtrim(strtr(base64_encode($s), '+/', '-_'), '='); }
 function b64u_dec(string $s): string {
@@ -678,10 +709,17 @@ function current_user(): ?array {
   if (!$payload) return null;
   $cols = 'id, nom, email, telephone, role, ville, classe, etablissement';
   if (users_has_profil_type()) $cols .= ', profil_type';
+  $hasSv = column_exists('users', 'session_version');
+  if ($hasSv) $cols .= ', session_version';
   $stmt = db()->prepare("SELECT $cols FROM users WHERE id = ?");
   $stmt->execute([$payload['sub']]);
   $row = $stmt->fetch();
-  return $row ? map_auth_user($row) : null;
+  if (!$row) return null;
+  if ($hasSv) {
+    $tokenSv = array_key_exists('sv', $payload) ? (int)$payload['sv'] : 0;
+    if (!session_version_accepte($tokenSv, (int)($row['session_version'] ?? 0), true)) return null;
+  }
+  return map_auth_user($row);
 }
 
 function require_user(array $roles = []): array {
@@ -1208,44 +1246,74 @@ function credit_wallet(string $userId, int $montant, string $description, ?strin
 }
 
 function debit_wallet(string $userId, int $montant, string $description, ?string $ref = null): bool {
-  $w = get_or_create_wallet($userId);
-  if ((int)$w['solde'] < $montant) return false;
-  db()->prepare('UPDATE portefeuilles SET solde = solde - ? WHERE user_id = ?')
-      ->execute([$montant, $userId]);
-  db()->prepare('INSERT INTO portefeuille_transactions (id,user_id,type,montant,description,reference)
-    VALUES (?,?,?,?,?,?)')
+  if ($montant <= 0) return false;
+  $pdo = db();
+  $own = !$pdo->inTransaction();
+  if ($own) $pdo->beginTransaction();
+  try {
+    get_or_create_wallet($userId);
+    $stmt = $pdo->prepare('UPDATE portefeuilles SET solde = solde - ? WHERE user_id = ? AND solde >= ?');
+    $stmt->execute([$montant, $userId, $montant]);
+    if ($stmt->rowCount() !== 1) {
+      if ($own && $pdo->inTransaction()) $pdo->rollBack();
+      return false;
+    }
+    $pdo->prepare('INSERT INTO portefeuille_transactions (id,user_id,type,montant,description,reference)
+      VALUES (?,?,?,?,?,?)')
       ->execute([uuid(), $userId, 'debit', $montant, $description, $ref]);
-  return true;
+    if ($own) $pdo->commit();
+    return true;
+  } catch (Throwable $e) {
+    if ($own && $pdo->inTransaction()) $pdo->rollBack();
+    throw $e;
+  }
 }
 
 function reward_contributor(string $userId): array {
   $cfg = contributeur_bareme();
   $parPalier = (int)$cfg['epreuves_par_recompense'];
   $montantPalier = (int)$cfg['montant_recompense'];
+  $pdo = db();
+  $own = !$pdo->inTransaction();
+  if ($own) $pdo->beginTransaction();
+  try {
+    get_or_create_wallet($userId);
+    $lock = $pdo->prepare('SELECT * FROM portefeuilles WHERE user_id = ? FOR UPDATE');
+    $lock->execute([$userId]);
+    $wallet = $lock->fetch();
+    if (!$wallet) {
+      if ($own && $pdo->inTransaction()) $pdo->rollBack();
+      return ['credite' => 0, 'epreuvesValidees' => 0];
+    }
 
-  if (column_exists('soumissions', 'recompense_eligible')) {
-    $stmt = db()->prepare("SELECT COUNT(*) FROM soumissions WHERE soumis_par=? AND statut='validee' AND recompense_eligible=1");
-  } else {
-    $stmt = db()->prepare("SELECT COUNT(*) FROM soumissions WHERE soumis_par=? AND statut='validee'");
+    if (column_exists('soumissions', 'recompense_eligible')) {
+      $stmt = $pdo->prepare("SELECT COUNT(*) FROM soumissions WHERE soumis_par=? AND statut='validee' AND recompense_eligible=1");
+    } else {
+      $stmt = $pdo->prepare("SELECT COUNT(*) FROM soumissions WHERE soumis_par=? AND statut='validee'");
+    }
+    $stmt->execute([$userId]);
+    $count = (int)$stmt->fetchColumn();
+
+    $pdo->prepare('UPDATE portefeuilles SET epreuves_validees = ? WHERE user_id = ?')
+        ->execute([$count, $userId]);
+
+    $calc = calculer_recompense_palier($count, (int)$wallet['paliers_verses'], $parPalier, $montantPalier);
+    $credite = 0;
+    if ($calc['nouveauxPaliers'] > 0) {
+      $upd = $pdo->prepare('UPDATE portefeuilles SET paliers_verses = ? WHERE user_id = ? AND paliers_verses = ?');
+      $upd->execute([(int)$calc['paliersDus'], $userId, (int)$wallet['paliers_verses']]);
+      if ($upd->rowCount() === 1) {
+        $n = (int)$calc['nouveauxPaliers'];
+        credit_wallet($userId, (int)$calc['credite'], "Récompense : {$n}×{$parPalier} épreuves validées", "reward-{$count}");
+        $credite = (int)$calc['credite'];
+      }
+    }
+    if ($own) $pdo->commit();
+    return ['credite' => $credite, 'epreuvesValidees' => $count];
+  } catch (Throwable $e) {
+    if ($own && $pdo->inTransaction()) $pdo->rollBack();
+    throw $e;
   }
-  $stmt->execute([$userId]);
-  $count = (int)$stmt->fetchColumn();
-
-  $wallet = get_or_create_wallet($userId);
-  db()->prepare('UPDATE portefeuilles SET epreuves_validees = ? WHERE user_id = ?')
-      ->execute([$count, $userId]);
-
-  $calc = calculer_recompense_palier($count, (int)$wallet['paliers_verses'], $parPalier, $montantPalier);
-  $credite = (int)$calc['credite'];
-
-  if ($calc['nouveauxPaliers'] > 0) {
-    $n = (int)$calc['nouveauxPaliers'];
-    credit_wallet($userId, $credite, "Récompense : {$n}×{$parPalier} épreuves validées", "reward-{$count}");
-    db()->prepare('UPDATE portefeuilles SET paliers_verses = ? WHERE user_id = ?')
-        ->execute([(int)$calc['paliersDus'], $userId]);
-  }
-
-  return ['credite' => $credite, 'epreuvesValidees' => $count];
 }
 
 function map_soumission_detail(array $row, bool $forOwner = false): array {
@@ -1274,6 +1342,7 @@ require_once __DIR__ . '/lib/niveau-soumission.php';
 require_once __DIR__ . '/lib/notifications.php';
 require_once __DIR__ . '/lib/abonnement-rappels.php';
 require_once __DIR__ . '/lib/freemium.php';
+require_once __DIR__ . '/lib/security.php';
 require_once __DIR__ . '/lib/acces-epreuve.php';
 require_once __DIR__ . '/lib/dedup-epreuve.php';
 require_once __DIR__ . '/lib/paiement-fournisseur.php';

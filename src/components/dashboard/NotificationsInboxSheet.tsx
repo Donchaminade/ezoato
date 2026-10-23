@@ -18,10 +18,18 @@ const PREVIEW_LEN = 120;
 
 function openNotificationUrl(url: string, navigate: ReturnType<typeof useNavigate>, onClose: () => void) {
   onClose();
+  if (!url || url.startsWith("//") || /[\s\\]/.test(url)) return;
   if (/^https?:\/\//i.test(url)) {
-    window.location.assign(url);
+    try {
+      const target = new URL(url);
+      if (target.origin !== window.location.origin) return;
+      window.location.assign(target.pathname + target.search + target.hash);
+    } catch {
+      return;
+    }
     return;
   }
+  if (!url.startsWith("/")) return;
   const q = url.indexOf("?");
   if (q !== -1) {
     const pathname = url.slice(0, q);

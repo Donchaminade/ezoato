@@ -7,7 +7,7 @@ require __DIR__ . '/lib/image-pdf.php';
 
 cors();
 $user = require_user();
-$cfg  = require __DIR__ . '/config.php';
+$cfg  = cfg();
 
 $payload = validate_soumission_payload($_POST);
 $niveau = $payload['niveau'];
