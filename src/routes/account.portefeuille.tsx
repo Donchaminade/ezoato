@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Wallet } from "lucide-react";
@@ -8,7 +9,13 @@ import { PageHeroBadge } from "@/components/layout/PageHeroBadge";
 import { formatFcfa, EPREUVES_PAR_RECOMPENSE, MONTANT_RECOMPENSE } from "@/lib/pricing";
 
 export const Route = createFileRoute("/account/portefeuille")({
-  head: () => ({ meta: [{ title: "Mon portefeuille — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/account/portefeuille",
+      title: "Mon portefeuille contributeur — Récompenses EZOA-TO",
+      description:
+        "Consulte ton solde de contributeur EZOA-TO, l'historique de tes récompenses et demande un retrait par Mobile Money en quelques clics.",
+    }),
   component: PortefeuillePage,
 });
 

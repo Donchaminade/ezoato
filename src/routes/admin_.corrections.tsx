@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -16,7 +17,13 @@ import { useAuth } from "@/lib/auth";
 import { formatFcfa } from "@/lib/pricing";
 
 export const Route = createFileRoute("/admin_/corrections")({
-  head: () => ({ meta: [{ title: "Demandes de correction — Administration" }] }),
+  head: () =>
+    pageHead({
+      path: "/admin/corrections",
+      title: "Demandes de correction — Administration EZOA-TO",
+      description:
+        "File des demandes de correction réservée à l'administration EZOA-TO : attribution aux correcteurs, suivi et validation des réponses.",
+    }),
   component: Page,
 });
 

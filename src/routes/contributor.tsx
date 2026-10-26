@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Trophy, Upload, Wallet, Loader2 } from "lucide-react";
@@ -9,7 +10,13 @@ import { useAuth } from "@/lib/auth";
 import { EPREUVES_PAR_RECOMPENSE, formatFcfa, MONTANT_RECOMPENSE } from "@/lib/pricing";
 
 export const Route = createFileRoute("/contributor")({
-  head: () => ({ meta: [{ title: "Programme contributeur — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/contributor",
+      title: "Programme contributeur EZOA-TO — Gagne en partageant",
+      description:
+        "Rejoins le programme contributeur d'EZOA-TO : envoie des épreuves vérifiées du Togo et reçois des récompenses versées par Mobile Money.",
+    }),
   component: ContributorPage,
 });
 
@@ -31,6 +38,7 @@ function ContributorPage() {
     return (
       <PublicLayout>
         <div className="flex min-h-[50vh] items-center justify-center">
+          <h1 className="sr-only">Programme contributeur EZOA-TO</h1>
           <Loader2 className="size-8 animate-spin text-muted-foreground" />
         </div>
       </PublicLayout>

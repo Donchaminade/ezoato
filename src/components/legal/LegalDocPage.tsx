@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { FileText, Mail } from "lucide-react";
 import { Fragment } from "react";
 import { LegalSection } from "@/components/legal/LegalSection";
@@ -44,15 +45,13 @@ export function getLegalDoc(slug: LegalSlug): LegalDoc {
 
 export function legalHead(slug: LegalSlug) {
   const d = getLegalDoc(slug);
-  return {
-    meta: [
-      { title: `${d.title} — EZOA-TO` },
-      { name: "description", content: d.description },
-      { property: "og:title", content: `${d.title} — EZOA-TO` },
-      { property: "og:description", content: d.description },
-    ],
-    links: [{ rel: "canonical", href: `https://ezoato.vercel.app/${d.slug}` }],
-  };
+  const title =
+    d.title.length < 25 ? `${d.title} — EZOA-TO, archives scolaires du Togo` : `${d.title} — EZOA-TO`;
+  const description =
+    d.description.length < 120
+      ? `${d.description} Plateforme d'archives d'épreuves du Togo.`
+      : d.description;
+  return pageHead({ path: `/${d.slug}`, title, description });
 }
 
 /** Met en évidence les mentions « [À compléter : …] ». */

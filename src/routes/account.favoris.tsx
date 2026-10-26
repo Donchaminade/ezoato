@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -13,7 +14,13 @@ import { api } from "@/lib/api";
 import type { Epreuve } from "@/lib/types";
 
 export const Route = createFileRoute("/account/favoris")({
-  head: () => ({ meta: [{ title: "Mes favoris — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/account/favoris",
+      title: "Mes épreuves favorites — Mon compte EZOA-TO",
+      description:
+        "Retrouve rapidement les devoirs, compositions et examens que tu as ajoutés à tes favoris sur EZOA-TO pour tes prochaines révisions.",
+    }),
   component: FavorisPage,
 });
 

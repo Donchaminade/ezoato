@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 import { RevisionWorkspace } from "@/components/ai/RevisionWorkspace";
@@ -6,16 +7,13 @@ import { PageHeroBadge } from "@/components/layout/PageHeroBadge";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 
 export const Route = createFileRoute("/reviser")({
-  head: () => ({
-    meta: [
-      { title: "Réviser avec l'IA — EZOA-TO" },
-      {
-        name: "description",
-        content:
-          "Tuteur guidé sur une épreuve du catalogue. Il aide à chercher, sans donner le corrigé.",
-      },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/reviser",
+      title: "Réviser avec l'IA — Tuteur d'examens EZOA-TO",
+      description:
+        "Révise tes épreuves du CEPD, BEPC et BAC avec le tuteur IA d'EZOA-TO : explications pas à pas, méthodes et conseils pour progresser.",
+    }),
   component: ReviserPage,
 });
 

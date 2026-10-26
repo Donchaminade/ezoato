@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -18,12 +19,13 @@ export const Route = createFileRoute("/contact")({
   validateSearch: (search: Record<string, unknown>) => ({
     sujet: typeof search.sujet === "string" ? search.sujet : undefined,
   }),
-  head: () => ({
-    meta: [
-      { title: "Contact — EZOA-TO" },
-      { name: "description", content: "Contactez l'équipe EZOA-TO pour toute question sur les épreuves, les paiements ou les contributions." },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/contact",
+      title: "Contacter l'équipe EZOA-TO — Aide et questions",
+      description:
+        "Une question sur une épreuve, un paiement Mobile Money ou une contribution ? Écris à l'équipe EZOA-TO, nous te répondons rapidement.",
+    }),
   component: ContactPage,
 });
 

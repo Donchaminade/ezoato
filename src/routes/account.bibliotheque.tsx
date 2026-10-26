@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -30,7 +31,13 @@ import { MiniStatCard } from "@/components/dashboard/MiniStatCard";
 import { dashboardTripleStatGrid } from "@/lib/dashboard-mobile";
 
 export const Route = createFileRoute("/account/bibliotheque")({
-  head: () => ({ meta: [{ title: "Ma bibliothèque — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/account/bibliotheque",
+      title: "Ma bibliothèque d'épreuves — Mon compte EZOA-TO",
+      description:
+        "Retrouve dans ta bibliothèque EZOA-TO toutes les épreuves que tu as débloquées ou téléchargées, disponibles aussi hors connexion.",
+    }),
   component: BibliothequePage,
 });
 

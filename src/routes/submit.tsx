@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { GraduationCap, Landmark, School, Trophy, Upload, X } from "lucide-react";
@@ -19,7 +20,13 @@ import type { ExamenNational, Niveau, Periode } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/submit")({
-  head: () => ({ meta: [{ title: "Soumettre une épreuve — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/submit",
+      title: "Soumettre une épreuve et gagner des récompenses",
+      description:
+        "Partage les devoirs, compositions et examens de ton établissement sur EZOA-TO et reçois des récompenses Mobile Money après vérification.",
+    }),
   component: SubmitPage,
 });
 

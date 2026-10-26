@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -37,7 +38,13 @@ import { isValidPhone, normalizePhone } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/auth/register")({
-  head: () => ({ meta: [{ title: "Créer un compte — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/auth/register",
+      title: "Créer un compte EZOA-TO — 50 épreuves gratuites",
+      description:
+        "Inscris-toi gratuitement sur EZOA-TO et accède à 50 épreuves du Togo : devoirs, compositions, CEPD, BEPC, BAC, université et concours.",
+    }),
   component: RegisterPage,
 });
 

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { useAsyncStatus } from "@/hooks/use-async-status";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -88,9 +89,13 @@ function parseAdminSearch(search: Record<string, unknown>): { section: AdminSect
 
 export const Route = createFileRoute("/admin")({
   validateSearch: parseAdminSearch,
-  head: () => ({
-    meta: [{ title: "Administration — EZOA-TO" }],
-  }),
+  head: () =>
+    pageHead({
+      path: "/admin",
+      title: "Administration EZOA-TO — Tableau de bord interne",
+      description:
+        "Espace d'administration réservé à l'équipe EZOA-TO : gestion des épreuves, des contributeurs, des paiements et des statistiques.",
+    }),
   component: AdminPage,
 });
 

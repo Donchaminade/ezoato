@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Upload, Eye, Clock, CheckCircle2, XCircle, ClipboardList } from "lucide-react";
@@ -24,7 +25,13 @@ import { MiniStatCard } from "@/components/dashboard/MiniStatCard";
 import { dashboardTripleStatGrid } from "@/lib/dashboard-mobile";
 
 export const Route = createFileRoute("/account/soumissions")({
-  head: () => ({ meta: [{ title: "Mes soumissions — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/account/soumissions",
+      title: "Mes épreuves soumises — Suivi des contributions",
+      description:
+        "Suis l'état de vérification des épreuves que tu as envoyées sur EZOA-TO et les récompenses associées à chacune de tes contributions.",
+    }),
   component: SoumissionsListPage,
 });
 

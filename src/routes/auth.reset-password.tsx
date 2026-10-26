@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -26,7 +27,13 @@ export const Route = createFileRoute("/auth/reset-password")({
   validateSearch: (s: Record<string, unknown>): ResetSearch => ({
     token: typeof s.token === "string" ? s.token : undefined,
   }),
-  head: () => ({ meta: [{ title: "Nouveau mot de passe — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/auth/reset-password",
+      title: "Nouveau mot de passe — Sécuriser ton compte EZOA-TO",
+      description:
+        "Choisis un nouveau mot de passe pour ton compte EZOA-TO et retrouve l'accès à ta bibliothèque d'épreuves et à tes révisions.",
+    }),
   component: ResetPasswordPage,
 });
 

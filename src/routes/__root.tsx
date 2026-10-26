@@ -96,6 +96,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Archive. Révise. Excelle. — Le passé scolaire du Togo, au service de ton avenir.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: EZOA_BRAND.name },
+      { property: "og:locale", content: "fr_FR" },
+      { property: "og:image", content: "https://ezoato.vercel.app/images/students-hero.png" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -14,7 +15,13 @@ import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/account/soumissions_/$id")({
-  head: () => ({ meta: [{ title: "Détail soumission — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/account/soumissions",
+      title: "Détail d'une épreuve soumise — Mon compte EZOA-TO",
+      description:
+        "Consulte le détail d'une épreuve que tu as soumise sur EZOA-TO : fichiers envoyés, statut de vérification et récompense prévue.",
+    }),
   component: SoumissionDetailPage,
 });
 

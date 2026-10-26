@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { PageHero } from "@/components/layout/PageHero";
@@ -21,16 +22,13 @@ import { EZOA_BRAND } from "@/lib/branding";
 import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "À propos — EZOA-TO" },
-      {
-        name: "description",
-        content:
-          "Découvrez EZOA-TO : archives collège, lycée, université et concours, abonnement Pro, validation anti-doublons — la plateforme togolaise d'épreuves.",
-      },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/about",
+      title: "À propos d'EZOA-TO — L'archive scolaire du Togo",
+      description:
+        "Découvre la mission d'EZOA-TO : rassembler les épreuves scolaires du Togo pour aider chaque élève à réviser. Archive. Révise. Excelle.",
+    }),
   component: AboutPage,
 });
 

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { User } from "lucide-react";
@@ -10,7 +11,13 @@ import { api } from "@/lib/api";
 import { roleLabel } from "@/lib/roles";
 
 export const Route = createFileRoute("/account/")({
-  head: () => ({ meta: [{ title: "Mon compte — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/account",
+      title: "Mon compte EZOA-TO — Téléchargements et soumissions",
+      description:
+        "Accède à ton espace EZOA-TO : téléchargements, épreuves soumises, abonnement Pro et portefeuille contributeur, au même endroit.",
+    }),
   component: AccountPage,
 });
 
