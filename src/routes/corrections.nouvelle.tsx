@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -15,7 +16,13 @@ import { correctionsApi } from "@/lib/corrections-api";
 import { formatFcfa } from "@/lib/pricing";
 
 export const Route = createFileRoute("/corrections/nouvelle")({
-  head: () => ({ meta: [{ title: "Nouvelle demande de correction — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/corrections/nouvelle",
+      title: "Nouvelle demande de correction d'épreuve — EZOA-TO",
+      description:
+        "Décris l'exercice qui te bloque sur une épreuve EZOA-TO et reçois une correction détaillée rédigée par un correcteur vérifié.",
+    }),
   component: Page,
 });
 

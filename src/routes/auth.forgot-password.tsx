@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -9,7 +10,13 @@ import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/auth/forgot-password")({
-  head: () => ({ meta: [{ title: "Mot de passe oublié — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/auth/forgot-password",
+      title: "Mot de passe oublié — Récupérer ton compte EZOA-TO",
+      description:
+        "Tu as oublié ton mot de passe EZOA-TO ? Indique ton email ou ton numéro pour recevoir un lien et retrouver l'accès à tes épreuves.",
+    }),
   component: ForgotPasswordPage,
 });
 

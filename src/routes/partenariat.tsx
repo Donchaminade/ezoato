@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -39,15 +40,13 @@ const TEXTAREA_CLASS = "min-h-[9rem] rounded-xl px-4 py-3.5 text-base md:text-ba
 const FORM_FIELD = "space-y-2";
 
 export const Route = createFileRoute("/partenariat")({
-  head: () => ({
-    meta: [
-      { title: "Partenariat & soutien — EZOA-TO" },
-      {
-        name: "description",
-        content: "Soutenez EZOA-TO par un partenariat, un sponsoring ou un don. Les établissements peuvent aussi nous contacter pour toute demande.",
-      },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/partenariat",
+      title: "Partenariat, sponsoring et dons — Soutenir EZOA-TO",
+      description:
+        "Soutiens EZOA-TO par un partenariat, un sponsoring ou un don. Établissements et entreprises peuvent nous contacter pour collaborer.",
+    }),
   component: PartenariatPage,
 });
 

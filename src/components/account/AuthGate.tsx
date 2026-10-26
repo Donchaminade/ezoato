@@ -21,6 +21,7 @@ export function AuthGate({ badge, title, description, children }: AuthGateProps)
     return (
       <PublicLayout>
         <div className="flex min-h-[50vh] items-center justify-center">
+          <h1 className="sr-only">{title}</h1>
           <Loader2 className="size-8 animate-spin text-primary" aria-label="Chargement" />
         </div>
       </PublicLayout>

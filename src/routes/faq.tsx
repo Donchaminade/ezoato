@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, CircleHelp, MessageCircle } from "lucide-react";
@@ -19,16 +20,13 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/faq")({
   validateSearch: searchSchema,
-  head: ({ search }) => ({
-    meta: [
-      { title: search?.q ? `FAQ — ${search.q} — EZOA-TO` : "FAQ — Questions fréquentes — EZOA-TO" },
-      {
-        name: "description",
-        content:
-          "Réponses aux questions sur les téléchargements, paiements Mobile Money, soumissions et espace contributeur EZOA-TO.",
-      },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/faq",
+      title: "FAQ EZOA-TO — Questions fréquentes sur les épreuves",
+      description:
+        "Réponses aux questions sur les téléchargements, les paiements Mobile Money, l'abonnement Pro, les soumissions et l'espace contributeur EZOA-TO.",
+    }),
   component: FaqPage,
 });
 

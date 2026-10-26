@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -14,7 +15,13 @@ import { correctionsApi, STATUT_LABEL, type DemandeCorrection, type PaiementCorr
 import { formatFcfa } from "@/lib/pricing";
 
 export const Route = createFileRoute("/corrections/$id")({
-  head: () => ({ meta: [{ title: "Suivi de demande — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/corrections",
+      title: "Suivi de ta demande de correction — EZOA-TO",
+      description:
+        "Suis l'avancement de ta demande de correction sur EZOA-TO : prise en charge par un correcteur, réponses et validation finale.",
+    }),
   component: Page,
 });
 

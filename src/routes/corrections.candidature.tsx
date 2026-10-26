@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { PenLine } from "lucide-react";
@@ -10,7 +11,13 @@ import { Input } from "@/components/ui/input";
 import { correctionsApi } from "@/lib/corrections-api";
 
 export const Route = createFileRoute("/corrections/candidature")({
-  head: () => ({ meta: [{ title: "Devenir correcteur — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/corrections/candidature",
+      title: "Devenir correcteur EZOA-TO — Déposer ta candidature",
+      description:
+        "Enseignant ou étudiant avancé ? Dépose ta candidature pour devenir correcteur EZOA-TO et aider les élèves du Togo à progresser.",
+    }),
   component: Page,
 });
 

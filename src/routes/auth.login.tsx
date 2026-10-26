@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -29,7 +30,13 @@ export const Route = createFileRoute("/auth/login")({
   validateSearch: (s: Record<string, unknown>): LoginSearch => ({
     logout: typeof s.logout === "string" ? s.logout : undefined,
   }),
-  head: () => ({ meta: [{ title: "Connexion — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/auth/login",
+      title: "Connexion à EZOA-TO — Accède à tes épreuves du Togo",
+      description:
+        "Connecte-toi à EZOA-TO pour télécharger les épreuves du CEPD, BEPC, BAC et concours, réviser avec l'IA et suivre tes contributions.",
+    }),
   component: LoginPage,
 });
 

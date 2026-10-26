@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Crown } from "lucide-react";
@@ -13,7 +14,13 @@ import {
 import { formatFcfa } from "@/lib/pricing";
 
 export const Route = createFileRoute("/account/abonnement")({
-  head: () => ({ meta: [{ title: "Abonnement Pro — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/account/abonnement",
+      title: "Abonnement Pro EZOA-TO — Toutes les épreuves 6 mois",
+      description:
+        "Gère ton abonnement Pro EZOA-TO : accès illimité aux épreuves payantes du CEPD, BEPC, BAC et concours pour 1 000 FCFA les 6 mois.",
+    }),
   component: AbonnementPage,
 });
 

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { PenLine } from "lucide-react";
@@ -9,7 +10,13 @@ import { Button } from "@/components/ui/button";
 import { correctionsApi, STATUT_LABEL } from "@/lib/corrections-api";
 
 export const Route = createFileRoute("/corrections/")({
-  head: () => ({ meta: [{ title: "Mes demandes de correction — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/corrections",
+      title: "Mes demandes de correction d'épreuves — EZOA-TO",
+      description:
+        "Demande de l'aide sur une épreuve du catalogue EZOA-TO et suis tes demandes de correction rédigées par des correcteurs vérifiés.",
+    }),
   component: Page,
 });
 

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -22,9 +23,13 @@ import { FreemiumQuotaNote } from "@/components/subscription/FreemiumQuotaNote";
 import { EpreuveReader } from "@/components/epreuves/EpreuveReader";
 
 export const Route = createFileRoute("/epreuves/$id")({
-  head: () => ({
-    meta: [{ title: "Épreuve — EZOA-TO" }],
-  }),
+  head: ({ params }) =>
+    pageHead({
+      path: `/epreuves/${params.id}`,
+      title: "Épreuve à télécharger et réviser — Archives EZOA-TO",
+      description:
+        "Consulte cette épreuve des archives scolaires du Togo sur EZOA-TO : aperçu, téléchargement, corrigé et révision avec le tuteur IA.",
+    }),
   component: EpreuveDetail,
 });
 

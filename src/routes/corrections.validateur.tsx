@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,7 +12,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { correctionsApi } from "@/lib/corrections-api";
 
 export const Route = createFileRoute("/corrections/validateur")({
-  head: () => ({ meta: [{ title: "Espace validateur — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/corrections/validateur",
+      title: "Espace validateur EZOA-TO — Relecture des corrections",
+      description:
+        "Espace des validateurs EZOA-TO : relis les corrections proposées par les correcteurs avant leur publication aux élèves.",
+    }),
   component: Page,
 });
 

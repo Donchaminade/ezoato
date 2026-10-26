@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { UserCircle } from "lucide-react";
 import { AuthGate } from "@/components/account/AuthGate";
@@ -6,7 +7,13 @@ import { RoleDashboardShell } from "@/components/dashboard/RoleDashboardShell";
 import { PageHeroBadge } from "@/components/layout/PageHeroBadge";
 
 export const Route = createFileRoute("/account/profil")({
-  head: () => ({ meta: [{ title: "Mon profil — EZOA-TO" }] }),
+  head: () =>
+    pageHead({
+      path: "/account/profil",
+      title: "Mon profil EZOA-TO — Informations et sécurité",
+      description:
+        "Modifie tes informations personnelles, ton mot de passe et tes préférences de notification sur ton profil EZOA-TO en toute sécurité.",
+    }),
   component: ProfilPage,
 });
 

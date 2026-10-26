@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowRight, Upload } from "lucide-react";
@@ -26,14 +27,13 @@ import { api } from "@/lib/api";
 import type { Epreuve } from "@/lib/types";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "EZOA-TO — Archives scolaires du Togo" },
-      { name: "description", content: "Archives des devoirs, compositions, examens nationaux et concours du Togo. 50 épreuves gratuites par compte, puis l'abonnement Pro à 1 000 FCFA pour 6 mois." },
-      { property: "og:title", content: "EZOA-TO — Archives scolaires du Togo" },
-      { property: "og:description", content: "Devoirs, compositions et examens antérieurs des établissements togolais." },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      path: "/",
+      title: "EZOA-TO — Archives des examens et devoirs du Togo",
+      description:
+        "Archives des devoirs, compositions, CEPD, BEPC, BAC et concours du Togo. 50 épreuves gratuites, puis l'abonnement Pro à 1 000 FCFA pour 6 mois.",
+    }),
   component: HomePage,
 });
 

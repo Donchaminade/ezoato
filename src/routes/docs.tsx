@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -25,17 +26,24 @@ const search = z.object({
   type: z.enum(["devoir", "composition", "examen"]).optional(),
   examen: z.string().optional(),
   annee: z.coerce.number().optional(),
-  page: z.coerce.number().min(1).default(1),
+  page: z.coerce.number().min(1).optional(),
 });
 
 export const Route = createFileRoute("/docs")({
   validateSearch: search,
-  head: () => ({
-    meta: [
-      { title: "Archives — EZOA-TO" },
-      { name: "description", content: "Catalogue complet des épreuves scolaires du Togo. Recherche, filtres, aperçu et téléchargement." },
-    ],
-  }),
+  head: ({ match }) => {
+    const ville = (match.search as { ville?: string } | undefined)?.ville;
+    const base = pageHead({
+      path: "/docs",
+      title: ville
+        ? `Épreuves et examens à ${ville} — Archives EZOA-TO`
+        : "Archives des épreuves du Togo — CEPD, BEPC et BAC",
+      description: ville
+        ? `Devoirs, compositions et examens des établissements de ${ville} : recherche par matière, niveau et année, aperçu et téléchargement sur EZOA-TO.`
+        : "Catalogue complet des épreuves scolaires du Togo : devoirs, compositions, CEPD, BEPC, BAC, université et concours. Recherche, aperçu et téléchargement.",
+    });
+    return base;
+  },
   component: DocsPage,
 });
 
@@ -49,7 +57,7 @@ function DocsPage() {
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["epreuves", "list", s],
-    queryFn: () => api.listEpreuves({ ...s, perPage: PER_PAGE }),
+    queryFn: () => api.listEpreuves({ ...s, page: s.page ?? 1, perPage: PER_PAGE }),
     retry: 1,
   });
   const { data: meta } = useQuery({
@@ -240,7 +248,7 @@ function DocsPage() {
                     </ScrollReveal>
                   ))}
                 </div>
-                <Pagination current={s.page} total={totalPages} onChange={setPage} />
+                <Pagination current={s.page ?? 1} total={totalPages} onChange={setPage} />
               </>
             )}
           </div>
