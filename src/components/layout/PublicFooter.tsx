@@ -16,7 +16,7 @@ export function PublicFooter() {
           </p>
         </div>
         <div>
-          <h4 className="mb-3 text-sm font-semibold text-foreground">Navigation</h4>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Navigation</h2>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/" className="hover:text-foreground">Accueil</Link></li>
             <li><Link to="/docs" className="hover:text-foreground">Archives</Link></li>
@@ -39,7 +39,7 @@ export function PublicFooter() {
           </ul>
         </div>
         <div>
-          <h4 className="mb-3 text-sm font-semibold text-foreground">Légal</h4>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Légal</h2>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/cgu" className="hover:text-foreground">Conditions d&apos;utilisation</Link></li>
             <li><Link to="/confidentialite" className="hover:text-foreground">Confidentialité</Link></li>
