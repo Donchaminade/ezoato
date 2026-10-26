@@ -71,7 +71,8 @@
     }
 
     /* H1 = section titles (Problème, Solution, …) — dominant */
-    .slide h1 {
+    .slide h1,
+    .slide .ttl {
       font-family: var(--font-display);
       font-weight: 800;
       font-size: clamp(2.85rem, 6.8vw, 5.25rem);
@@ -82,7 +83,8 @@
       margin-bottom: 0.2rem;
     }
 
-    .slide.slide-cover h1 {
+    .slide.slide-cover h1,
+    .slide.slide-cover .ttl {
       font-size: clamp(3.4rem, 8.5vw, 6.25rem);
       font-weight: 800;
       max-width: 14ch;
@@ -90,7 +92,7 @@
     }
 
     /* H2 = supporting line — clearly secondary to H1 */
-    .slide h2 {
+    .slide .deck-subtitle {
       font-family: var(--font-display);
       font-weight: 600;
       font-size: clamp(1.35rem, 2.6vw, 2.05rem);
@@ -192,9 +194,11 @@
         height: min(38vh, 280px);
         order: -1;
       }
-      .slide h1, .slide h2 { max-width: none; }
-      .slide h1 { font-size: clamp(2.4rem, 9vw, 3.75rem); }
-      .slide h2 { font-size: clamp(1.15rem, 4vw, 1.55rem); }
+      .slide h1,
+      .slide .ttl, .slide .deck-subtitle { max-width: none; }
+      .slide h1,
+      .slide .ttl { font-size: clamp(2.4rem, 9vw, 3.75rem); }
+      .slide .deck-subtitle { font-size: clamp(1.15rem, 4vw, 1.55rem); }
       .bullet-list li,
       .nowrap {
         white-space: normal;
@@ -500,12 +504,13 @@
       height: 100%;
     }
 
-    .slide-split.team-layout h1 {
+    .slide-split.team-layout h1,
+    .slide-split.team-layout .ttl {
       font-size: clamp(2.2rem, 4.8vw, 3.6rem);
       max-width: none;
     }
 
-    .slide-split.team-layout h2 {
+    .slide-split.team-layout .deck-subtitle {
       font-size: clamp(1.05rem, 1.8vw, 1.45rem);
       margin-bottom: 0.55rem;
       max-width: none;
@@ -935,13 +940,14 @@
       gap: 0.45rem;
     }
 
-    .closing-slide h1 {
+    .closing-slide h1,
+    .closing-slide .ttl {
       font-size: clamp(3.75rem, 9vw, 6.75rem);
       margin-bottom: 0.1rem;
       max-width: 12ch;
     }
 
-    .closing-slide h2 {
+    .closing-slide .deck-subtitle {
       font-size: clamp(1.75rem, 3.4vw, 2.65rem);
       margin-bottom: 0.55rem;
       max-width: 22ch;
@@ -996,10 +1002,11 @@
     }
 
     @media (max-width: 960px) {
-      .closing-slide h1 {
+      .closing-slide h1,
+      .closing-slide .ttl {
         font-size: clamp(3rem, 11vw, 4.5rem);
       }
-      .closing-slide h2 {
+      .closing-slide .deck-subtitle {
         font-size: clamp(1.4rem, 5vw, 1.9rem);
       }
       .closing-slide .bullet-list li {
@@ -1253,8 +1260,8 @@
     <section class="slide" data-title="Problème" aria-label="Diapositive 2 — Problème">
       <div class="slide-split">
         <div class="slide-copy">
-          <h1>Problème</h1>
-          <h2>Les épreuves se perdent.</h2>
+          <h2 class="ttl">Problème</h2>
+          <h3 class="deck-subtitle">Les épreuves se perdent.</h3>
           <ul class="bullet-list">
             <li><span class="nowrap">Accès fragmenté (WhatsApp, photocopies)</span></li>
             <li><span class="nowrap">Temps perdu avant les examens</span></li>
@@ -1273,8 +1280,8 @@
     <section class="slide" data-title="Solution" aria-label="Diapositive 3 — Solution">
       <div class="slide-split reverse">
         <div class="slide-copy">
-          <h1>Solution</h1>
-          <h2>Une archive nationale, dans la poche.</h2>
+          <h2 class="ttl">Solution</h2>
+          <h3 class="deck-subtitle">Une archive nationale, dans la poche.</h3>
           <ul class="bullet-list">
             <li><span class="nowrap">4 niveaux : collège · lycée · université · concours</span></li>
             <li><span class="nowrap">CEPD · BEPC · BAC + devoirs / compositions</span></li>
@@ -1294,8 +1301,8 @@
       <div class="slide-split">
         <div class="slide-copy">
           <img class="slide-brand-logo" src="assets/logo-ezoa.png" alt="EZOA-TO" />
-          <h1>Produit</h1>
-          <h2>App &amp; web opérationnels.</h2>
+          <h2 class="ttl">Produit</h2>
+          <h3 class="deck-subtitle">App &amp; web opérationnels.</h3>
           <ul class="bullet-list">
             <li><span class="nowrap">4 niveaux livrés + formulaires adaptatifs</span></li>
             <li><span class="nowrap">Archives filtrables (niveau, ville, matière)</span></li>
@@ -1314,8 +1321,8 @@
     <section class="slide" data-title="Marché" aria-label="Diapositive 5 — Marché">
       <div class="slide-split reverse">
         <div class="slide-copy">
-          <h1>Marché</h1>
-          <h2>Togo → Afrique de l’Ouest francophone.</h2>
+          <h2 class="ttl">Marché</h2>
+          <h3 class="deck-subtitle">Togo → Afrique de l’Ouest francophone.</h3>
           <ul class="bullet-list">
             <li><span class="nowrap"><strong>~912&nbsp;k</strong> élèves secondaire (Ministère de l’Éducation)</span></li>
             <li><span class="nowrap">Upside : CAP · BT · BTS · concours (post-secondaire)</span></li>
@@ -1334,8 +1341,8 @@
     <section class="slide" data-title="Modèle économique" aria-label="Diapositive 6 — Modèle économique">
       <div class="slide-split">
         <div class="slide-copy">
-          <h1>Modèle économique</h1>
-          <h2>Freemium + <span class="nowrap">Mobile&nbsp;Money</span>.</h2>
+          <h2 class="ttl">Modèle économique</h2>
+          <h3 class="deck-subtitle">Freemium + <span class="nowrap">Mobile&nbsp;Money</span>.</h3>
           <ul class="bullet-list">
             <li><span class="nowrap">Devoirs &amp; compositions gratuits</span></li>
             <li><span class="nowrap">Pro&nbsp;: <strong>1&nbsp;000&nbsp;FCFA&nbsp;/&nbsp;6&nbsp;mois</strong> (examens illimités)</span></li>
@@ -1354,8 +1361,8 @@
     <section class="slide" data-title="Traction" aria-label="Diapositive 7 — Traction">
       <div class="slide-split reverse">
         <div class="slide-copy">
-          <h1>Traction</h1>
-          <h2>Produit prêt. Preuve terrain à lancer.</h2>
+          <h2 class="ttl">Traction</h2>
+          <h3 class="deck-subtitle">Produit prêt. Preuve terrain à lancer.</h3>
           <ul class="bullet-list">
             <li><span class="nowrap">Produit bout en bout (web + mobile)</span></li>
             <li><span class="nowrap">4 niveaux + détection de doublons admin</span></li>
@@ -1374,8 +1381,8 @@
     <section class="slide" data-title="Concurrence" aria-label="Diapositive 8 — Concurrence">
       <div class="slide-split">
         <div class="slide-copy">
-          <h1>Concurrence</h1>
-          <h2>Le chaos informel, pas une app.</h2>
+          <h2 class="ttl">Concurrence</h2>
+          <h3 class="deck-subtitle">Le chaos informel, pas une app.</h3>
           <div class="table-scroll">
             <table class="data-table pitch-table compact" aria-label="Comparaison EZOA-TO vs alternatives">
               <thead>
@@ -1436,8 +1443,8 @@
     <section class="slide" data-title="Go-to-market" aria-label="Diapositive 9 — Go-to-market">
       <div class="slide-split reverse">
         <div class="slide-copy">
-          <h1>Go-to-market</h1>
-          <h2>Écoles, élèves, <span class="nowrap">Mobile&nbsp;Money</span>.</h2>
+          <h2 class="ttl">Go-to-market</h2>
+          <h3 class="deck-subtitle">Écoles, élèves, <span class="nowrap">Mobile&nbsp;Money</span>.</h3>
           <ul class="bullet-list">
             <li><span class="nowrap">Pilotes : 3–5 lycées (Lomé / régions)</span></li>
             <li><span class="nowrap">Ambassadeurs élèves &amp; profs récompensés</span></li>
@@ -1456,8 +1463,8 @@
     <section class="slide" data-title="Équipe" aria-label="Diapositive 10 — Équipe">
       <div class="slide-split team-layout">
         <div class="slide-copy">
-          <h1>Équipe</h1>
-          <h2>Produit, tech &amp; terrain.</h2>
+          <h2 class="ttl">Équipe</h2>
+          <h3 class="deck-subtitle">Produit, tech &amp; terrain.</h3>
           <div class="team-grid">
             <article class="team-card">
               <div class="team-card-media" aria-hidden="true">
@@ -1551,8 +1558,8 @@
     <section class="slide" data-title="Roadmap" aria-label="Diapositive 11 — Roadmap">
       <div class="slide-split reverse">
         <div class="slide-copy">
-          <h1>Roadmap</h1>
-          <h2><span class="nowrap">6 · 12 · 18&nbsp;mois.</span></h2>
+          <h2 class="ttl">Roadmap</h2>
+          <h3 class="deck-subtitle"><span class="nowrap">6 · 12 · 18&nbsp;mois.</span></h3>
           <ul class="bullet-list">
             <li><span class="nowrap"><strong>Livré</strong> — 4 niveaux, Pro, anti-doublons, web + mobile</span></li>
             <li><span class="nowrap"><strong>6&nbsp;mois</strong> — pilotes lycées, Play Store, premiers Pro</span></li>
@@ -1571,8 +1578,8 @@
     <section class="slide" data-title="Financement demandé" aria-label="Diapositive 12 — Financement demandé">
       <div class="slide-split">
         <div class="slide-copy">
-          <h1>Financement</h1>
-          <h2>Ticket seed / pré-amorçage.</h2>
+          <h2 class="ttl">Financement</h2>
+          <h3 class="deck-subtitle">Ticket seed / pré-amorçage.</h3>
           <p class="ask-amount"><span class="nowrap">25&nbsp;M&nbsp;FCFA</span></p>
           <p class="sub">Pour débloquer pilotes, catalogue national et premiers abonnements Pro.</p>
           <div class="table-scroll">
@@ -1624,8 +1631,8 @@
     <section class="slide" data-title="Projections" aria-label="Diapositive 13 — Projections et unit economics">
       <div class="slide-split reverse">
         <div class="slide-copy">
-          <h1>Projections</h1>
-          <h2>Unit economics &amp; seuil de rentabilité.</h2>
+          <h2 class="ttl">Projections</h2>
+          <h3 class="deck-subtitle">Unit economics &amp; seuil de rentabilité.</h3>
           <ul class="bullet-list">
             <li><span class="nowrap">Pro&nbsp;: <strong>1&nbsp;000&nbsp;FCFA / 6&nbsp;mois</strong> → ~2&nbsp;000&nbsp;FCFA / an</span></li>
             <li><span class="nowrap">Seuil ops lean (~5–7&nbsp;M FCFA/an) ≈ <strong>2,5–3,5&nbsp;k Pro</strong></span></li>
@@ -1670,8 +1677,8 @@
     <section class="slide closing-slide" data-title="Merci" aria-label="Diapositive 14 — Merci">
       <div class="slide-split">
         <div class="slide-copy">
-          <h1>Merci</h1>
-          <h2>Prochaines étapes.</h2>
+          <h2 class="ttl">Merci</h2>
+          <h3 class="deck-subtitle">Prochaines étapes.</h3>
           <ul class="bullet-list">
             <li><span class="nowrap">Démo produit (web + mobile)</span></li>
             <li><span class="nowrap">Cadre de pilote lycée (3–5 établissements)</span></li>
